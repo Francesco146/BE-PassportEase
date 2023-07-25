@@ -177,7 +177,7 @@ build/
 .#*
 *#
 *~
-
+.idea/*
 bin
 build
 target
@@ -194,3 +194,4 @@ README.html
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+/.idea/
