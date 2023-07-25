@@ -49,6 +49,7 @@ tmp/
 *~.nib
 local.properties
 .settings/
+.idea/
 .loadpath
 .recommenders
 
