@@ -3,8 +3,6 @@ package it.univr.passportease.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
-
 @Entity
 @Table(name = "request_types")
 @NoArgsConstructor
@@ -22,8 +20,8 @@ public class RequestType {
     private String name;
 
     @Column(name = "created_at")
-    private Date createdAt;
+    private String createdAt;
 
     @Column(name = "updated_at")
-    private Date updatedAt;
+    private String updatedAt;
 }

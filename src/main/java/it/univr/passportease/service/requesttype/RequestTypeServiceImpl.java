@@ -23,7 +23,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
 
     @Override
     public List<RequestType> get() {
-        return requestTypeRepository.get();
+        return requestTypeRepository.findAll();
     }
 
 }
