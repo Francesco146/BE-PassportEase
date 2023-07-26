@@ -1,6 +1,5 @@
 package it.univr.passportease.resolver.requesttype;
 
-import graphql.kickstart.tools.GraphQLMutationResolver;
 import it.univr.passportease.dto.RequestTypeInput;
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.service.requesttype.RequestTypeService;
@@ -11,14 +10,11 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 @AllArgsConstructor
-public class RequestTypeMutationResolver implements GraphQLMutationResolver {
+public class RequestTypeMutationResolver {
     private final RequestTypeService requestTypeService;
 
     @MutationMapping
-    public RequestType addRequestType(@Argument RequestTypeInput requestTypeInput) {
-        System.out.println("RequestTypeMutationResolver.addRequestType\n\n\n\n\n\n");
-        System.out.println("requestTypeInput = " + requestTypeInput);
-        return null;
-        //return requestTypeService.add(requestTypeInput);
+    public RequestType addRequestType(@Argument("requestType") RequestTypeInput requestTypeInput) {
+        return requestTypeService.add(requestTypeInput);
     }
 }

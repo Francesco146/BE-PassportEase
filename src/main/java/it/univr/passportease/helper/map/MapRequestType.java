@@ -11,8 +11,8 @@ public class MapRequestType {
     public RequestType mapInputToRequestType(RequestTypeInput requestTypeInput) {
         RequestType requestType = new RequestType();
         requestType.setName(requestTypeInput.getName());
-        requestType.setCreatedAt(new Date().toString());
-        requestType.setUpdatedAt(new Date().toString());
+        requestType.setCreatedAt(new Date());
+        requestType.setUpdatedAt(new Date());
         return requestType;
     }
 }
