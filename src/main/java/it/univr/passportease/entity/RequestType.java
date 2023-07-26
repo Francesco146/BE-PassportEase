@@ -1,26 +1,29 @@
 package it.univr.passportease.entity;
 
-import lombok.*;
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.Date;
 
 @Entity
-@Table(name = "requestTypes")
+@Table(name = "request_types")
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode(of = {"id"})
 public class RequestType {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "name")
     private String name;
 
     @Column(name = "created_at")
-    private String createdAt;
+    private Date createdAt;
 
     @Column(name = "updated_at")
-    private String updatedAt;
+    private Date updatedAt;
 }
