@@ -1,0 +1,7 @@
+type DayWorkingHour{
+    id: ID!
+    startHour: String!
+    endHour: String!
+    createdAt: String!
+    updatedAt: String!
+}

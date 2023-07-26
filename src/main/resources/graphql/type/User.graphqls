@@ -1,0 +1,13 @@
+type User{
+    fiscalCode: String!
+    email: String!
+    name: String!
+    surname: String!
+    cityOfBirth: String!
+    dateOfBirth: String!
+    hashPassword: String!
+    active: Boolean!
+    refreshToken: String!
+    createdAt: String!
+    updatedAt: String!
+}

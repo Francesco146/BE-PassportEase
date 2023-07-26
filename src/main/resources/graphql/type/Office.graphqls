@@ -1,0 +1,8 @@
+type Office{
+    id: ID!
+    name: String!
+    address: String!
+    workerNumber: Int!
+    createdAt: String!
+    updatedAt: String!
+}

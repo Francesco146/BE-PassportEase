@@ -1,0 +1,10 @@
+type Request{
+    id: ID!
+    duration: Int!
+    startingDate: String!
+    endingDate: String!
+    createdBy: Worker!
+    requestType: RequestType!
+    createdAt: String!
+    updatedAt: String!
+}

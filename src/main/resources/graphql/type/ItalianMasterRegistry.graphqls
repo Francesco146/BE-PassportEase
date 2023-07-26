@@ -1,0 +1,10 @@
+type ItalianMasterRegistry{
+    fiscalCode: String!
+    name: String!
+    surname: String!
+    cityOfBirth: String!
+    dateOfBirth: String!
+    healthCardNumber: String!
+    createdAt: String!
+    updatedAt: String!
+}

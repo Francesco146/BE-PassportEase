@@ -1,0 +1,11 @@
+type Awailability{
+    id: ID!
+    status: Status!
+    date: String!
+    time: String!
+    request: Request!
+    office: Office!
+    user: User
+    createdAt: String!
+    updatedAt: String!
+}

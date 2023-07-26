@@ -1,0 +1,4 @@
+type Query{
+    getRequestType(id: ID!): RequestType!
+    getAllRequestType: [RequestType!]!
+}

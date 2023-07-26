@@ -1,0 +1,9 @@
+type Worker{
+    id: ID!
+    username: String!
+    email: String!
+    hashPassword: String!
+    refreshToken: String!
+    createdAt: String!
+    updatedAt: String!
+}

@@ -1,0 +1,11 @@
+type OfficeWorkingDay{
+    id: ID!
+    day: Day!
+    startTime1: String!
+    endTime1: String!
+    startTime2: String!
+    endTime2: String!
+    office: Office!
+    createdAt: String!
+    updatedAt: String!
+}
