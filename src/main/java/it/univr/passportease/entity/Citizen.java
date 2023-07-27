@@ -1,31 +1,26 @@
 package it.univr.passportease.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
 
-import jakarta.persistence.*;
-
 @Entity
-@Table(name = "users")
+@Table(name = "citizens")
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode(of = { "id" })
-public class User {
+public class Citizen {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
+    
     @NonNull
     @Column(name = "fiscal_code", unique = true)
     private String fiscalCode;
-
-    @NonNull
-    @Column(unique = true)
-    private String email;
 
     @NonNull
     private String name;
@@ -42,15 +37,8 @@ public class User {
     private Date dateOfBirth;
 
     @NonNull
-    @Column(name = "hash_password")
-    private String hashPassword;
-
-    @NonNull
-    private Boolean active;
-
-    @NonNull
-    @Column(name = "refresh_token")
-    private String refreshToken;
+    @Column(name = "health_card_number")
+    private String healthCardNumber;
 
     @Column(name = "created_at")
     private Date createdAt;

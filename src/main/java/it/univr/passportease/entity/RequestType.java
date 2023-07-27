@@ -3,6 +3,7 @@ package it.univr.passportease.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
@@ -22,7 +23,8 @@ public class RequestType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name")
+    @NonNull
+    @Column(unique = true)
     private String name;
 
     @Column(name = "created_at")

@@ -1,5 +1,0 @@
-type RegistryCategory{
-    id: ID!
-    registry_id: ItalianMasterRegistry!
-    category_id: Category!
-}

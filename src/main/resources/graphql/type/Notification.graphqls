@@ -1,6 +1,6 @@
 type Notification{
     id: ID!
-    ready: Boolean!
+    isReady: Boolean!
     startDate: String!
     endDate: String!
     office: Office!
