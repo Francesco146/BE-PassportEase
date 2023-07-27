@@ -1,4 +1,4 @@
-type Notification{
+type Notification {
     id: ID!
     isReady: Boolean!
     startDate: String!
@@ -6,6 +6,4 @@ type Notification{
     office: Office!
     user: User!
     requestType: RequestType!
-    createdAt: String!
-    updatedAt: String!
 }

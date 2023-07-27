@@ -1,12 +1,13 @@
 package it.univr.passportease.entity;
 
+import it.univr.passportease.entity.enums.Day;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.sql.Time;
 import java.util.Date;
-
-import it.univr.passportease.entity.enums.Day;
+import java.util.Objects;
 
 @Entity
 @Table(name = "office_working_days")
@@ -14,7 +15,6 @@ import it.univr.passportease.entity.enums.Day;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(of = { "id" })
 public class OfficeWorkingDay {
 
     @Id
@@ -50,4 +50,20 @@ public class OfficeWorkingDay {
 
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        OfficeWorkingDay that = (OfficeWorkingDay) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
 }

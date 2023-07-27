@@ -1,0 +1,6 @@
+enum AvailabilityStatus{
+    FREE
+    TAKEN
+    TIMEDOUT
+    CANCELLED
+}

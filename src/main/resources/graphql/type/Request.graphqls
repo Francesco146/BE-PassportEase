@@ -1,10 +1,7 @@
-type Request{
+type Request {
     id: ID!
     duration: Int!
-    startingDate: String!
-    endingDate: String!
-    createdBy: Worker!
+    startDate: String!
+    endDate: String!
     requestType: RequestType!
-    createdAt: String!
-    updatedAt: String!
 }

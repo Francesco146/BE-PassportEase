@@ -2,8 +2,10 @@ package it.univr.passportease.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name = "citizens")
@@ -11,13 +13,12 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(of = { "id" })
 public class Citizen {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @NonNull
     @Column(name = "fiscal_code", unique = true)
     private String fiscalCode;
@@ -45,4 +46,20 @@ public class Citizen {
 
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        Citizen citizen = (Citizen) o;
+        return getId() != null && Objects.equals(getId(), citizen.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
 }

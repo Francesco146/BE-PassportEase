@@ -1,0 +1,4 @@
+type JWTSet {
+    accessToken: String!
+    refreshToken: String!
+}

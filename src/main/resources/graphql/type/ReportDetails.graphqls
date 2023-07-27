@@ -1,0 +1,13 @@
+type ReportDetails {
+    fiscalCode: String!
+    name: String!
+    surname: String!
+    cityOfBirth: String!
+    dateOfBirth: String!
+    dateOfAvailability: String!
+    startTime: String!
+    duration: Int!
+    nameRequestType: String!
+    officeName: String!
+    address: String!
+}

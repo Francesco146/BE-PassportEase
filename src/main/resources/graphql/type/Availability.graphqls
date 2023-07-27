@@ -1,11 +1,9 @@
-type Availability{
+type Availability {
     id: ID!
-    status: Status!
     date: String!
     time: String!
+    status: AvailabilityStatus!
     request: Request!
+    user: User!
     office: Office!
-    user: User
-    createdAt: String!
-    updatedAt: String!
 }

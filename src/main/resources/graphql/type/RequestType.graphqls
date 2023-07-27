@@ -1,6 +1,4 @@
-type RequestType{
+type RequestType {
     id: ID!
     name: String!
-    createdAt: String!
-    updatedAt: String!
 }

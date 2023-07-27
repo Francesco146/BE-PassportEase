@@ -1,0 +1,4 @@
+type RegisterUserOutput {
+    JWTSet: JWTSet!
+    user: User!
+}

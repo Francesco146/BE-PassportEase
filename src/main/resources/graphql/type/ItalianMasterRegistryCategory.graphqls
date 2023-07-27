@@ -1,8 +1,0 @@
-# many to many relationship between ItalianMasterRegistry and Category
-type ItalianMasterRegistryCategory{
-    id: ID!
-    category: Category!
-    fiscalCode: ItalianMasterRegistry!
-    createdAt: String!
-    updatedAt: String!
-}
