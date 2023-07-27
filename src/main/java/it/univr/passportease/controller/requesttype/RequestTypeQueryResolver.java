@@ -1,4 +1,4 @@
-package it.univr.passportease.resolver.requesttype;
+package it.univr.passportease.controller.requesttype;
 
 
 import it.univr.passportease.entity.RequestType;

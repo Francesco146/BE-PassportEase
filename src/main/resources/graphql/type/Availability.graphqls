@@ -1,4 +1,4 @@
-type Awailability{
+type Availability{
     id: ID!
     status: Status!
     date: String!

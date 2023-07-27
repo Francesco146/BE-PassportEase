@@ -1,9 +1,14 @@
 package it.univr.passportease.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name = "request_types")
@@ -11,7 +16,6 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(of = {"id"})
 public class RequestType {
 
     @Id
@@ -26,4 +30,20 @@ public class RequestType {
 
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        RequestType that = (RequestType) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
 }
