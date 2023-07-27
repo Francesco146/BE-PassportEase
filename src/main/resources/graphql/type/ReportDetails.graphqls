@@ -1,4 +1,5 @@
 type ReportDetails {
+    #mandare la risposta solo se FC è uguale al token
     fiscalCode: String!
     name: String!
     surname: String!

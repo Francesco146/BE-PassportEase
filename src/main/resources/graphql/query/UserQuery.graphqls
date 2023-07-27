@@ -1,0 +1,7 @@
+type Query {
+    getRequestTypesByUser(token: String!): [RequestType!]!
+    getReportDetailsAvailabilityID(token: String!, availabilityID: ID!): ReportDetails!
+    getNotificationUser(token: String!): [Notification]
+    getUserDetails(token: String!): User!
+    getUserReservations(token: String!): [Availability]
+}

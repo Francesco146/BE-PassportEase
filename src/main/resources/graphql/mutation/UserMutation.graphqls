@@ -1,0 +1,13 @@
+type Mutation {
+    loginUser(fiscalCode: String!, password: String!): LoginOutput!
+    logoutUser(token: String!): Boolean
+    registerUser(registerInput: RegisterInput): RegisterUserOutput!
+    refreshAccessUserToken(refreshToken: String!): JWTSet!
+    changePasswordUser(token: String!, PWDSet: PWDSet): Boolean
+    createReservation(token: String!, availabilityID: ID!): Availability!
+    deleteReservation(token: String!, availabilityID: ID!): Boolean
+    createNotification(token: String!, notification: NotificationInput!): Notification!
+    modifyNotification(token: String!, notification: NotificationInput!, notificationID: ID!): Notification!
+    deleteNotification(token: String!, notificationID: ID!): Boolean
+    changeEmailUser(token: String!, emailSet: EmailSet!): String!
+}

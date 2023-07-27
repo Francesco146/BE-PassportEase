@@ -4,6 +4,5 @@ type Availability {
     time: String!
     status: AvailabilityStatus!
     request: Request!
-    user: User!
     office: Office!
 }

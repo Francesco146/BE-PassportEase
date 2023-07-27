@@ -1,0 +1,4 @@
+input OfficeInput {
+    name: String!
+    address: String!
+}

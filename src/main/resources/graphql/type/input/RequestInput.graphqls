@@ -1,0 +1,6 @@
+input RequestInput {
+    duration: Int!
+    startDate: String!
+    endDate: String!
+    requestType: String!
+}

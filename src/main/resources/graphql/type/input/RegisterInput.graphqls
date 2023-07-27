@@ -1,0 +1,9 @@
+input RegisterInput {
+    fiscalCode: String!
+    email: String!
+    name: String!
+    surname: String!
+    cityOfBirth: String!
+    dateOfBirth: String!
+    password: String!
+}

@@ -4,6 +4,5 @@ type Notification {
     startDate: String!
     endDate: String!
     office: Office!
-    user: User!
     requestType: RequestType!
 }
