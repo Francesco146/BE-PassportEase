@@ -1,21 +1,28 @@
 package it.univr.passportease.controller.user;
 
+import it.univr.passportease.dto.input.RegisterInput;
+import it.univr.passportease.dto.output.LoginOutput;
+import it.univr.passportease.service.user.UserAuthService;
+import lombok.AllArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
-import it.univr.passportease.dto.output.JWTSet;
-import it.univr.passportease.dto.output.LoginOutput;
-import lombok.AllArgsConstructor;
-
 @Controller
 @AllArgsConstructor
 public class UserAuthController {
-    
+    private final UserAuthService userAuthService;
+
     @MutationMapping
     public LoginOutput loginUser(@Argument("fiscalCode") String fiscalCode, @Argument("password") String password) {
-        System.out.println(fiscalCode);
-        LoginOutput loginOutput = new LoginOutput("12345", new JWTSet("jwt", "refreshJwt"));
-        return loginOutput;
+        return null;
     }
+
+    // registerUser(registerInput: RegisterInput): RegisterUserOutput!
+
+    @MutationMapping
+    public LoginOutput registerUser(@Argument("registerInput") RegisterInput registerInput) {
+        return userAuthService.register(registerInput);
+    }
+
 }

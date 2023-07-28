@@ -1,4 +1,4 @@
 type LoginOutput{
     id: ID!
-    JWTSet: JWTSet!
+    jwtSet: JWTSet!
 }

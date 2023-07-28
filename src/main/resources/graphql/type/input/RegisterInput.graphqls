@@ -4,6 +4,6 @@ input RegisterInput {
     name: String!
     surname: String!
     cityOfBirth: String!
-    dateOfBirth: String!
+    dateOfBirth: Date!
     password: String!
 }
