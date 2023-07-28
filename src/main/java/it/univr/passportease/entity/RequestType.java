@@ -10,6 +10,7 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "request_types")
@@ -20,8 +21,8 @@ import java.util.Objects;
 public class RequestType {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NonNull
     @Column(unique = true)

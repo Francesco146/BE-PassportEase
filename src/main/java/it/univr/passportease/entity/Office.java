@@ -6,6 +6,7 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "offices")
@@ -16,8 +17,8 @@ import java.util.Objects;
 public class Office {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NonNull
     @Column(unique = true)

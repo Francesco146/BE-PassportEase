@@ -1,5 +1,6 @@
 package it.univr.passportease.service.jwt;
 
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -9,25 +10,36 @@ import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
+
 
 @Service
 @AllArgsConstructor
-public class JwtService {
-    private final WorkerRepository workerRepository;
-    private final UserRepository userRepository;
+public class RefreshTokenService {
 
-    @Value("${jwt.secret}")
+    @Value("${refreshtoken.secret}")
     private static String secret;
+
+    private final UserRepository userRepository;
+    private final WorkerRepository workerRepository;
+
+    private String createRefreshToken(UUID id) {
+
+        Calendar todayDate = Calendar.getInstance();
+        todayDate.add(Calendar.DATE, 30);
+        Date expirationDate = todayDate.getTime();
+
+        return Jwts.builder()
+                .setSubject(id.toString())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(expirationDate)
+                .setId(UUID.randomUUID().toString())
+                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+    }
 
     public UUID extractId(String token) {
         return UUID.fromString(extractClaim(token, Claims::getSubject));
@@ -62,35 +74,10 @@ public class JwtService {
     }
 
 
-    public String generateToken(UUID id) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, id);
-    }
-
-    private String createToken(Map<String, Object> claims, UUID id) {
-        if (workerRepository.findById(id).isPresent()) {
-            claims.put("role", "worker");
-        }
-        else if (userRepository.findById(id).isPresent()) {
-            claims.put("role", "user");
-        }
-        else {
-            throw new RuntimeException("ID does not belong to either Worker or User");
-        }
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(id.toString())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
-                .setNotBefore(new Date(System.currentTimeMillis()))
-                .setId(UUID.randomUUID().toString())
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
-    }
-
     private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
 }
+
+

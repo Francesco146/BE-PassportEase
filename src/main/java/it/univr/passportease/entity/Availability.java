@@ -8,6 +8,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.sql.Time;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "availabilities")
@@ -18,8 +19,8 @@ import java.util.Objects;
 public class Availability {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NonNull
     @Enumerated(EnumType.STRING)
