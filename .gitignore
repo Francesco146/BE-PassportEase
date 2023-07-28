@@ -35,7 +35,7 @@ replay_pid*
 .springBeans
 .sts4-cache
 
-
+.idea/.env
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 
 ### Eclipse ###
@@ -196,3 +196,5 @@ README.html
 /dataSources/
 /dataSources.local.xml
 /.idea/
+/PassportEase.sql
+!/.env
