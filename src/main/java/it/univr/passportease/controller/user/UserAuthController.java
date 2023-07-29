@@ -15,10 +15,8 @@ public class UserAuthController {
 
     @MutationMapping
     public LoginOutput loginUser(@Argument("fiscalCode") String fiscalCode, @Argument("password") String password) {
-        return null;
+        return userAuthService.login(fiscalCode, password);
     }
-
-    // registerUser(registerInput: RegisterInput): RegisterUserOutput!
 
     @MutationMapping
     public LoginOutput registerUser(@Argument("registerInput") RegisterInput registerInput) {

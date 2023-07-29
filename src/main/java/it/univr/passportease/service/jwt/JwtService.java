@@ -9,8 +9,6 @@ import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -27,12 +25,17 @@ public class JwtService {
     private final UserRepository userRepository;
 
     @Value("${jwt.secret}")
-    private static String secret;
+    private static String accessKey;
+
+    @Value("${refreshtoken.secret}")
+    private static String refreshKey;
+
+    // TODO: eliminare
+    private static String key = "FrancescoTiAmoPeroQuestaPasswordETroppoCortaQuindiDevoAllungarlaUnPoDiPiuAliceCiao";
 
     public UUID extractId(String token) {
         return UUID.fromString(extractClaim(token, Claims::getSubject));
     }
-
 
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
@@ -46,7 +49,7 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
-                .setSigningKey(getSignKey())
+                .setSigningKey(getAccessSignKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -61,35 +64,53 @@ public class JwtService {
         return (id.equals(_id) && !isTokenExpired(token));
     }
 
-
-    public String generateToken(UUID id) {
+    public String generateAccessToken(UUID id) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, id);
+        return createAccessToken(claims, id);
     }
 
-    private String createToken(Map<String, Object> claims, UUID id) {
-        if (workerRepository.findById(id).isPresent()) {
-            claims.put("role", "worker");
-        }
-        else if (userRepository.findById(id).isPresent()) {
-            claims.put("role", "user");
-        }
-        else {
-            throw new RuntimeException("ID does not belong to either Worker or User");
-        }
+    private String createAccessToken(Map<String, Object> claims, UUID id) {
+        claims.put("role", getRoleById(id));
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(id.toString())
+                .setSubject(UUID.randomUUID().toString())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
                 .setNotBefore(new Date(System.currentTimeMillis()))
-                .setId(UUID.randomUUID().toString())
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+                .setId(id.toString())
+                .signWith(getAccessSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
-    private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+    public String generateRefreshToken(UUID id) {
+        return createRefreshToken(id);
+    }
+
+    private String createRefreshToken(UUID id) {
+        return Jwts.builder()
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 30))
+                .setId(id.toString())
+                .signWith(getRefreshSignKey(), SignatureAlgorithm.HS256).compact();
+    }
+
+    private String getRoleById(UUID id) {
+        if (workerRepository.findById(id).isPresent()) {
+            return "worker";
+        } else if (userRepository.findById(id).isPresent()) {
+            return "user";
+        } else {
+            throw new RuntimeException("ID does not belong to either Worker or User");
+        }
+    }
+
+    private Key getAccessSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(key);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private Key getRefreshSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(key);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
