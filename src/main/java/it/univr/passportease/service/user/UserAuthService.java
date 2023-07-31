@@ -7,4 +7,6 @@ public interface UserAuthService {
     LoginOutput login(String fiscalCode, String password);
 
     LoginOutput register(RegisterInput registerInput);
+
+    void logout();
 }

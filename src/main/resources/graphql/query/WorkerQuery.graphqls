@@ -1,4 +1,4 @@
 extend type Query {
-    getRequestByAvailabilityID(token: String!, availabilityID: ID!): Request
-    getAllRequestTypes(token: String!): [RequestType]
+    getRequestByAvailabilityID(availabilityID: ID!): Request
+    getAllRequestTypes: [RequestType]
 }

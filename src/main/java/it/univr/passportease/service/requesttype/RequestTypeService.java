@@ -5,10 +5,9 @@ import it.univr.passportease.entity.RequestType;
 
 import java.util.List;
 
-
 public interface RequestTypeService {
 
     RequestType add(RequestTypeInput requestTypeInput);
 
-    List<RequestType> get();
+    List<RequestType> getAll();
 }

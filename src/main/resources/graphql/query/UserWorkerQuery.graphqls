@@ -1,4 +1,4 @@
 extend type Query {
-    getAvailabilities(token: String!, availabilityFilters: AvailabilityFilters): [Availability]
-    getOffices(token: String!): [Office!]!
+    getAvailabilities(availabilityFilters: AvailabilityFilters): [Availability]
+    getOffices: [Office!]!
 }

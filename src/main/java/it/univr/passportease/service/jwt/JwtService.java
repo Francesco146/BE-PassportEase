@@ -9,6 +9,7 @@ import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -59,9 +60,9 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    public Boolean validateToken(String token, UUID id) {
-        final UUID _id = extractId(token);
-        return (id.equals(_id) && !isTokenExpired(token));
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String id = extractId(token).toString();
+        return (id.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     public String generateAccessToken(UUID id) {
@@ -73,12 +74,13 @@ public class JwtService {
         claims.put("role", getRoleById(id));
 
         return Jwts.builder()
+                .setHeaderParam("typ", "JWT")
                 .setClaims(claims)
-                .setSubject(UUID.randomUUID().toString())
+                .setSubject(id.toString())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
                 .setNotBefore(new Date(System.currentTimeMillis()))
-                .setId(id.toString())
+                .setId(UUID.randomUUID().toString())
                 .signWith(getAccessSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
@@ -88,9 +90,11 @@ public class JwtService {
 
     private String createRefreshToken(UUID id) {
         return Jwts.builder()
+                .setHeaderParam("typ", "JWT")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 30))
-                .setId(id.toString())
+                .setId(UUID.randomUUID().toString())
+                .setSubject(id.toString())
                 .signWith(getRefreshSignKey(), SignatureAlgorithm.HS256).compact();
     }
 

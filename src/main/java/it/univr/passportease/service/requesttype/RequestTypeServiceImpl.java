@@ -5,6 +5,8 @@ import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.helper.map.MapRequestType;
 import it.univr.passportease.repository.RequestTypeRepository;
 import lombok.AllArgsConstructor;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,8 +24,8 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     }
 
     @Override
-    public List<RequestType> get() {
+    @PreAuthorize("hasAuthority('USER')")
+    public List<RequestType> getAll() {
         return requestTypeRepository.findAll();
     }
-
 }

@@ -18,6 +18,6 @@ public class RequestTypeQueryResolver {
 
     @QueryMapping
     public List<RequestType> getAllRequestType() {
-        return requestTypeService.get();
+        return requestTypeService.getAll();
     }
 }

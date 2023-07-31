@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Data
 @Table(name = "workers")
 @NoArgsConstructor
 @Getter

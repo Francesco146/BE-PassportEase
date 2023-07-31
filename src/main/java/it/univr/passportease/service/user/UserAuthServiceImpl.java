@@ -4,11 +4,21 @@ import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.input.RegisterInputDB;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.entity.User;
-import it.univr.passportease.helper.HashHelper;
 import it.univr.passportease.helper.map.MapUser;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import lombok.AllArgsConstructor;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,63 +27,56 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final UserRepository userRepository;
     private final MapUser mapUser;
     private final JwtService jwtService;
-    private final HashHelper hashHelper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Override
     public LoginOutput login(String fiscalCode, String password) {
-
-        // get user by fiscal code
-        User user = userRepository.findByFiscalCode(fiscalCode);
-
-        // check if user exists
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
-
-        // check if passed password hash is equal to password hash in db 
-        String hashPasswordDB = user.getHashPassword();
-        System.out.println(hashPasswordDB);
-        CharSequence hashPassword = hashHelper.hashPassword(password);
-        System.out.println(hashPassword.toString());
-        if (!hashHelper.checkHash(hashPassword, hashPasswordDB)) {
-            throw new RuntimeException("Password is not correct");
-        }
-
-        // generate access token
-        String accessToken = jwtService.generateAccessToken(user.getId());
-
-        // generate refresh token
-        String refreshToken = jwtService.generateRefreshToken(user.getId());
+        // get user id
+        Optional<User> _user = userRepository.findByFiscalCode(fiscalCode);
+        _user.orElseThrow(() -> new RuntimeException("User not found"));
+        User user = _user.get();
 
         // TODO: invalidate old refresh token
 
-        // save refresh token
-        user.setRefreshToken(refreshToken);
-        userRepository.save(user);
+        String id = user.getId().toString();
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(id, password));
 
-        // return login output
-        return mapUser.mapUserToLoginOutput(
-                user,
-                accessToken
-        );
+        if (authentication.isAuthenticated()) {
+            String accessToken = jwtService.generateAccessToken(UUID.fromString(id));
+            String refreshToken = jwtService.generateRefreshToken(UUID.fromString(id));
+
+            // save refresh token
+            user.setRefreshToken(refreshToken);
+            userRepository.save(user);
+
+            return mapUser.mapUserToLoginOutput(
+                    user,
+                    accessToken);
+        } else {
+            throw new UsernameNotFoundException("invalid user request !");
+        }
     }
 
     @Override
     public LoginOutput register(RegisterInput registerInput) {
         // check if user already exists
-        User userDB = userRepository.findByFiscalCode(registerInput.getFiscalCode());
-        if (userDB != null) {
+        Optional<User> userDB = userRepository.findByFiscalCode(registerInput.getFiscalCode());
+        if (userDB.isPresent()) {
             throw new RuntimeException("User already exists");
         }
 
+        // TODO: check if user exists in the citizens table
+
         // create user
-        CharSequence hashPassword = hashHelper.hashPassword(registerInput.getPassword());
         RegisterInputDB registerInputDB = new RegisterInputDB(
                 registerInput,
-                hashPassword.toString(),
+                passwordEncoder.encode(registerInput.getPassword()),
                 true,
-                ""
-        );
+                "");
         User user = mapUser.mapRegisterInputDBToUser(registerInputDB);
         User addedUser = userRepository.save(user);
 
@@ -88,7 +91,16 @@ public class UserAuthServiceImpl implements UserAuthService {
         // return login output
         return mapUser.mapUserToLoginOutput(
                 addedUser,
-                accessToken
-        );
+                accessToken);
+
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('USER', 'WORKER')")
+    public void logout() {
+        // invalidate access token
+
+
+        // invalidate refresh token
     }
 }
