@@ -5,5 +5,5 @@ type User {
     name: String!
     surname: String!
     cityOfBirth: String!
-    dateOfBirth: String!
+    dateOfBirth: Date!
 }

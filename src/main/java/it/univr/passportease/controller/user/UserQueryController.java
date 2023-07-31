@@ -1,26 +1,32 @@
 package it.univr.passportease.controller.user;
 
+import it.univr.passportease.dto.output.UserOutput;
+import it.univr.passportease.service.user.UserQueryService;
+import lombok.AllArgsConstructor;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestHeader;
 
+@Controller
+@AllArgsConstructor
 public class UserQueryController {
+
+    private final UserQueryService userQueryService;
     @QueryMapping
-    @PreAuthorize("hasAuthority('USER')")
     public void getRequestTypesByUser() {}
 
     @QueryMapping
-    @PreAuthorize("hasAuthority('USER')")
     public void getReportDetailsByAvailabilityId() {}
 
     @QueryMapping
-    @PreAuthorize("hasAuthority('USER')")
     public void getUserNotifications() {}
 
     @QueryMapping
-    @PreAuthorize("hasAuthority('USER')")
-    public void getUserDetails() {}
+    public UserOutput getUserDetails(@RequestHeader("Authorization") String token) {
+        System.out.println(token);
+        return userQueryService.getUserDetails(token);
+    }
 
     @QueryMapping
-    @PreAuthorize("hasAuthority('USER')")
     public void getUserReservations() {}
 }
