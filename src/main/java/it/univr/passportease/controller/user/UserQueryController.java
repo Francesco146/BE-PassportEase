@@ -1,5 +1,6 @@
 package it.univr.passportease.controller.user;
 
+import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.service.user.UserQueryService;
@@ -40,5 +41,9 @@ public class UserQueryController {
     }
 
     @QueryMapping
-    public void getUserReservations() {}
+    public List<Availability> getUserReservations() {
+        String token = request.getHeader("Authorization");
+        token = token.substring(7);
+        return userQueryService.getUserReservations(token);
+    }
 }

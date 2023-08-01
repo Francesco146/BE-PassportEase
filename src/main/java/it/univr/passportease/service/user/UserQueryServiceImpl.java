@@ -1,8 +1,10 @@
 package it.univr.passportease.service.user;
 
+import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.repository.NotificationRepository;
+import it.univr.passportease.repository.ReservationRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import lombok.AllArgsConstructor;
@@ -19,6 +21,7 @@ public class UserQueryServiceImpl implements UserQueryService {
 
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final ReservationRepository reservationRepository;
     private final JwtService jwtService;
 
     @Override
@@ -35,6 +38,13 @@ public class UserQueryServiceImpl implements UserQueryService {
     public List<Notification> getUserNotifications(String token) {
         UUID id = jwtService.extractId(token);
         return notificationRepository.findByUserId(id);
+    }
+
+    @Override
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
+    public List<Availability> getUserReservations(String token) {
+        UUID id = jwtService.extractId(token);
+        return reservationRepository.findByUserId(id);
     }
 
 }

@@ -24,7 +24,6 @@ public class OfficeWorkingDay {
 
     @NonNull
     @Enumerated(EnumType.STRING)
-    @Column(unique = true)
     private Day day;
 
     @NonNull
