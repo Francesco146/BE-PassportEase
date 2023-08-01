@@ -9,9 +9,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Data
+@RequiredArgsConstructor
 @Table(name = "users")
-@NoArgsConstructor
+@NoArgsConstructor(force = true)
 @AllArgsConstructor
 @Getter
 @Setter

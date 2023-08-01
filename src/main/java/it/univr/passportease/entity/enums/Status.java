@@ -4,5 +4,5 @@ public enum Status {
     FREE,
     TAKEN,
     TIMEDOUT,
-    CANCELLED;
+    CANCELLED
 }

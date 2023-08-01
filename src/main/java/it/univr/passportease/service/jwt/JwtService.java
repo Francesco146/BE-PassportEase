@@ -8,20 +8,20 @@ import io.jsonwebtoken.security.Keys;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
 @AllArgsConstructor
 public class JwtService {
+    private RedisTemplate<String, String> redisTemplate;
     private final WorkerRepository workerRepository;
     private final UserRepository userRepository;
 
@@ -32,7 +32,7 @@ public class JwtService {
     private static String refreshKey;
 
     // TODO: eliminare
-    private static String key = "FrancescoTiAmoPeroQuestaPasswordETroppoCortaQuindiDevoAllungarlaUnPoDiPiuAliceCiao";
+    private final static String key = "FrancescoTiAmoPeroQuestaPasswordETroppoCortaQuindiDevoAllungarlaUnPoDiPiuAliceCiao";
 
     public UUID extractId(String token) {
         return UUID.fromString(extractClaim(token, Claims::getSubject));
@@ -62,7 +62,13 @@ public class JwtService {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String id = extractId(token).toString();
-        return (id.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        if (redisTemplate.opsForValue().get(id) == null) {
+            return false;
+        }
+        @NonNull String tokenInRedis = Objects.requireNonNull(redisTemplate.opsForValue().get(id));
+        return id.equals(userDetails.getUsername()) &&
+                !isTokenExpired(token) &&
+                (tokenInRedis.equals(token));
     }
 
     public String generateAccessToken(UUID id) {
@@ -92,7 +98,7 @@ public class JwtService {
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 30))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30))
                 .setId(UUID.randomUUID().toString())
                 .setSubject(id.toString())
                 .signWith(getRefreshSignKey(), SignatureAlgorithm.HS256).compact();
@@ -116,6 +122,15 @@ public class JwtService {
     private Key getRefreshSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(key);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public boolean invalidateAccessToken(String token) {
+        return Boolean.TRUE.equals(redisTemplate.delete(extractId(token).toString()));
+    }
+
+    public boolean invalidateRefreshToken(String token) {
+
+        return true;
     }
 
 }

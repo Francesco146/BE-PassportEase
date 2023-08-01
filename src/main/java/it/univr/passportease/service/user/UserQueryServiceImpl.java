@@ -22,7 +22,7 @@ public class UserQueryServiceImpl implements UserQueryService {
     private final JwtService jwtService;
 
     @Override
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public User getUserDetails(String token) {
         UUID id = jwtService.extractId(token);
         Optional<User> user = userRepository.findById(id);
@@ -31,7 +31,7 @@ public class UserQueryServiceImpl implements UserQueryService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public List<Notification> getUserNotifications(String token) {
         UUID id = jwtService.extractId(token);
         return notificationRepository.findByUserId(id);

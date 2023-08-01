@@ -23,15 +23,20 @@ public class UserAuthController {
 
     @MutationMapping
     public LoginOutput loginUser(@Argument("fiscalCode") String fiscalCode, @Argument("password") String password) {
-        System.out.println(request.getHeader("Content-Type"));
         LoginOutput login = userAuthService.login(fiscalCode, password);
-        redisTemplate.opsForValue().set(login.getId().toString(), login.getJwtSet().getAccessToken());
+        redisTemplate.opsForValue().set(
+                login.getId().toString(),
+                login.getJwtSet().getAccessToken(),
+                15,
+                java.util.concurrent.TimeUnit.MINUTES
+        );
         return login;
     }
 
     @MutationMapping
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public void logoutUser() {
+        userAuthService.logout();
     }
 
     @MutationMapping

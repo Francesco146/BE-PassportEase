@@ -4,9 +4,12 @@ import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.input.RegisterInputDB;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.entity.User;
+import it.univr.passportease.entity.Worker;
 import it.univr.passportease.helper.map.MapUser;
 import it.univr.passportease.repository.UserRepository;
+import it.univr.passportease.repository.WorkerRepository;
 import it.univr.passportease.service.jwt.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +26,10 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class UserAuthServiceImpl implements UserAuthService {
+    @Autowired
+    private HttpServletRequest request;
     private final UserRepository userRepository;
+    private final WorkerRepository workerRepository;
     private final MapUser mapUser;
     private final JwtService jwtService;
     @Autowired
@@ -96,14 +101,28 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     @Override
+    // add filter to check if access token is valid
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER')")
-    public void logout(@RequestHeader("Authorization") String authorizationHeader) {
-        // invalidate access token
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Invalid token");
-        }
-        String accessToken = authorizationHeader.substring(7);
+    public void logout() {
+        String authorizationHeader = request.getHeader("Authorization");
         // remove access token from cache
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer "))
+            throw new RuntimeException("Invalid token");
+
+        String accessToken = authorizationHeader.substring(7);
+        UUID userId = jwtService.extractId(accessToken);
+        Optional<User> _user = userRepository.findById(userId);
+        Optional<Worker> _worker = workerRepository.findById(userId);
+        if (_user.isPresent()) {
+            _user.get().setRefreshToken("");
+            userRepository.save(_user.get());
+        } else if (_worker.isPresent()) {
+            _worker.get().setRefreshToken("");
+            workerRepository.save(_worker.get());
+        } else
+            throw new RuntimeException("Invalid token");
+
+        jwtService.invalidateAccessToken(accessToken);
         // invalidate refresh token
     }
 }
