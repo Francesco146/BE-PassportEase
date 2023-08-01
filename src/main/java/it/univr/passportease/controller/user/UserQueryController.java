@@ -28,22 +28,19 @@ public class UserQueryController {
 
     @QueryMapping
     public List<Notification> getUserNotifications() {
-        String token = request.getHeader("Authorization");
-        token = token.substring(7);
+        String token = request.getHeader("Authorization").substring(7);
         return userQueryService.getUserNotifications(token);
     }
 
     @QueryMapping
     public User getUserDetails() {
-        String token = request.getHeader("Authorization");
-        token = token.substring(7);
+        String token = request.getHeader("Authorization").substring(7);
         return userQueryService.getUserDetails(token);
     }
 
     @QueryMapping
     public List<Availability> getUserReservations() {
-        String token = request.getHeader("Authorization");
-        token = token.substring(7);
+        String token = request.getHeader("Authorization").substring(7);
         return userQueryService.getUserReservations(token);
     }
 }
