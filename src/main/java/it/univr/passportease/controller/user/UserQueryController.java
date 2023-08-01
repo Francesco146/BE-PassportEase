@@ -1,15 +1,22 @@
 package it.univr.passportease.controller.user;
 
-import it.univr.passportease.dto.output.UserOutput;
+import it.univr.passportease.entity.Notification;
+import it.univr.passportease.entity.User;
 import it.univr.passportease.service.user.UserQueryService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestHeader;
+
+import java.util.List;
 
 @Controller
 @AllArgsConstructor
 public class UserQueryController {
+
+    @Autowired
+    private HttpServletRequest request;
 
     private final UserQueryService userQueryService;
     @QueryMapping
@@ -19,11 +26,16 @@ public class UserQueryController {
     public void getReportDetailsByAvailabilityId() {}
 
     @QueryMapping
-    public void getUserNotifications() {}
+    public List<Notification> getUserNotifications() {
+        String token = request.getHeader("Authorization");
+        token = token.substring(7);
+        return userQueryService.getUserNotifications(token);
+    }
 
     @QueryMapping
-    public UserOutput getUserDetails(@RequestHeader("Authorization") String token) {
-        System.out.println(token);
+    public User getUserDetails() {
+        String token = request.getHeader("Authorization");
+        token = token.substring(7);
         return userQueryService.getUserDetails(token);
     }
 

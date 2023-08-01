@@ -4,7 +4,6 @@ import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.input.RegisterInputDB;
 import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
-import it.univr.passportease.dto.output.UserOutput;
 import it.univr.passportease.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -36,18 +35,6 @@ public class MapUser {
                         accessToken,
                         user.getRefreshToken()
                 )
-        );
-    }
-
-    public UserOutput mapUserToUserOutput(User user) {
-        return new UserOutput(
-                user.getId(),
-                user.getFiscalCode(),
-                user.getEmail(),
-                user.getName(),
-                user.getSurname(),
-                user.getCityOfBirth(),
-                user.getDateOfBirth()
         );
     }
 }

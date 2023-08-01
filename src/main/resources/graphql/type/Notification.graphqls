@@ -1,8 +1,8 @@
 type Notification {
     id: ID!
     isReady: Boolean!
-    startDate: String!
-    endDate: String!
+    startDate: Date!
+    endDate: Date!
     office: Office!
     requestType: RequestType!
 }
