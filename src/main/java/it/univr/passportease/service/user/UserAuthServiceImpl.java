@@ -8,18 +8,18 @@ import it.univr.passportease.helper.map.MapUser;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import lombok.AllArgsConstructor;
-
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -97,10 +97,13 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER')")
-    public void logout() {
+    public void logout(@RequestHeader("Authorization") String authorizationHeader) {
         // invalidate access token
-
-
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Invalid token");
+        }
+        String accessToken = authorizationHeader.substring(7);
+        // remove access token from cache
         // invalidate refresh token
     }
 }
