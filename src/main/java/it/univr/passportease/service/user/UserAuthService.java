@@ -1,6 +1,7 @@
 package it.univr.passportease.service.user;
 
 import it.univr.passportease.dto.input.RegisterInput;
+import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
 
 public interface UserAuthService {
@@ -9,4 +10,6 @@ public interface UserAuthService {
     LoginOutput register(RegisterInput registerInput);
 
     void logout();
+
+    JWTSet refreshAccessToken(String token, String refreshToken);
 }

@@ -3,7 +3,6 @@ package it.univr.passportease.controller;
 import it.univr.passportease.entity.Office;
 import it.univr.passportease.service.UserWorkerQueryService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 

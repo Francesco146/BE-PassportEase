@@ -2,6 +2,7 @@ package it.univr.passportease.service.user;
 
 import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.input.RegisterInputDB;
+import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.Worker;
@@ -123,6 +124,36 @@ public class UserAuthServiceImpl implements UserAuthService {
             throw new RuntimeException("Invalid token");
 
         jwtService.invalidateAccessToken(accessToken);
-        // invalidate refresh token
+    }
+
+    @Override
+    public JWTSet refreshAccessToken(String token, String refreshToken) {
+        // check if refresh token is valid
+        UUID id = jwtService.extractId(token);
+        Optional<User> _user = userRepository.findById(id);
+        Optional<Worker> _worker = workerRepository.findById(id);
+        String newRefreshToken = jwtService.generateRefreshToken(id);
+        if (_user.isPresent()) {
+            User user = _user.get();
+            if (!user.getRefreshToken().equals(refreshToken))
+                throw new RuntimeException("Invalid refresh token");
+            // save new refresh token
+            user.setRefreshToken(newRefreshToken);
+            userRepository.save(user);
+        } else if (_worker.isPresent()) {
+            Worker worker = _worker.get();
+            if (!worker.getRefreshToken().equals(refreshToken))
+                throw new RuntimeException("Invalid refresh token");
+            // save new refresh token
+            worker.setRefreshToken(newRefreshToken);
+            workerRepository.save(worker);
+        } else
+            throw new RuntimeException("Invalid refresh token");
+
+        // generate new access token
+        String accessToken = jwtService.generateAccessToken(id);
+
+        // return new access token
+        return new JWTSet(accessToken, newRefreshToken);
     }
 }

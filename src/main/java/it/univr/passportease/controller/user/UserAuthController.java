@@ -1,6 +1,7 @@
 package it.univr.passportease.controller.user;
 
 import it.univr.passportease.dto.input.RegisterInput;
+import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.service.user.UserAuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,7 +47,9 @@ public class UserAuthController {
 
     @MutationMapping
     @PreAuthorize("hasAuthority('USER')")
-    public void refreshAccessTokenUser() {
+    public JWTSet refreshAccessTokenUser(@Argument("refreshToken") String refreshToken) {
+        String token = request.getHeader("Authorization").substring(7);
+        return userAuthService.refreshAccessToken(token, refreshToken);
     }
 
     @MutationMapping

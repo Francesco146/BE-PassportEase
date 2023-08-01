@@ -1,7 +1,6 @@
 package it.univr.passportease.repository;
 
 import it.univr.passportease.entity.Availability;
-import it.univr.passportease.entity.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
