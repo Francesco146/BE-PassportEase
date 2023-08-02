@@ -1,7 +1,9 @@
 package it.univr.passportease.controller.worker;
 
+import it.univr.passportease.entity.Request;
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.service.worker.WorkerQueryService;
+import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
@@ -17,7 +19,9 @@ public class WorkerQueryController {
 
 
     @QueryMapping
-    public void getRequestsByAvailabilityId() {}
+    public Request getRequestsByAvailabilityId(@Argument("availabilityID") String id) {
+        return workerQueryService.getRequestByAvailabilityID(id);
+    }
 
     @QueryMapping
     public List<RequestType> getAllRequestTypes() {

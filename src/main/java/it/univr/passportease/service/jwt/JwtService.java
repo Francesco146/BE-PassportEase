@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import it.univr.passportease.entity.User;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
@@ -129,8 +130,14 @@ public class JwtService {
     }
 
     public boolean invalidateRefreshToken(String token) {
-
+    //TODO
         return true;
     }
 
+    public User getUserFromToken(String token) {
+        UUID id = extractId(token);
+        if (userRepository.findById(id).isEmpty())
+            throw new RuntimeException("Invalid User ID");
+        return userRepository.findById(id).get();
+    }
 }
