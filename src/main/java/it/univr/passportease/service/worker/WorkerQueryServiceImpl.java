@@ -21,15 +21,13 @@ public class WorkerQueryServiceImpl implements WorkerQueryService {
     private final ReservationRepository reservationRepository;
 
     @Override
-    //TODO
-    //@PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
+    @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
     public List<RequestType> getAllRequestTypes() {
         return requestTypeRepository.findAll();
     }
 
     @Override
-    //TODO
-    //@PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
+    @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
     public Request getRequestByAvailabilityID(String id) {
         Optional<Availability> _availability = reservationRepository.findById(UUID.fromString(id));
         if (_availability.isEmpty())

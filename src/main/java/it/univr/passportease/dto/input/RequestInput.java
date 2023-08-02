@@ -1,21 +1,21 @@
 package it.univr.passportease.dto.input;
 
+import java.util.Date;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.Date;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @ToString
-public class NotificationInput {
-
+public class RequestInput {
+    private Integer duration;
     private Date startDate;
     private Date endDate;
-    private String office;
-    //TODO check requestTypeId to Name
-    private String requestTypeName;
+    private String requestType;
+    private List<String> offices;
 }

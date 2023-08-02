@@ -3,4 +3,5 @@ input RequestInput {
     startDate: String!
     endDate: String!
     requestType: String!
+    offices: [String!]!
 }

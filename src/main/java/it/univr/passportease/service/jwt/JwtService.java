@@ -10,6 +10,7 @@ import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,7 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class JwtService {
     private RedisTemplate<String, String> redisTemplate;
+    // repositories
     private final WorkerRepository workerRepository;
     private final UserRepository userRepository;
 

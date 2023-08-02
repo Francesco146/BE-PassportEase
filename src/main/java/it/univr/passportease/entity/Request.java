@@ -24,12 +24,12 @@ public class Request {
     private Integer duration;
 
     @NonNull
-    @Column(name = "starting_date")
-    private Date startingDate;
+    @Column(name = "start_date")
+    private Date startDate;
 
     @NonNull
-    @Column(name = "ending_date")
-    private Date endingDate;
+    @Column(name = "end_date")
+    private Date endDate;
 
     @NonNull
     @ManyToOne

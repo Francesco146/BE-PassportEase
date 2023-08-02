@@ -4,9 +4,11 @@ import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.input.RegisterInputDB;
 import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
+import it.univr.passportease.entity.Citizen;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.Worker;
 import it.univr.passportease.helper.map.MapUser;
+import it.univr.passportease.repository.CitizenRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import it.univr.passportease.service.jwt.JwtService;
@@ -32,6 +34,7 @@ public class UserAuthServiceImpl implements UserAuthService {
     private HttpServletRequest request;
     private final UserRepository userRepository;
     private final WorkerRepository workerRepository;
+    private final CitizenRepository citizenRepository;
     private final MapUser mapUser;
     private final JwtService jwtService;
     @Autowired
@@ -41,13 +44,11 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     public LoginOutput login(String fiscalCode, String password) {
-        // get user id
+        // get user
         Optional<User> _user = userRepository.findByFiscalCode(fiscalCode);
         _user.orElseThrow(() -> new RuntimeException("User not found"));
         User user = _user.get();
-
-        // TODO: invalidate old refresh token
-
+        // get user id
         String id = user.getId().toString();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(id, password));
@@ -70,13 +71,18 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     public LoginOutput register(RegisterInput registerInput) {
+        String fiscalCode = registerInput.getFiscalCode();
         // check if user already exists
-        Optional<User> userDB = userRepository.findByFiscalCode(registerInput.getFiscalCode());
+        Optional<User> userDB = userRepository.findByFiscalCode(fiscalCode);
         if (userDB.isPresent()) {
             throw new RuntimeException("User already exists");
         }
 
-        // TODO: check if user exists in the citizens table
+        // check if user exists in the citizens table
+        Optional<Citizen> citizen = citizenRepository.findByFiscalCode(fiscalCode);
+        if (citizen.isEmpty()) {
+            throw new RuntimeException("No citizen found with this fiscal code");
+        }
 
         // create user
         RegisterInputDB registerInputDB = new RegisterInputDB(
