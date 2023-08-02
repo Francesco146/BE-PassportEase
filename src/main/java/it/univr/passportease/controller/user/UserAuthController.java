@@ -42,7 +42,14 @@ public class UserAuthController {
 
     @MutationMapping
     public LoginOutput registerUser(@Argument("registerInput") RegisterInput registerInput) {
-        return userAuthService.register(registerInput);
+        LoginOutput register = userAuthService.register(registerInput);
+        redisTemplate.opsForValue().set(
+                register.getId().toString(),
+                register.getJwtSet().getAccessToken(),
+                15,
+                java.util.concurrent.TimeUnit.MINUTES
+        );
+        return register;
     }
 
     @MutationMapping
