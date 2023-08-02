@@ -1,4 +1,0 @@
-input PWDSet {
-    newPassword: String!
-    oldPassword: String!
-}

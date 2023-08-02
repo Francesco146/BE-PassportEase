@@ -1,4 +1,0 @@
-input EmailSet {
-    newEmail: String!
-    oldEmail: String!
-}

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 @AllArgsConstructor
@@ -155,5 +156,76 @@ public class UserAuthServiceImpl implements UserAuthService {
 
         // return new access token
         return new JWTSet(accessToken, newRefreshToken);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
+    public void changePassword(String oldPassword, String newPassword) {
+        String authorizationHeader = request.getHeader("Authorization");
+        // remove access token from cache
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer "))
+            throw new RuntimeException("Invalid token");
+
+        String accessToken = authorizationHeader.substring(7);
+        UUID userId = jwtService.extractId(accessToken);
+        Optional<User> _user = userRepository.findById(userId);
+        Optional<Worker> _worker = workerRepository.findById(userId);
+        if (_user.isPresent()) {
+            User user = _user.get();
+            if (!passwordEncoder.matches(oldPassword, user.getHashPassword()))
+                throw new RuntimeException("Invalid old password");
+            // save new password
+            user.setHashPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        } else if (_worker.isPresent()) {
+            Worker worker = _worker.get();
+            if (!passwordEncoder.matches(oldPassword, worker.getHashPassword()))
+                throw new RuntimeException("Invalid old password");
+            // save new password
+            worker.setHashPassword(passwordEncoder.encode(newPassword));
+            workerRepository.save(worker);
+        } else
+            throw new RuntimeException("Invalid token");
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
+    public String changeEmail(String newEmail, String oldEmail) {
+        String authorizationHeader = request.getHeader("Authorization");
+        // remove access token from cache
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer "))
+            throw new RuntimeException("Invalid token");
+
+        if (!emailValid(newEmail))
+            throw new RuntimeException("Invalid email");
+
+        String accessToken = authorizationHeader.substring(7);
+        UUID userId = jwtService.extractId(accessToken);
+        Optional<User> _user = userRepository.findById(userId);
+        Optional<Worker> _worker = workerRepository.findById(userId);
+        if (_user.isPresent()) {
+            User user = _user.get();
+            if (!user.getEmail().equals(oldEmail))
+                throw new RuntimeException("Invalid old email");
+            // save new email
+            user.setEmail(newEmail);
+            userRepository.save(user);
+        } else if (_worker.isPresent()) {
+            Worker worker = _worker.get();
+            if (!worker.getEmail().equals(oldEmail))
+                throw new RuntimeException("Invalid old email");
+            // save new email
+            worker.setEmail(newEmail);
+            workerRepository.save(worker);
+        } else
+            throw new RuntimeException("Invalid token");
+        return newEmail;
+    }
+
+    private boolean emailValid(String email) {
+        return Pattern
+                .compile("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")
+                .matcher(email)
+                .matches();
     }
 }

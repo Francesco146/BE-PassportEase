@@ -12,4 +12,8 @@ public interface UserAuthService {
     void logout();
 
     JWTSet refreshAccessToken(String token, String refreshToken);
+
+    void changePassword(String oldPassword, String newPassword);
+
+    String changeEmail(String newEmail, String oldEmail);
 }

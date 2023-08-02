@@ -3,11 +3,11 @@ type Mutation {
     logoutUser: Boolean
     registerUser(registerInput: RegisterInput): LoginOutput!
     refreshAccessTokenUser(refreshToken: String!): JWTSet!
-    changePasswordUser(PWDSet: PWDSet): Boolean
+    changePasswordUser(newPassword: String!, oldPassword: String!): Boolean
     createReservation(availabilityID: ID!): Availability!
     deleteReservation(availabilityID: ID!): Boolean
     createNotification(notification: NotificationInput!): Notification!
     modifyNotification(notification: NotificationInput!, notificationID: ID!): Notification!
     deleteNotification(notificationID: ID!): Boolean
-    changeEmailUser(emailSet: EmailSet!): String!
+    changeEmailUser(newEmail: String!, oldEmail: String!): String!
 }

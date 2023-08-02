@@ -53,12 +53,12 @@ public class UserAuthController {
     }
 
     @MutationMapping
-    @PreAuthorize("hasAuthority('USER')")
-    public void changePasswordUser() {
+    public void changePasswordUser(@Argument("oldPassword") String oldPassword, @Argument("newPassword") String newPassword) {
+        userAuthService.changePassword(oldPassword, newPassword);
     }
 
     @MutationMapping
-    @PreAuthorize("hasAuthority('USER')")
-    public void changeEmailUser() {
+    public String changeEmailUser(@Argument("newEmail") String newEmail, @Argument("oldEmail") String oldEmail) {
+        return userAuthService.changeEmail(newEmail, oldEmail);
     }
 }
