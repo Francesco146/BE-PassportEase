@@ -8,5 +8,4 @@ import java.util.UUID;
 
 public interface OfficeRepository extends JpaRepository<Office, UUID> {
 
-    List<Office> findAll();
 }
