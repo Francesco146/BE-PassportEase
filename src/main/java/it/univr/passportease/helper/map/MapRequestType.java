@@ -1,16 +1,16 @@
 package it.univr.passportease.helper.map;
 
-import it.univr.passportease.dto.RequestTypeInput;
-import it.univr.passportease.entity.RequestType;
+import java.util.Date;
+
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import it.univr.passportease.entity.RequestType;
 
 @Component
 public class MapRequestType {
-    public RequestType mapInputToRequestType(RequestTypeInput requestTypeInput) {
+    public RequestType mapStringToRequestType(String name) {
         RequestType requestType = new RequestType();
-        requestType.setName(requestTypeInput.getName());
+        requestType.setName(name);
         requestType.setCreatedAt(new Date());
         requestType.setUpdatedAt(new Date());
         return requestType;
