@@ -1,7 +1,5 @@
 extend type Mutation {
     loginWorker(username: String!, password: String!): LoginOutput
-    logoutWorker: Boolean
-    refreshAccessTokenWorker(refreshToken: String!): JWTSet!
     createRequest(request: RequestInput!): Request!
     modifyRequest(requestID: ID!, request: RequestInput): Request!
     deleteRequest(requestID: ID!): Boolean

@@ -6,11 +6,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import it.univr.passportease.entity.User;
+import it.univr.passportease.entity.Worker;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,19 +23,15 @@ import java.util.function.Function;
 @Service
 @AllArgsConstructor
 public class JwtService {
-    private RedisTemplate<String, String> redisTemplate;
-    // repositories
-    private final WorkerRepository workerRepository;
-    private final UserRepository userRepository;
-
-    @Value("${jwt.secret}")
-    private static String accessKey;
-
-    @Value("${refreshtoken.secret}")
-    private static String refreshKey;
-
     // TODO: eliminare
     private final static String key = "FrancescoTiAmoPeroQuestaPasswordETroppoCortaQuindiDevoAllungarlaUnPoDiPiuAliceCiao";
+    @Value("${jwt.secret}")
+    private static String accessKey;
+    @Value("${refreshtoken.secret}")
+    private static String refreshKey;
+    private final WorkerRepository workerRepository;
+    private final UserRepository userRepository;
+    private RedisTemplate<String, String> redisTemplate;
 
     public UUID extractId(String token) {
         return UUID.fromString(extractClaim(token, Claims::getSubject));
@@ -60,7 +56,21 @@ public class JwtService {
     }
 
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        /* TODO: Check if this is correct
+         * Checks for understanding if the token is expired:
+         * 1. if the token is expired
+         * 2. if the token is not in redis
+         * 3. if the token in redis is not the same as the token in the request
+         * 4. if the token has nbf (not before) field and if it is after the current time
+         * 5. if the token has iat (issued at) field and if it is after the current time
+         */
+        return extractExpiration(token).before(new Date()) &&
+                redisTemplate.opsForValue().get(extractId(token).toString()) == null &&
+                !redisTemplate.opsForValue().get(extractId(token).toString()).equals(token) &&
+                extractAllClaims(token).get("nbf") != null &&
+                extractAllClaims(token).get("nbf", Date.class).after(new Date()) &&
+                extractAllClaims(token).get("iat") != null &&
+                extractAllClaims(token).get("iat", Date.class).after(new Date());
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
@@ -82,7 +92,7 @@ public class JwtService {
     private String createAccessToken(Map<String, Object> claims, UUID id) {
         claims.put("role", getRoleById(id));
 
-        return Jwts.builder()
+        String accessToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setClaims(claims)
                 .setSubject(id.toString())
@@ -91,6 +101,13 @@ public class JwtService {
                 .setNotBefore(new Date(System.currentTimeMillis()))
                 .setId(UUID.randomUUID().toString())
                 .signWith(getAccessSignKey(), SignatureAlgorithm.HS256).compact();
+
+        saveTokenInRedis(id, accessToken);
+        return accessToken;
+    }
+
+    private void saveTokenInRedis(UUID id, String token) {
+        redisTemplate.opsForValue().set(id.toString(), token);
     }
 
     public String generateRefreshToken(UUID id) {
@@ -128,18 +145,31 @@ public class JwtService {
     }
 
     public boolean invalidateAccessToken(String token) {
-        return Boolean.TRUE.equals(redisTemplate.delete(extractId(token).toString()));
-    }
-
-    public boolean invalidateRefreshToken(String token) {
-    //TODO
+        if (redisTemplate.opsForValue().get(extractId(token).toString()) == null) return false;
+        redisTemplate.delete(extractId(token).toString());
         return true;
     }
 
-    public User getUserFromToken(String token) {
+    public void invalidateRefreshToken(String token) throws RuntimeException {
+        //TODO
+        Object userOrWorker = getUserOrWorkerFromToken(token);
+        if (userOrWorker instanceof User) {
+            ((User) userOrWorker).setRefreshToken("");
+            userRepository.save((User) userOrWorker);
+        } else {
+            ((Worker) userOrWorker).setRefreshToken("");
+            workerRepository.save((Worker) userOrWorker);
+        }
+    }
+
+    // wrapper function to return User or Worker depending on the token
+    public Object getUserOrWorkerFromToken(String token) throws RuntimeException {
         UUID id = extractId(token);
-        if (userRepository.findById(id).isEmpty())
-            throw new RuntimeException("Invalid User ID");
-        return userRepository.findById(id).get();
+        if (userRepository.findById(id).isPresent())
+            return userRepository.findById(id).get();
+        else if (workerRepository.findById(id).isPresent())
+            return workerRepository.findById(id).get();
+        else
+            throw new RuntimeException("Invalid User and Worker ID");
     }
 }

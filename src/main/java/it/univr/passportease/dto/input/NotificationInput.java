@@ -15,7 +15,6 @@ public class NotificationInput {
 
     private Date startDate;
     private Date endDate;
-    private String office;
-    //TODO check requestTypeId to Name
+    private String officeName;
     private String requestTypeName;
 }

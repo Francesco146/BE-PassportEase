@@ -11,10 +11,11 @@ import java.util.List;
 @Controller
 @AllArgsConstructor
 public class UserWorkerQueryController {
-
     private final UserWorkerQueryService userWorkerQueryService;
+
     @QueryMapping
-    public void getAvailabilities() {}
+    public void getAvailabilities() {
+    }
 
     @QueryMapping
     public List<Office> getOffices() {

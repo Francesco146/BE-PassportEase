@@ -1,8 +1,8 @@
 type Mutation {
     loginUser(fiscalCode: String!, password: String!): LoginOutput!
-    logoutUser: Boolean
+    logout: Boolean
     registerUser(registerInput: RegisterInput): LoginOutput!
-    refreshAccessTokenUser(refreshToken: String!): JWTSet!
+    refreshAccessToken(refreshToken: String!): JWTSet!
     changePassword(newPassword: String!, oldPassword: String!): Boolean
     createReservation(availabilityID: ID!): Availability!
     deleteReservation(availabilityID: ID!): Boolean

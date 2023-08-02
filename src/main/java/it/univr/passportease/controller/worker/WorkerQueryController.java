@@ -3,11 +3,10 @@ package it.univr.passportease.controller.worker;
 import it.univr.passportease.entity.Request;
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.service.worker.WorkerQueryService;
+import lombok.AllArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-
-import lombok.AllArgsConstructor;
 
 import java.util.List;
 
@@ -16,7 +15,6 @@ import java.util.List;
 public class WorkerQueryController {
 
     private final WorkerQueryService workerQueryService;
-
 
     @QueryMapping
     public Request getRequestsByAvailabilityId(@Argument("availabilityID") String id) {

@@ -16,31 +16,37 @@ import java.util.List;
 @AllArgsConstructor
 public class UserQueryController {
 
+    private final UserQueryService userQueryService;
     @Autowired
     private HttpServletRequest request;
 
-    private final UserQueryService userQueryService;
     @QueryMapping
-    public void getRequestTypesByUser() {}
+    public void getRequestTypesByUser() {
+    }
 
     @QueryMapping
-    public void getReportDetailsByAvailabilityId() {}
+    public void getReportDetailsByAvailabilityId() {
+    }
 
     @QueryMapping
     public List<Notification> getUserNotifications() {
-        String token = request.getHeader("Authorization").substring(7);
-        return userQueryService.getUserNotifications(token);
+        return userQueryService.getUserNotifications(getTokenFromRequest());
     }
 
     @QueryMapping
-    public User getUserDetails() {
-        String token = request.getHeader("Authorization").substring(7);
-        return userQueryService.getUserDetails(token);
+    public User getUserDetails() throws RuntimeException {
+        return userQueryService.getUserDetails(getTokenFromRequest());
     }
 
     @QueryMapping
-    public List<Availability> getUserReservations() {
-        String token = request.getHeader("Authorization").substring(7);
-        return userQueryService.getUserReservations(token);
+    public List<Availability> getUserReservations() throws RuntimeException {
+        return userQueryService.getUserReservations(getTokenFromRequest());
+    }
+
+    private String getTokenFromRequest() throws RuntimeException {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer "))
+            throw new RuntimeException("Invalid token");
+        return authorizationHeader.substring(7);
     }
 }

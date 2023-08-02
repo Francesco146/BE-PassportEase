@@ -20,6 +20,7 @@ public class MapUser {
 
     private final RequestTypeRepository requestTypeRepository;
     private final OfficeRepository officeRepository;
+
     public User mapRegisterInputDBToUser(RegisterInputDB registerInputDB) {
         RegisterInput registerInput = registerInputDB.getRegisterInput();
         User user = new User();
@@ -48,17 +49,18 @@ public class MapUser {
     }
 
     public Notification mapNotificationInputToNotification(NotificationInput notificationInput, User user) {
-        if (officeRepository.findByName(notificationInput.getOffice()).isEmpty())
+        if (officeRepository.findByName(notificationInput.getOfficeName()).isEmpty())
             throw new RuntimeException("Invalid Office");
         if (requestTypeRepository.findByName(notificationInput.getRequestTypeName()).isEmpty())
             throw new RuntimeException("Invalid Request Type Name");
+
         Notification notification = new Notification();
         notification.setIsReady(false);
         notification.setStartDate(notificationInput.getStartDate());
         notification.setEndDate(notificationInput.getEndDate());
         notification.setOffice(
                 officeRepository.findByName(
-                        notificationInput.getOffice()
+                        notificationInput.getOfficeName()
                 ).get()
         );
         notification.setUser(user);

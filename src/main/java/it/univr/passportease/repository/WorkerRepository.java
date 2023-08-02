@@ -1,16 +1,20 @@
 package it.univr.passportease.repository;
 
-import java.util.Optional;
-import java.util.UUID;
-
+import it.univr.passportease.entity.Office;
+import it.univr.passportease.entity.Worker;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import it.univr.passportease.entity.Office;
-import it.univr.passportease.entity.Worker;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface WorkerRepository extends JpaRepository<Worker, UUID> {
-    Optional<Worker> findById(UUID id);
+    @NotNull
+    Optional<Worker> findById(@NotNull UUID id);
+
     Integer countByOffice(Office office);
+
+    Optional<Worker> findByUsername(String username);
 }
