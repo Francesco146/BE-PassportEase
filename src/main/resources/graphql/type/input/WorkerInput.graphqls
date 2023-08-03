@@ -1,0 +1,6 @@
+input WorkerInput {
+    username: String!
+    email: String!
+    officeName: String!
+    password: String!
+}

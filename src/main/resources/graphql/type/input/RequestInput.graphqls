@@ -1,7 +1,9 @@
 input RequestInput {
     duration: Int!
-    startDate: String!
-    endDate: String!
+    startDate: Date!
+    endDate: Date!
+    startTime: LocalTime!
+    endTime: LocalTime!
     requestType: String!
     offices: [String!]!
 }

@@ -3,4 +3,7 @@ extend type Mutation {
     createRequest(request: RequestInput!): Request!
     modifyRequest(requestID: ID!, request: RequestInput): Request!
     deleteRequest(requestID: ID!): Boolean
+
+    # Eliminar
+    registerWorker(workerInput: WorkerInput!): LoginOutput!
 }

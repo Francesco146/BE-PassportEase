@@ -16,6 +16,8 @@ public class MapRequest {
         request.setDuration(requestInput.getDuration());
         request.setStartDate(requestInput.getStartDate());
         request.setEndDate(requestInput.getEndDate());
+        request.setStartTime(requestInput.getStartTime());
+        request.setEndTime(requestInput.getEndTime());
         request.setWorker(worker);
         request.setRequestType(requestType);
         request.setCreatedAt(new Date());

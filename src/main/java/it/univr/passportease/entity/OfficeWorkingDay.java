@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.sql.Time;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
@@ -28,17 +28,17 @@ public class OfficeWorkingDay {
 
     @NonNull
     @Column(name = "start_time1")
-    private Time startTime1;
+    private LocalTime startTime1;
 
     @NonNull
     @Column(name = "end_time1")
-    private Time endTime1;
+    private LocalTime endTime1;
 
     @Column(name = "start_time2")
-    private Time startTime2;
+    private LocalTime startTime2;
 
     @Column(name = "end_time2")
-    private Time endTime2;
+    private LocalTime endTime2;
 
     @NonNull
     @ManyToOne

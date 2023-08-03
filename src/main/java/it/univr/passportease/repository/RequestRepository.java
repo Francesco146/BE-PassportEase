@@ -19,5 +19,5 @@ public interface RequestRepository extends JpaRepository<Request, UUID> {
             "AND r.start_date >= ?2"+
             "AND r.start_date <= ?3", 
             nativeQuery = true)
-    Integer countBusyWorkersByOfficeAndDataRange(Office office, Date startDate, Date endDate);
+    Long countBusyWorkersByOfficeAndDataRange(Office office, Date startDate, Date endDate);
 }

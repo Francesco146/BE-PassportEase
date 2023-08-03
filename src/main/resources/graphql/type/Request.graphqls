@@ -3,5 +3,7 @@ type Request {
     duration: Int!
     startDate: String!
     endDate: String!
+    startTime: LocalTime!
+    endTime: LocalTime!
     requestType: RequestType!
 }

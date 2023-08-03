@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.sql.Time;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
@@ -30,7 +30,7 @@ public class Availability {
     private Date date;
 
     @NonNull
-    private Time time;
+    private LocalTime time;
 
     @NonNull
     @ManyToOne

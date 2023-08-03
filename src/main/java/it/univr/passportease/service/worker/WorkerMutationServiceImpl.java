@@ -1,5 +1,8 @@
 package it.univr.passportease.service.worker;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import it.univr.passportease.dto.input.RequestInput;
+import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.Office;
 import it.univr.passportease.entity.OfficeWorkingDay;
@@ -16,6 +20,8 @@ import it.univr.passportease.entity.Request;
 import it.univr.passportease.entity.RequestOffice;
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.entity.Worker;
+import it.univr.passportease.entity.enums.Day;
+import it.univr.passportease.helper.map.MapAvailability;
 import it.univr.passportease.helper.map.MapRequest;
 import it.univr.passportease.helper.map.MapRequestOffice;
 import it.univr.passportease.helper.map.MapRequestType;
@@ -47,6 +53,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     private final MapRequest mapRequest;
     private final MapRequestType mapRequestType;
     private final MapRequestOffice mapRequestOffice;
+    private final MapAvailability mapAvailability;
 
     @Override
     @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
@@ -93,10 +100,10 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
 
     private Boolean isWorkersEnoughForRequest(Date startDate, Date endDate, List<Office> offices) {
         for (Office office : offices) {
-            Integer totalNumberOfWorker = workerRepository.countByOffice(office);
+            Long totalNumberOfWorker = workerRepository.countByOffice(office);
             // TODO: delete this
             System.out.println("totalNumberOfWorker: " + totalNumberOfWorker);
-            Integer busyWorkers = requestRepository.countBusyWorkersByOfficeAndDataRange(office,
+            Long busyWorkers = requestRepository.countBusyWorkersByOfficeAndDataRange(office,
                     startDate,
                     endDate);
 
@@ -122,17 +129,70 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         }
     }
 
-    // TODO:
     private void createAvailabilities(Date startDate, Date endDate, List<Office> offices, Request request) {
-        /*
-         * status
-         * date
-         * time
-         * request_id
-         * office_id
-         * user_id
-         */
-        
+        // cast dates to LocalDate
+        LocalDate start = startDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        LocalDate end = endDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+
+        LocalTime requestStartTime = request.getStartTime();
+        LocalTime requestEndTime = request.getEndTime();
+
+        Integer duration = request.getDuration();
+
+        List<OfficeWorkingDay> officeWorkingDays = new ArrayList<>();
+        for (Office office : offices) {
+            officeWorkingDays.addAll(officeWorkingDayRepository.findByOffice(office));
+        }
+
+        for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
+            String dayOfWeek = date.getDayOfWeek().toString();
+            Day day = Day.valueOf(dayOfWeek);
+            for (OfficeWorkingDay officeWorkingDay : officeWorkingDays) {
+                if (officeWorkingDay.getDay().equals(day)) {
+                    LocalTime officeStartTime1 = officeWorkingDay.getStartTime1();
+                    LocalTime officeEndTime1 = officeWorkingDay.getEndTime1();
+
+                    LocalTime startTime = getHigherTime(officeStartTime1, requestStartTime);
+                    LocalTime endTime = getLowerTime(officeEndTime1, requestEndTime);
+
+                    for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
+                        Availability availability = mapAvailability.mapRequestToAvailability(request,
+                                officeWorkingDay.getOffice(), date, time);
+                        availabilityRepository.save(availability);
+                    }
+
+                    LocalTime officeStartTime2 = officeWorkingDay.getStartTime2();
+                    LocalTime officeEndTime2 = officeWorkingDay.getEndTime2();
+                    if (officeStartTime2 != null && officeEndTime2 != null) {
+                        startTime = getHigherTime(officeStartTime2, requestStartTime);
+                        endTime = getLowerTime(officeEndTime2, requestEndTime);
+
+                        for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
+                            Availability availability = mapAvailability.mapRequestToAvailability(request,
+                                    officeWorkingDay.getOffice(), date, time);
+                            availabilityRepository.save(availability);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    private LocalTime getHigherTime(LocalTime time1, LocalTime time2) {
+        if (time1.isAfter(time2)) {
+            return time1;
+        } else {
+            return time2;
+        }
+    }
+
+    private LocalTime getLowerTime(LocalTime time1, LocalTime time2) {
+        if (time1.isBefore(time2)) {
+            return time1;
+        } else {
+            return time2;
+        }
     }
 
 }

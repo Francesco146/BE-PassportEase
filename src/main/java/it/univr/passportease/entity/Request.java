@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
@@ -30,6 +31,14 @@ public class Request {
     @NonNull
     @Column(name = "end_date")
     private Date endDate;
+
+    @NonNull
+    @Column(name = "start_time")
+    private LocalTime startTime;
+
+    @NonNull
+    @Column(name = "end_time")
+    private LocalTime endTime;
 
     @NonNull
     @ManyToOne

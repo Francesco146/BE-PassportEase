@@ -1,5 +1,6 @@
 package it.univr.passportease.controller.worker;
 
+import it.univr.passportease.dto.input.WorkerInput;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.service.worker.WorkerAuthService;
 import lombok.AllArgsConstructor;
@@ -15,5 +16,10 @@ public class WorkerAuthController {
     @MutationMapping
     public LoginOutput loginWorker(@Argument("username") String username, @Argument("password") String password) {
         return workerAuthService.login(username, password);
+    }
+
+    @MutationMapping
+    public LoginOutput registerWorker(@Argument("workerInput") WorkerInput workerInput) {
+        return workerAuthService.register(workerInput);
     }
 }

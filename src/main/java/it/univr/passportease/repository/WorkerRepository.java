@@ -14,7 +14,7 @@ public interface WorkerRepository extends JpaRepository<Worker, UUID> {
     @NotNull
     Optional<Worker> findById(@NotNull UUID id);
 
-    Integer countByOffice(Office office);
+    Long countByOffice(Office office);
 
     Optional<Worker> findByUsername(String username);
 }
