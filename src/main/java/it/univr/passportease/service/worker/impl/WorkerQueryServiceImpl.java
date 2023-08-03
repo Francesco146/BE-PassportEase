@@ -1,10 +1,11 @@
-package it.univr.passportease.service.worker;
+package it.univr.passportease.service.worker.impl;
 
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Request;
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.repository.RequestTypeRepository;
 import it.univr.passportease.repository.ReservationRepository;
+import it.univr.passportease.service.worker.WorkerQueryService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class WorkerQueryServiceImpl implements WorkerQueryService {
     public Request getRequestByAvailabilityID(String id) {
         Optional<Availability> _availability = reservationRepository.findById(UUID.fromString(id));
         if (_availability.isEmpty())
-           throw new RuntimeException("Invalid Availability ID");
+            throw new RuntimeException("Invalid Availability ID");
         return _availability.get().getRequest();
     }
 }

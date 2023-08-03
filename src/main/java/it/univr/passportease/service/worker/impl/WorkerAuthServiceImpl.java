@@ -1,4 +1,4 @@
-package it.univr.passportease.service.worker;
+package it.univr.passportease.service.worker.impl;
 
 import it.univr.passportease.dto.input.WorkerInput;
 import it.univr.passportease.dto.output.JWTSet;
@@ -9,6 +9,7 @@ import it.univr.passportease.helper.map.MapWorker;
 import it.univr.passportease.repository.OfficeRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import it.univr.passportease.service.jwt.JwtService;
+import it.univr.passportease.service.worker.WorkerAuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;

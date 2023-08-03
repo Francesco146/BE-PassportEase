@@ -1,40 +1,22 @@
-package it.univr.passportease.service.worker;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
+package it.univr.passportease.service.worker.impl;
 
 import it.univr.passportease.dto.input.RequestInput;
-import it.univr.passportease.entity.Availability;
-import it.univr.passportease.entity.Notification;
-import it.univr.passportease.entity.Office;
-import it.univr.passportease.entity.OfficeWorkingDay;
-import it.univr.passportease.entity.Request;
-import it.univr.passportease.entity.RequestOffice;
-import it.univr.passportease.entity.RequestType;
-import it.univr.passportease.entity.Worker;
+import it.univr.passportease.entity.*;
 import it.univr.passportease.entity.enums.Day;
 import it.univr.passportease.helper.map.MapAvailability;
 import it.univr.passportease.helper.map.MapRequest;
 import it.univr.passportease.helper.map.MapRequestOffice;
 import it.univr.passportease.helper.map.MapRequestType;
-import it.univr.passportease.repository.AvailabilityRepository;
-import it.univr.passportease.repository.NotificationRepository;
-import it.univr.passportease.repository.OfficeRepository;
-import it.univr.passportease.repository.OfficeWorkingDayRepository;
-import it.univr.passportease.repository.RequestOfficeRepository;
-import it.univr.passportease.repository.RequestRepository;
-import it.univr.passportease.repository.RequestTypeRepository;
-import it.univr.passportease.repository.WorkerRepository;
+import it.univr.passportease.repository.*;
 import it.univr.passportease.service.jwt.JwtService;
+import it.univr.passportease.service.worker.WorkerMutationService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.*;
 
 @Service
 @AllArgsConstructor

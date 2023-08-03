@@ -1,10 +1,11 @@
-package it.univr.passportease.service.user;
+package it.univr.passportease.service.user.impl;
 
 import it.univr.passportease.dto.input.NotificationInput;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.helper.map.MapUser;
 import it.univr.passportease.repository.NotificationRepository;
+import it.univr.passportease.service.user.UserMutationService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;

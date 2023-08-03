@@ -1,0 +1,17 @@
+jwt:
+    secret: ${JWT_SECRET}
+server:
+    error:
+        include-message: always
+    port: 8080
+spring:
+    datasource:
+        password: example
+        url: jdbc:postgresql://localhost:5432/postgres
+        username: postgres
+    jackson:
+        serialization:
+            fail-on-empty-beans: false
+    jpa:
+        hibernate:
+            ddl-auto: update

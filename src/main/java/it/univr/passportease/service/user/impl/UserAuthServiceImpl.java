@@ -1,13 +1,15 @@
-package it.univr.passportease.service.user;
+package it.univr.passportease.service.user.impl;
 
 import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.input.RegisterInputDB;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.entity.User;
+import it.univr.passportease.exception.WrongPasswordException;
 import it.univr.passportease.helper.map.MapUser;
 import it.univr.passportease.repository.CitizenRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
+import it.univr.passportease.service.user.UserAuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,10 +35,10 @@ public class UserAuthServiceImpl implements UserAuthService {
     private AuthenticationManager authenticationManager;
 
     @Override
-    public LoginOutput login(String fiscalCode, String password) {
+    public LoginOutput login(String fiscalCode, String password) throws UsernameNotFoundException, WrongPasswordException {
         // get user
         Optional<User> _user = userRepository.findByFiscalCode(fiscalCode);
-        _user.orElseThrow(() -> new RuntimeException("User not found"));
+        _user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         User user = _user.get();
         String userId = user.getId().toString();
@@ -45,7 +47,8 @@ public class UserAuthServiceImpl implements UserAuthService {
                 new UsernamePasswordAuthenticationToken(userId, password)
         );
 
-        if (!authentication.isAuthenticated()) throw new UsernameNotFoundException("invalid user request !");
+        // Exception if authentication fails (wrong password)
+        if (!authentication.isAuthenticated()) throw new WrongPasswordException("Authentication failed");
 
         user.setRefreshToken(
                 jwtService.generateRefreshToken(UUID.fromString(userId))

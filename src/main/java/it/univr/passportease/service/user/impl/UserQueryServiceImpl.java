@@ -1,4 +1,4 @@
-package it.univr.passportease.service.user;
+package it.univr.passportease.service.user.impl;
 
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
@@ -7,6 +7,7 @@ import it.univr.passportease.repository.NotificationRepository;
 import it.univr.passportease.repository.ReservationRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
+import it.univr.passportease.service.user.UserQueryService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;

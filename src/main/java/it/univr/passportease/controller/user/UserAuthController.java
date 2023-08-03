@@ -1,15 +1,19 @@
 package it.univr.passportease.controller.user;
 
+import io.github.bucket4j.Bucket;
 import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
+import it.univr.passportease.exception.RateLimitException;
+import it.univr.passportease.exception.WrongPasswordException;
+import it.univr.passportease.helper.BucketLimiter;
+import it.univr.passportease.helper.RequestAnalyzer;
 import it.univr.passportease.service.UserWorkerMutationService;
 import it.univr.passportease.service.user.UserAuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -17,13 +21,18 @@ import org.springframework.stereotype.Controller;
 public class UserAuthController {
     private final UserAuthService userAuthService;
     private final UserWorkerMutationService userWorkerMutationService;
+    private final BucketLimiter bucketLimiter;
 
-    @Autowired
-    private HttpServletRequest request;
+    private RequestAnalyzer requestAnalyzer;
+
 
     @MutationMapping
-    public LoginOutput loginUser(@Argument("fiscalCode") String fiscalCode, @Argument("password") String password) {
-        return userAuthService.login(fiscalCode, password);
+    public LoginOutput loginUser(@Argument("fiscalCode") String fiscalCode, @Argument("password") String password)
+            throws UsernameNotFoundException, WrongPasswordException, RateLimitException {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (bucket.tryConsume(1))
+            return userAuthService.login(fiscalCode, password);
+        else throw new RateLimitException("Too many login attempts");
     }
 
     @MutationMapping
@@ -38,7 +47,7 @@ public class UserAuthController {
 
     @MutationMapping
     public JWTSet refreshAccessToken(@Argument("refreshToken") String refreshToken) {
-        return userWorkerMutationService.refreshAccessToken(getTokenFromRequest(), refreshToken);
+        return userWorkerMutationService.refreshAccessToken(requestAnalyzer.getTokenFromRequest(), refreshToken);
     }
 
     @MutationMapping
@@ -49,12 +58,5 @@ public class UserAuthController {
     @MutationMapping
     public String changeEmail(@Argument("newEmail") String newEmail, @Argument("oldEmail") String oldEmail) {
         return userWorkerMutationService.changeEmail(newEmail, oldEmail);
-    }
-
-    private String getTokenFromRequest() throws RuntimeException {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer "))
-            throw new RuntimeException("Invalid token");
-        return authorizationHeader.substring(7);
     }
 }

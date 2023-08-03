@@ -66,7 +66,7 @@ public class JwtService {
          */
         return extractExpiration(token).before(new Date()) &&
                 redisTemplate.opsForValue().get(extractId(token).toString()) == null &&
-                !redisTemplate.opsForValue().get(extractId(token).toString()).equals(token) &&
+                !Objects.equals(redisTemplate.opsForValue().get(extractId(token).toString()), token) &&
                 extractAllClaims(token).get("nbf") != null &&
                 extractAllClaims(token).get("nbf", Date.class).after(new Date()) &&
                 extractAllClaims(token).get("iat") != null &&
@@ -75,21 +75,21 @@ public class JwtService {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String id = extractId(token).toString();
-        if (redisTemplate.opsForValue().get(id) == null) {
-            return false;
-        }
+
+        if (redisTemplate.opsForValue().get(id) == null) return false;
+
         @NonNull String tokenInRedis = Objects.requireNonNull(redisTemplate.opsForValue().get(id));
         return id.equals(userDetails.getUsername()) &&
                 !isTokenExpired(token) &&
                 (tokenInRedis.equals(token));
     }
 
-    public String generateAccessToken(UUID id) {
+    public String generateAccessToken(UUID id) throws RuntimeException {
         Map<String, Object> claims = new HashMap<>();
         return createAccessToken(claims, id);
     }
 
-    private String createAccessToken(Map<String, Object> claims, UUID id) {
+    private String createAccessToken(Map<String, Object> claims, UUID id) throws RuntimeException {
         claims.put("role", getRoleById(id));
 
         String accessToken = Jwts.builder()
@@ -124,7 +124,7 @@ public class JwtService {
                 .signWith(getRefreshSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
-    private String getRoleById(UUID id) {
+    private String getRoleById(UUID id) throws RuntimeException {
         if (workerRepository.findById(id).isPresent()) {
             return "worker";
         } else if (userRepository.findById(id).isPresent()) {
@@ -145,9 +145,7 @@ public class JwtService {
     }
 
     public boolean invalidateAccessToken(String token) {
-        if (redisTemplate.opsForValue().get(extractId(token).toString()) == null) return false;
-        redisTemplate.delete(extractId(token).toString());
-        return true;
+        return Boolean.TRUE.equals(redisTemplate.delete(extractId(token).toString()));
     }
 
     public void invalidateRefreshToken(String token) throws RuntimeException {
