@@ -21,8 +21,7 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NonNull
-    private Integer duration;
+    private long duration;
 
     @NonNull
     @Column(name = "start_date")

@@ -14,7 +14,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class RequestInput {
-    private Integer duration;
+    private long duration;
     private Date startDate;
     private Date endDate;
     private LocalTime startTime;

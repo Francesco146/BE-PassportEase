@@ -1,6 +1,6 @@
 input NotificationInput {
     startDate: Date!
     endDate: Date!
-    office: String!
+    officeName: String!
     requestTypeName: String!
 }

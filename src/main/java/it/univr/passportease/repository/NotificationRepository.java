@@ -13,5 +13,5 @@ import java.util.UUID;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
     List<Notification> findByUserId(UUID id);
-    List<Notification> findByOfficeAndIsReadyAndRequestType(Office office, boolean isReady, RequestType requestType);
+    List<Notification> findAllByOfficeAndIsReadyAndRequestType(Office office, boolean isReady, RequestType requestType);
 }

@@ -48,12 +48,24 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         }
         // params in requestInput
         String requestTypeName = requestInput.getRequestType();
+        // TODO: delete this
+        System.out.println(requestTypeName);
         List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
+        // TODO: delete this
+        for (Office office : offices) {
+            System.out.println(office.getName());
+        }
         Date startDate = requestInput.getStartDate();
+        // TODO: delete this
+        System.out.println(startDate);
         Date endDate = requestInput.getEndDate();
+        // TODO: delete this
+        System.out.println(endDate);
 
         if (isWorkersEnoughForRequest(startDate, endDate, offices)) {
             RequestType requestType = getOrCreateRequestType(requestTypeName);
+            // TODO: delete this
+            System.out.println(requestType.getName());
 
             Request request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker.get());
             request = requestRepository.save(request);
@@ -65,6 +77,8 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
             setNotifications(startDate, endDate, offices, requestType);
 
             createAvailabilities(startDate, endDate, offices, request);
+
+            return request;
         }
 
         return null;
@@ -82,16 +96,16 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
 
     private Boolean isWorkersEnoughForRequest(Date startDate, Date endDate, List<Office> offices) {
         for (Office office : offices) {
-            Long totalNumberOfWorker = workerRepository.countByOffice(office);
+            long totalNumberOfWorker = workerRepository.countByOffice(office);
             // TODO: delete this
             System.out.println("totalNumberOfWorker: " + totalNumberOfWorker);
-            Long busyWorkers = requestRepository.countBusyWorkersByOfficeAndDataRange(office,
+            long busyWorkers = requestRepository.countBusyWorkers(office.getId(),
                     startDate,
                     endDate);
 
             // TODO: delete this
             System.out.println("busyWorkers: " + busyWorkers);
-            if (totalNumberOfWorker > busyWorkers)
+            if (busyWorkers >= totalNumberOfWorker)
                 throw new RuntimeException("Office " + office.getName() + " doesn't have enough workers");
         }
         return true;
@@ -99,11 +113,14 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
 
     private void setNotifications(Date startDate, Date endDate, List<Office> offices, RequestType requestType) {
         for (Office office : offices) {
-            List<Notification> notifications = notificationRepository.findByOfficeAndIsReadyAndRequestType(office,
+            List<Notification> notifications = notificationRepository.findAllByOfficeAndIsReadyAndRequestType(office,
                     false, requestType);
             for (Notification notification : notifications) {
-                if (notification.getStartDate().compareTo(startDate) >= 0 &&
-                        notification.getEndDate().compareTo(endDate) <= 0) {
+                // TODO: delete this
+                System.out.println("notification: " + notification.getId());
+
+                if (isRequestDateInsideNotificationDate(startDate, endDate, notification.getStartDate(),
+                        notification.getEndDate()) && notification.getIsReady() == false) {
                     notification.setIsReady(true);
                     notificationRepository.save(notification);
                 }
@@ -119,7 +136,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         LocalTime requestStartTime = request.getStartTime();
         LocalTime requestEndTime = request.getEndTime();
 
-        Integer duration = request.getDuration();
+        long duration = request.getDuration();
 
         List<OfficeWorkingDay> officeWorkingDays = new ArrayList<>();
         for (Office office : offices) {
@@ -175,6 +192,27 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         } else {
             return time2;
         }
+    }
+
+    private Boolean isRequestDateInsideNotificationDate(Date requestStartDate, Date requestEndDate,
+            Date notificationStartDate, Date notificationEndDate) {
+        // 1. requestDates are between notificationStartDate and notificationEndDate
+        if ((requestStartDate.after(notificationStartDate) || requestStartDate.equals(notificationStartDate))
+                && (requestEndDate.before(notificationEndDate) || requestEndDate.equals(notificationEndDate))) {
+            return true;
+        }
+        // 2. requestStartDate is after notificationStartDate but before
+        // notificationEndDate and requestEndDate is after notificationEndDate
+        if (requestStartDate.after(notificationStartDate) && requestStartDate.before(notificationEndDate)
+                && requestEndDate.after(notificationEndDate)) {
+            return true;
+        }
+        // 3. requestStartDate is before notificationStartDate and requestEndDate is
+        // after notificationStartDate
+        if (requestStartDate.before(notificationStartDate) && requestEndDate.after(notificationStartDate)) {
+            return true;
+        }
+        return false;
     }
 
 }
