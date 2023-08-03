@@ -4,7 +4,9 @@ import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.input.RegisterInputDB;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.entity.User;
-import it.univr.passportease.exception.WrongPasswordException;
+import it.univr.passportease.exception.illegalstate.UserAlreadyExistsException;
+import it.univr.passportease.exception.notfound.UserNotFoundException;
+import it.univr.passportease.exception.security.WrongPasswordException;
 import it.univr.passportease.helper.map.MapUser;
 import it.univr.passportease.repository.CitizenRepository;
 import it.univr.passportease.repository.UserRepository;
@@ -15,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +36,10 @@ public class UserAuthServiceImpl implements UserAuthService {
     private AuthenticationManager authenticationManager;
 
     @Override
-    public LoginOutput login(String fiscalCode, String password) throws UsernameNotFoundException, WrongPasswordException {
+    public LoginOutput login(String fiscalCode, String password) throws UserNotFoundException, WrongPasswordException {
         // get user
         Optional<User> _user = userRepository.findByFiscalCode(fiscalCode);
-        _user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        _user.orElseThrow(() -> new UserNotFoundException("User not found"));
 
         User user = _user.get();
         String userId = user.getId().toString();
@@ -62,14 +63,14 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     @Override
-    public LoginOutput register(RegisterInput registerInput) {
+    public LoginOutput register(RegisterInput registerInput) throws UserNotFoundException, UserAlreadyExistsException {
         String fiscalCode = registerInput.getFiscalCode();
 
         Optional<User> userDB = userRepository.findByFiscalCode(fiscalCode);
-        if (userDB.isPresent()) throw new RuntimeException("User already exists");
+        if (userDB.isPresent()) throw new UserAlreadyExistsException("User already exists");
 
         if (citizenRepository.findByFiscalCode(fiscalCode).isEmpty())
-            throw new RuntimeException("No citizen found with this fiscal code");
+            throw new UserNotFoundException("No citizen found with this fiscal code");
 
         User _user = mapUser.mapRegisterInputDBToUser(
                 new RegisterInputDB(

@@ -7,6 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.Worker;
+import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
@@ -148,8 +149,7 @@ public class JwtService {
         return Boolean.TRUE.equals(redisTemplate.delete(extractId(token).toString()));
     }
 
-    public void invalidateRefreshToken(String token) throws RuntimeException {
-        //TODO
+    public void invalidateRefreshToken(String token) throws UserNotFoundException {
         Object userOrWorker = getUserOrWorkerFromToken(token);
         if (userOrWorker instanceof User) {
             ((User) userOrWorker).setRefreshToken("");
@@ -161,13 +161,13 @@ public class JwtService {
     }
 
     // wrapper function to return User or Worker depending on the token
-    public Object getUserOrWorkerFromToken(String token) throws RuntimeException {
+    public Object getUserOrWorkerFromToken(String token) throws UserNotFoundException {
         UUID id = extractId(token);
         if (userRepository.findById(id).isPresent())
             return userRepository.findById(id).get();
         else if (workerRepository.findById(id).isPresent())
             return workerRepository.findById(id).get();
         else
-            throw new RuntimeException("Invalid User and Worker ID");
+            throw new UserNotFoundException("Invalid User and Worker ID");
     }
 }

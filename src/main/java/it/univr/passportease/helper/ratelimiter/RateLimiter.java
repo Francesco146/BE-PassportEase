@@ -1,4 +1,4 @@
-package it.univr.passportease.helper;
+package it.univr.passportease.helper.ratelimiter;
 
 import io.github.bucket4j.Bandwidth;
 

@@ -1,4 +1,4 @@
-package it.univr.passportease.exception;
+package it.univr.passportease.exception.security;
 
 import javax.naming.AuthenticationException;
 

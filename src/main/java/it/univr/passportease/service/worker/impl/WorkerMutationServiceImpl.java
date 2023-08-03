@@ -3,6 +3,9 @@ package it.univr.passportease.service.worker.impl;
 import it.univr.passportease.dto.input.RequestInput;
 import it.univr.passportease.entity.*;
 import it.univr.passportease.entity.enums.Day;
+import it.univr.passportease.exception.illegalstate.OfficeOverloadedException;
+import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
+import it.univr.passportease.exception.notfound.WorkerNotFoundException;
 import it.univr.passportease.helper.map.MapAvailability;
 import it.univr.passportease.helper.map.MapRequest;
 import it.univr.passportease.helper.map.MapRequestOffice;
@@ -22,7 +25,7 @@ import java.util.*;
 @AllArgsConstructor
 public class WorkerMutationServiceImpl implements WorkerMutationService {
     private final JwtService jwtService;
-    // repositories
+
     private final WorkerRepository workerRepository;
     private final RequestTypeRepository requestTypeRepository;
     private final RequestRepository requestRepository;
@@ -31,7 +34,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     private final OfficeWorkingDayRepository officeWorkingDayRepository;
     private final RequestOfficeRepository requestOfficeRepository;
     private final NotificationRepository notificationRepository;
-    // mappers
+
     private final MapRequest mapRequest;
     private final MapRequestType mapRequestType;
     private final MapRequestOffice mapRequestOffice;
@@ -39,93 +42,97 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
 
     @Override
     @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
-    public Request createRequest(String token, RequestInput requestInput) {
+    public Request createRequest(String token, RequestInput requestInput)
+            throws WorkerNotFoundException, InvalidRequestTypeException, OfficeOverloadedException {
         // get worker from db
         UUID workerId = jwtService.extractId(token);
         Optional<Worker> worker = workerRepository.findById(workerId);
-        if (worker.isEmpty()) {
-            throw new RuntimeException("Worker not found");
-        }
-        // params in requestInput
+        if (worker.isEmpty()) throw new WorkerNotFoundException("Worker not found");
+
         String requestTypeName = requestInput.getRequestType();
-        // TODO: delete this
-        System.out.println(requestTypeName);
+        // delete this
+        // System.out.println(requestTypeName);
         List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
-        // TODO: delete this
-        for (Office office : offices) {
-            System.out.println(office.getName());
-        }
+        // delete this
+        // for (Office office : offices) System.out.println(office.getName());
         Date startDate = requestInput.getStartDate();
-        // TODO: delete this
-        System.out.println(startDate);
+        // delete this
+        // System.out.println(startDate);
         Date endDate = requestInput.getEndDate();
-        // TODO: delete this
-        System.out.println(endDate);
+        // delete this
+        // System.out.println(endDate);
 
-        if (isWorkersEnoughForRequest(startDate, endDate, offices)) {
-            RequestType requestType = getOrCreateRequestType(requestTypeName);
-            // TODO: delete this
-            System.out.println(requestType.getName());
+        if (!isWorkersEnoughForRequest(startDate, endDate, offices)) return null;
 
-            Request request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker.get());
-            request = requestRepository.save(request);
-            for (Office office : offices) {
-                RequestOffice requestOffice = mapRequestOffice.mapRequestAndOfficeToRequestOffice(request, office);
-                requestOfficeRepository.save(requestOffice);
-            }
+        RequestType requestType = getOrCreateRequestType(requestTypeName);
+        // delete this
+        // System.out.println(requestType.getName());
 
-            setNotifications(startDate, endDate, offices, requestType);
-
-            createAvailabilities(startDate, endDate, offices, request);
-
-            return request;
+        Request request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker.get());
+        request = requestRepository.save(request);
+        for (Office office : offices) {
+            RequestOffice requestOffice = mapRequestOffice.mapRequestAndOfficeToRequestOffice(request, office);
+            requestOfficeRepository.save(requestOffice);
         }
 
-        return null;
+        setNotifications(startDate, endDate, offices, requestType);
+
+        createAvailabilities(startDate, endDate, offices, request);
+
+        return request;
     }
 
-    private RequestType getOrCreateRequestType(String requestTypeName) {
+    private RequestType getOrCreateRequestType(String requestTypeName) throws InvalidRequestTypeException {
         Optional<RequestType> _requestType = requestTypeRepository.findByName(requestTypeName);
         if (_requestType.isEmpty()) {
             RequestType newRequestType = mapRequestType.mapStringToRequestType(requestTypeName);
             requestTypeRepository.save(newRequestType);
             _requestType = requestTypeRepository.findByName(requestTypeName);
         }
+
+        if (_requestType.isEmpty()) throw new InvalidRequestTypeException("Error while creating request type");
+
         return _requestType.get();
     }
 
-    private Boolean isWorkersEnoughForRequest(Date startDate, Date endDate, List<Office> offices) {
-        for (Office office : offices) {
+    private Boolean isWorkersEnoughForRequest(Date startDate, Date endDate, List<Office> offices)
+            throws OfficeOverloadedException {
+        // delete this
+        // System.out.println("totalNumberOfWorker: " + totalNumberOfWorker);
+        // delete this
+        // System.out.println("busyWorkers: " + busyWorkers);
+        offices.forEach(office -> {
             long totalNumberOfWorker = workerRepository.countByOffice(office);
-            // TODO: delete this
-            System.out.println("totalNumberOfWorker: " + totalNumberOfWorker);
-            long busyWorkers = requestRepository.countBusyWorkers(office.getId(),
+            long busyWorkers = requestRepository.countBusyWorkers(
+                    office.getId(),
                     startDate,
-                    endDate);
-
-            // TODO: delete this
-            System.out.println("busyWorkers: " + busyWorkers);
+                    endDate
+            );
             if (busyWorkers >= totalNumberOfWorker)
-                throw new RuntimeException("Office " + office.getName() + " doesn't have enough workers");
-        }
+                throw new OfficeOverloadedException("Office " + office.getName() + " doesn't have enough workers");
+        });
         return true;
     }
 
     private void setNotifications(Date startDate, Date endDate, List<Office> offices, RequestType requestType) {
-        for (Office office : offices) {
-            List<Notification> notifications = notificationRepository.findAllByOfficeAndIsReadyAndRequestType(office,
-                    false, requestType);
-            for (Notification notification : notifications) {
-                // TODO: delete this
-                System.out.println("notification: " + notification.getId());
-
-                if (isRequestDateInsideNotificationDate(startDate, endDate, notification.getStartDate(),
-                        notification.getEndDate()) && notification.getIsReady() == false) {
-                    notification.setIsReady(true);
-                    notificationRepository.save(notification);
-                }
-            }
-        }
+        // delete this
+        // System.out.println("notification: " + notification.getId());
+        offices.stream()
+                .map(office -> notificationRepository.findAllByOfficeAndIsReadyAndRequestType(
+                                office, false, requestType
+                        )
+                )
+                .forEach(notifications ->
+                        notifications.stream()
+                                .filter(notification -> isRequestDateInsideNotificationDate(
+                                        startDate, endDate, notification.getStartDate(), notification.getEndDate()) &&
+                                        !notification.getIsReady())
+                                .forEach(notification -> {
+                                            notification.setIsReady(true);
+                                            notificationRepository.save(notification);
+                                        }
+                                )
+                );
     }
 
     private void createAvailabilities(Date startDate, Date endDate, List<Office> offices, Request request) {
@@ -179,40 +186,40 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     private LocalTime getHigherTime(LocalTime time1, LocalTime time2) {
-        if (time1.isAfter(time2)) {
-            return time1;
-        } else {
-            return time2;
-        }
+        return time1.isAfter(time2) ? time1 : time2;
     }
 
     private LocalTime getLowerTime(LocalTime time1, LocalTime time2) {
-        if (time1.isBefore(time2)) {
-            return time1;
-        } else {
-            return time2;
-        }
+        return time1.isBefore(time2) ? time1 : time2;
     }
 
     private Boolean isRequestDateInsideNotificationDate(Date requestStartDate, Date requestEndDate,
-            Date notificationStartDate, Date notificationEndDate) {
+                                                        Date notificationStartDate, Date notificationEndDate) {
+        boolean isRequestStartDateAfterNotificationStartDate = requestStartDate.after(notificationStartDate);
+        boolean isRequestStartDateEqualsNotificationStartDate = requestStartDate.equals(notificationStartDate);
+        boolean isRequestEndDateBeforeNotificationEndDate = requestEndDate.before(notificationEndDate);
+        boolean isRequestEndDateEqualsNotificationEndDate = requestEndDate.equals(notificationEndDate);
+        boolean isRequestStartDateBeforeNotificationEndDate = requestStartDate.before(notificationEndDate);
+        boolean isRequestEndDateAfterNotificationEndDate = requestEndDate.after(notificationEndDate);
+        boolean isRequestStartDateBeforeNotificationStartDate = requestStartDate.before(notificationStartDate);
+        boolean isRequestEndDateAfterNotificationStartDate = requestEndDate.after(notificationStartDate);
+
+
         // 1. requestDates are between notificationStartDate and notificationEndDate
-        if ((requestStartDate.after(notificationStartDate) || requestStartDate.equals(notificationStartDate))
-                && (requestEndDate.before(notificationEndDate) || requestEndDate.equals(notificationEndDate))) {
+        if ((isRequestStartDateAfterNotificationStartDate || isRequestStartDateEqualsNotificationStartDate) &&
+                (isRequestEndDateBeforeNotificationEndDate || isRequestEndDateEqualsNotificationEndDate))
             return true;
-        }
+
+
         // 2. requestStartDate is after notificationStartDate but before
         // notificationEndDate and requestEndDate is after notificationEndDate
-        if (requestStartDate.after(notificationStartDate) && requestStartDate.before(notificationEndDate)
-                && requestEndDate.after(notificationEndDate)) {
+        if (isRequestStartDateAfterNotificationStartDate &&
+                isRequestStartDateBeforeNotificationEndDate &&
+                isRequestEndDateAfterNotificationEndDate)
             return true;
-        }
+
         // 3. requestStartDate is before notificationStartDate and requestEndDate is
         // after notificationStartDate
-        if (requestStartDate.before(notificationStartDate) && requestEndDate.after(notificationStartDate)) {
-            return true;
-        }
-        return false;
+        return isRequestStartDateBeforeNotificationStartDate && isRequestEndDateAfterNotificationStartDate;
     }
-
 }

@@ -1,7 +1,7 @@
 package it.univr.passportease.helper;
 
+import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service

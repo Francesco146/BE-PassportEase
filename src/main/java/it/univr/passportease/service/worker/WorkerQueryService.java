@@ -2,6 +2,7 @@ package it.univr.passportease.service.worker;
 
 import it.univr.passportease.entity.Request;
 import it.univr.passportease.entity.RequestType;
+import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 
 import java.util.List;
 
@@ -9,6 +10,6 @@ public interface WorkerQueryService {
 
     List<RequestType> getAllRequestTypes();
 
-    Request getRequestByAvailabilityID(String id);
+    Request getRequestByAvailabilityID(String id) throws InvalidAvailabilityIDException;
 
 }

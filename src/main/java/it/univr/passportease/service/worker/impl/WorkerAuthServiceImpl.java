@@ -5,6 +5,9 @@ import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.entity.Office;
 import it.univr.passportease.entity.Worker;
+import it.univr.passportease.exception.notfound.OfficeNotFoundException;
+import it.univr.passportease.exception.notfound.WorkerNotFoundException;
+import it.univr.passportease.exception.security.WrongPasswordException;
 import it.univr.passportease.helper.map.MapWorker;
 import it.univr.passportease.repository.OfficeRepository;
 import it.univr.passportease.repository.WorkerRepository;
@@ -35,9 +38,9 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public LoginOutput login(String username, String password) {
+    public LoginOutput login(String username, String password) throws WrongPasswordException, WorkerNotFoundException {
         Optional<Worker> worker = workerRepository.findByUsername(username);
-        if (worker.isEmpty()) throw new RuntimeException("Worker not found");
+        if (worker.isEmpty()) throw new WorkerNotFoundException("Worker not found");
 
         Worker _worker = worker.get();
 
@@ -46,7 +49,7 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
                 new UsernamePasswordAuthenticationToken(id, password));
 
         if (!authentication.isAuthenticated())
-            throw new RuntimeException("Invalid worker request !");
+            throw new WrongPasswordException("Invalid credentials");
 
         _worker.setRefreshToken(jwtService.generateRefreshToken(UUID.fromString(id)));
         workerRepository.save(_worker);
@@ -58,13 +61,12 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
     }
 
     @Override
-    public LoginOutput register(WorkerInput workerInput) {
-
-        System.out.println(workerInput.getOfficeName());
+    public LoginOutput register(WorkerInput workerInput) throws OfficeNotFoundException {
+        // System.out.println(workerInput.getOfficeName());
 
         Optional<Office> office = officeRepository.findByName(workerInput.getOfficeName());
-
-        System.out.println(office.get().getName());
+        if (office.isEmpty()) throw new OfficeNotFoundException("Office not found");
+        // System.out.println(office.get().getName());
 
         Worker worker = new Worker();
         worker.setUsername(workerInput.getUsername());
@@ -83,6 +85,12 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
 
         String accessToken = jwtService.generateAccessToken(addedWorker.getId());
 
-        return new LoginOutput(addedWorker.getId(), new JWTSet(accessToken, refreshToken));
+        return new LoginOutput(
+                addedWorker.getId(),
+                new JWTSet(
+                        accessToken,
+                        refreshToken
+                )
+        );
     }
 }
