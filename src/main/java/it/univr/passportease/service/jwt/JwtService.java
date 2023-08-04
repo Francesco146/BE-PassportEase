@@ -7,6 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.Worker;
+import it.univr.passportease.exception.invalid.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
@@ -85,12 +86,12 @@ public class JwtService {
                 (tokenInRedis.equals(token));
     }
 
-    public String generateAccessToken(UUID id) throws RuntimeException {
+    public String generateAccessToken(UUID id) throws UserOrWorkerIDNotFoundException {
         Map<String, Object> claims = new HashMap<>();
         return createAccessToken(claims, id);
     }
 
-    private String createAccessToken(Map<String, Object> claims, UUID id) throws RuntimeException {
+    private String createAccessToken(Map<String, Object> claims, UUID id) throws UserOrWorkerIDNotFoundException {
         claims.put("role", getRoleById(id));
 
         String accessToken = Jwts.builder()
@@ -116,22 +117,27 @@ public class JwtService {
     }
 
     private String createRefreshToken(UUID id) {
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+        long expMillisFor30Days = nowMillis + 1000L * 60 * 60 * 24 * 30; // 30 days
+        Date fromNow30Days = new Date(expMillisFor30Days);
+
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30))
+                .setIssuedAt(now)
+                .setExpiration(fromNow30Days)
                 .setId(UUID.randomUUID().toString())
                 .setSubject(id.toString())
                 .signWith(getRefreshSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
-    private String getRoleById(UUID id) throws RuntimeException {
+    private String getRoleById(UUID id) throws UserOrWorkerIDNotFoundException {
         if (workerRepository.findById(id).isPresent()) {
             return "worker";
         } else if (userRepository.findById(id).isPresent()) {
             return "user";
         } else {
-            throw new RuntimeException("ID does not belong to either Worker or User");
+            throw new UserOrWorkerIDNotFoundException("ID does not belong to either Worker or User");
         }
     }
 

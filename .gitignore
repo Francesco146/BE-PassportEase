@@ -198,3 +198,4 @@ README.html
 /.idea/
 /PassportEase.sql
 !/.env
+/.env

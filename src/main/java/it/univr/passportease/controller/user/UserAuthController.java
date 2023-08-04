@@ -6,6 +6,8 @@ import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.exception.illegalstate.UserAlreadyExistsException;
 import it.univr.passportease.exception.invalid.InvalidEmailException;
+import it.univr.passportease.exception.invalid.InvalidRefreshTokenException;
+import it.univr.passportease.exception.invalid.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
@@ -40,7 +42,8 @@ public class UserAuthController {
     }
 
     @MutationMapping
-    public void logout() throws TokenNotInRedisException, RateLimitException, UserNotFoundException, AuthenticationCredentialsNotFoundException {
+    public void logout()
+            throws TokenNotInRedisException, RateLimitException, UserNotFoundException, AuthenticationCredentialsNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (bucket.tryConsume(1))
             userWorkerMutationService.logout();
@@ -57,7 +60,8 @@ public class UserAuthController {
     }
 
     @MutationMapping
-    public JWTSet refreshAccessToken(@Argument("refreshToken") String refreshToken) throws AuthenticationCredentialsNotFoundException, UserNotFoundException, RateLimitException {
+    public JWTSet refreshAccessToken(@Argument("refreshToken") String refreshToken)
+            throws AuthenticationCredentialsNotFoundException, UserNotFoundException, RateLimitException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (bucket.tryConsume(1))
             return userWorkerMutationService.refreshAccessToken(requestAnalyzer.getTokenFromRequest(), refreshToken);
@@ -65,7 +69,8 @@ public class UserAuthController {
     }
 
     @MutationMapping
-    public void changePassword(@Argument("oldPassword") String oldPassword, @Argument("newPassword") String newPassword) throws UserNotFoundException, AuthenticationCredentialsNotFoundException, WrongPasswordException, RateLimitException {
+    public void changePassword(@Argument("oldPassword") String oldPassword, @Argument("newPassword") String newPassword)
+            throws UserNotFoundException, AuthenticationCredentialsNotFoundException, WrongPasswordException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (bucket.tryConsume(1))
             userWorkerMutationService.changePassword(oldPassword, newPassword);
@@ -73,7 +78,8 @@ public class UserAuthController {
     }
 
     @MutationMapping
-    public String changeEmail(@Argument("newEmail") String newEmail, @Argument("oldEmail") String oldEmail) throws UserNotFoundException, InvalidEmailException, RateLimitException, AuthenticationCredentialsNotFoundException {
+    public String changeEmail(@Argument("newEmail") String newEmail, @Argument("oldEmail") String oldEmail)
+            throws UserNotFoundException, InvalidEmailException, RateLimitException, AuthenticationCredentialsNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (bucket.tryConsume(1))
             return userWorkerMutationService.changeEmail(newEmail, oldEmail);

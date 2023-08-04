@@ -36,10 +36,12 @@ public class WorkerMutationController {
     @MutationMapping
     @PreAuthorize("hasAuthority('WORKER')")
     public void modifyRequest() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @MutationMapping
     @PreAuthorize("hasAuthority('WORKER')")
     public void deleteRequest() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

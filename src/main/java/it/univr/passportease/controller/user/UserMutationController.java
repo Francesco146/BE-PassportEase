@@ -31,10 +31,12 @@ public class UserMutationController {
 
     @MutationMapping
     public void createReservation() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @MutationMapping
     public void deleteReservation() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @MutationMapping
@@ -45,16 +47,18 @@ public class UserMutationController {
             throw new RateLimitException("Too many createNotification attempts");
 
         Object user = jwtService.getUserOrWorkerFromToken(requestAnalyzer.getTokenFromRequest());
-        if (user instanceof Worker || user == null)
+        if (user instanceof Worker)
             throw new InvalidWorkerActionException("Workers cannot create notifications");
         return userMutationService.createNotification(notificationInput, (User) user);
     }
 
     @MutationMapping
     public void modifyNotification() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @MutationMapping
     public void deleteNotification() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

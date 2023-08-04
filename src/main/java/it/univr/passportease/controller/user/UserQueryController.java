@@ -26,10 +26,12 @@ public class UserQueryController {
 
     @QueryMapping
     public void getRequestTypesByUser() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @QueryMapping
     public void getReportDetailsByAvailabilityId() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @QueryMapping
