@@ -4,6 +4,8 @@ import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.Worker;
 import it.univr.passportease.exception.invalid.InvalidEmailException;
+import it.univr.passportease.exception.invalid.InvalidRefreshTokenException;
+import it.univr.passportease.exception.invalid.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.TokenNotInRedisException;
@@ -43,24 +45,26 @@ public class UserWorkerMutationServiceImpl implements UserWorkerMutationService 
 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public JWTSet refreshAccessToken(String token, String refreshToken) throws UserNotFoundException {
+    public JWTSet refreshAccessToken(String token, String refreshToken) throws UserNotFoundException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException {
         Object userOrWorker = jwtService.getUserOrWorkerFromToken(token);
 
         UUID id = jwtService.extractId(token);
+        if (id == null)
+            throw new UserOrWorkerIDNotFoundException("Token has been corrupted token.id is null");
+
         String newRefreshToken = jwtService.generateRefreshToken(id);
 
         if (userOrWorker instanceof User user) {
             if (!user.getRefreshToken().equals(refreshToken))
-                throw new RuntimeException("Invalid refresh token");
+                throw new InvalidRefreshTokenException("Invalid user refresh token");
             user.setRefreshToken(newRefreshToken);
             userRepository.save(user);
         } else if (userOrWorker instanceof Worker worker) {
             if (!worker.getRefreshToken().equals(refreshToken))
-                throw new RuntimeException("Invalid refresh token");
+                throw new InvalidRefreshTokenException("Invalid worker refresh token");
             worker.setRefreshToken(newRefreshToken);
             workerRepository.save(worker);
-        } else
-            throw new RuntimeException("Invalid refresh token");
+        }
 
         return new JWTSet(jwtService.generateAccessToken(id), newRefreshToken);
     }

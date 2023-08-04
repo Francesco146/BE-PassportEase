@@ -19,6 +19,7 @@ public class UserWorkerQueryController {
 
     @QueryMapping
     public void getAvailabilities() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @QueryMapping
