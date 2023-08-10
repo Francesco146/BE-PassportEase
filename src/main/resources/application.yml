@@ -5,6 +5,12 @@ server:
         include-message: always
     port: 8080
 spring:
+    graphql:
+        cors:
+            allow-credentials: true
+            allowed-origins:
+                - http://localhost:5173
+                - http://127.0.0.1:5173
     datasource:
         password: example
         url: jdbc:postgresql://localhost:5432/postgres

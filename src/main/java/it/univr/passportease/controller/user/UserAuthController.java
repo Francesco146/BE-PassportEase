@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @Controller
 @AllArgsConstructor
@@ -33,6 +34,7 @@ public class UserAuthController {
 
 
     @MutationMapping
+    @CrossOrigin(origins = "http://127.0.0.1:5173")
     public LoginOutput loginUser(@Argument("fiscalCode") String fiscalCode, @Argument("password") String password)
             throws UserNotFoundException, WrongPasswordException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
