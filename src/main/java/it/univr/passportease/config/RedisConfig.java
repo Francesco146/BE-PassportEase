@@ -12,7 +12,7 @@ public class RedisConfig {
     @Bean
     public JedisConnectionFactory redisConnectionFactory() {
 
-        String redisHost = "localhost";
+        String redisHost = "redis";
         int redisPort = 6379;
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost,
                 redisPort);

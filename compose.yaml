@@ -1,13 +1,49 @@
 services:
-  postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
-    ports:
-      - "5432:5432"
-  redis:
-    image: 'redis:latest'
-    ports:
-      - "6379:6379"
+    backend:
+        hostname: backend
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "8080:8080"
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/mydatabase'
+            - 'SPRING_DATASOURCE_USERNAME=myuser'
+            - 'SPRING_DATASOURCE_PASSWORD=secret'
+            - 'SPRING_REDIS_HOST=redis'
+            - 'SPRING_REDIS_PORT=6379'
+            - 'SPRING_JPA_HIBERNATE_DDL-AUTO=update'
+        links:
+            - postgres
+            - redis
+    postgres:
+        image: 'postgres:latest'
+        hostname: postgres
+        restart: always
+        environment:
+            - 'POSTGRES_DB=mydatabase'
+            - 'POSTGRES_PASSWORD=secret'
+            - 'POSTGRES_USER=myuser'
+        ports:
+            - "5432:5432"
+        healthcheck:
+            test: [ "CMD-SHELL", "sh -c 'pg_isready -U myuser -d mydatabase'" ]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+    redis:
+        image: 'redis:latest'
+        hostname: redis
+        restart: always
+        ports:
+            - "6379:6379"
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 1s
+            timeout: 3s
+            retries: 30

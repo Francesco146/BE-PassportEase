@@ -12,9 +12,9 @@ spring:
                 - http://localhost:5173
                 - http://127.0.0.1:5173
     datasource:
-        password: example
         url: jdbc:postgresql://localhost:5432/postgres
         username: postgres
+        password: example
     jackson:
         serialization:
             fail-on-empty-beans: false
