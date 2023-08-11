@@ -34,9 +34,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/graphql"))
+                .csrf(csrf -> csrf.ignoringRequestMatchers(request ->
+                        request.getServletPath().startsWith("/graphql") ||
+                                request.getServletPath().startsWith("/actuator/health")
+                ))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/graphql").permitAll())
+                        .requestMatchers(request ->
+                                request.getServletPath().startsWith("/actuator/health") ||
+                                        request.getServletPath().startsWith("/graphql")
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                                 .maximumSessions(1)
