@@ -4,8 +4,13 @@ server:
     error:
         include-message: always
     port: 8080
+
+    forward-headers-strategy: framework
+    http2:
+        enabled: true
 spring:
     graphql:
+        # TODO: With Traefik, allowed origins must be set to the domain name of the frontend
         cors:
             allow-credentials: true
             allowed-origins:
