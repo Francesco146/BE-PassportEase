@@ -2,27 +2,35 @@ services:
     traefik:
         image: traefik:v2.10.4
         hostname: traefik
+        depends_on:
+            frontend:
+                condition: service_healthy
         command:
             - "--providers.docker=true"  # Usa il provider Docker per configurare i backend
-            - "--entrypoints.web.address=:80"  # Porta HTTP
-            - "--entrypoints.websecure.address=:443"  # Porta HTTPS
-            - "--certificatesresolvers.myresolver.acme.httpchallenge=true"  # Utilizza la sfida HTTP per ottenere i certificati ACME
-            - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"  # Utilizza la porta HTTP per la sfida ACME
-            - "--certificatesresolvers.myresolver.acme.email=your@email.com"  # La tua email per i certificati ACME
-            # TODO: set certificate information Released by... and Emitted by... with this infos: (Organization and Unit Organization, Country Code, State, Locality, Common Name)
-            - "--certificatesresolvers.myresolver.acme.storage=/acme.json/acme.json"  # Memorizza i certificati ACME
+
+            - "--entrypoints.http.address=:80"  # Porta HTTP
+            - "--entrypoints.https.address=:443"  # Porta HTTPS
+            - "--entrypoints.api.address=:8080"  # Porta API esposta
+
+            - "--entrypoints.http.http.redirections.entryPoint.to=https"  # Reindirizza le richieste HTTP a HTTPS
+            - "--certificatesresolvers.resolver.acme.httpchallenge=true"  # Utilizza la sfida HTTP per ottenere i certificati ACME
+            - "--certificatesresolvers.resolver.acme.httpchallenge.entrypoint=http"  # Utilizza la porta HTTP per la sfida ACME
+            - "--certificatesresolvers.resolver.acme.email=your@email.com"  # La tua email per i certificati ACME
+            - "--certificatesresolvers.resolver.acme.storage=/acme.json/acme.json"  # Memorizza i certificati ACME
         ports:
             - "80:80"  # Porta HTTP esposta
             - "443:443"  # Porta HTTPS esposta
+            - "8080:8080"  # Porta API esposta
         volumes:
             - "./acme.json:/acme.json/acme.json"  # Monta la directory per il salvataggio dei certificati ACME
             - "/var/run/docker.sock:/var/run/docker.sock:ro"  # Condividi il socket Docker per la configurazione dinamica
         healthcheck:
-            test: [ "CMD", "traefik", "healthcheck", "--ping" ]
+            test: [ "CMD", "wget", "--no-check-certificate", "--spider", "https://localhost" ]
             interval: 10s
             timeout: 5s
             retries: 3
             start_period: 5s
+
     backend:
         hostname: backend
         build:
@@ -33,10 +41,6 @@ services:
                 condition: service_healthy
             redis:
                 condition: service_healthy
-            traefik:
-                condition: service_started
-
-        # how can backend generate new certificate for communication with traefik container? A: Traefik will generate it automatically,
         environment:
             - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/mydatabase'
             - 'SPRING_DATASOURCE_USERNAME=myuser'
@@ -56,11 +60,12 @@ services:
             - redis
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.backend.rule=Host(`localhost`)"
-            - "traefik.http.routers.backend.entrypoints=websecure"
-            - "traefik.http.services.backend.loadbalancer.server.port=8080"
             - "traefik.http.routers.backend.tls=true"  # Abilita TLS per questa route
-            - "traefik.http.routers.backend.tls.certresolver=myresolver"  # Utilizza il resolver dei certificati configurato in Traefik
+            - "traefik.http.routers.backend.entrypoints=api"
+            - "traefik.http.services.backend.loadbalancer.server.port=8080"
+            - "traefik.http.routers.backend.rule=Host(`localhost`)"
+            - "traefik.http.routers.backend.tls.certresolver=resolver"  # Utilizza il resolver dei certificati configurato in Traefik
+
     postgres:
         image: 'postgres:15.4'
         hostname: postgres
@@ -77,6 +82,7 @@ services:
             timeout: 2s
             retries: 5
             start_period: 2s
+
     frontend:
         extends: # extends the frontend service from the docker-compose.yaml file in the parent directory
             file: ~/WebstormProjects/Passportease/docker-compose.yaml
@@ -91,21 +97,29 @@ services:
         depends_on: # depends on backend service
             backend:
                 condition: service_healthy
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.frontend.tls=true"  # Abilita TLS per questa route
+            - "traefik.http.routers.frontend.entrypoints=https"
+            - "traefik.http.services.frontend.loadbalancer.server.port=5173"
+            - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+            - "traefik.http.routers.frontend.tls.certresolver=resolver"  # Utilizza il resolver dei certificati configurato in Traefik
+
     redis:
         image: 'redis:6.2.13'
         hostname: redis
         restart: unless-stopped
         healthcheck:
             test: [ "CMD", "redis-cli", "ping" ]
-            interval: 1s
+            interval: 3s
             timeout: 3s
             retries: 30
+
 volumes:
     postgres-data:
         external: false
 
 networks:
-    # a cosa serve traefik-network? A: serve per creare una rete separata per Traefik, in modo che non sia accessibile dall'esterno. Ma non
     traefik-network: # Crea una rete separata per Traefik
         external: false
         driver: bridge
