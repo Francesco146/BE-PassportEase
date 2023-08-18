@@ -7,7 +7,7 @@ RUN mvn dependency:go-offline
 
 # Build the JAR - Skip Tests because we don't have a DB yet
 COPY src ./src/
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -Pnative
 
 # Run the JAR file stage
 FROM openjdk:22-slim AS production
