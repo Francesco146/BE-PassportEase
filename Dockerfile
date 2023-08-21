@@ -10,11 +10,10 @@ COPY src ./src/
 RUN mvn clean package -DskipTests -Pnative
 
 # Run the JAR file stage
-FROM openjdk:22-slim AS production
+FROM amazoncorretto:20-alpine3.18 AS production
 
 # Install curl
-RUN apt-get update
-RUN  apt-get install -y curl
+RUN  apk add curl
 
 # Add a spring user to run our application so that it doesn't need to run as root
 RUN addgroup --system spring && adduser --system spring --ingroup spring
