@@ -17,8 +17,8 @@ spring:
                 - https://localhost
     datasource:
         url: jdbc:postgresql://postgres:5432/postgres
-        username: postgres
-        password: example
+        username: myuser
+        password: secret
     jackson:
         serialization:
             fail-on-empty-beans: false

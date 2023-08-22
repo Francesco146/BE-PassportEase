@@ -1,6 +1,8 @@
 package it.univr.passportease.service.impl;
 
+import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Office;
+import it.univr.passportease.repository.AvailabilityRepository;
 import it.univr.passportease.repository.OfficeRepository;
 import it.univr.passportease.service.UserWorkerQueryService;
 import lombok.AllArgsConstructor;
@@ -14,10 +16,16 @@ import java.util.List;
 public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
 
     private final OfficeRepository officeRepository;
+    private final AvailabilityRepository availabilityRepository;
 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public List<Office> getOffices() {
         return officeRepository.findAll();
     }
+
+   /* @Override
+    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
+    public List<Availability> getAvailabilites() { return availabilityRepository.find} */
+
 }

@@ -1,9 +1,11 @@
 package it.univr.passportease.controller.user;
 
 import io.github.bucket4j.Bucket;
+import it.univr.passportease.dto.output.ReportDetails;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.User;
+import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
@@ -11,6 +13,7 @@ import it.univr.passportease.helper.RequestAnalyzer;
 import it.univr.passportease.helper.ratelimiter.BucketLimiter;
 import it.univr.passportease.service.user.UserQueryService;
 import lombok.AllArgsConstructor;
+import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
@@ -30,8 +33,12 @@ public class UserQueryController {
     }
 
     @QueryMapping
-    public void getReportDetailsByAvailabilityId() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public ReportDetails getReportDetailsByAvailabilityId(@Argument("availabilityID") String availabilityId)
+            throws SecurityException, InvalidAvailabilityIDException, RateLimitException {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many get notifications attempts");
+        return userQueryService.getReportDetailsByAvailabilityID(availabilityId, requestAnalyzer.getTokenFromRequest());
     }
 
     @QueryMapping

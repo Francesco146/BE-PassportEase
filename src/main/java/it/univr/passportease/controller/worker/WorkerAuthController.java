@@ -31,9 +31,6 @@ public class WorkerAuthController {
 
     @MutationMapping
     public LoginOutput registerWorker(@Argument("workerInput") WorkerInput workerInput) throws RateLimitException, OfficeNotFoundException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
             return workerAuthService.register(workerInput);
-        else throw new RateLimitException("Too many register attempts");
     }
 }

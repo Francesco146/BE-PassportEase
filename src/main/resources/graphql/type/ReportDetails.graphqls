@@ -7,7 +7,6 @@ type ReportDetails {
     dateOfBirth: String!
     dateOfAvailability: String!
     startTime: String!
-    duration: Int!
     nameRequestType: String!
     officeName: String!
     address: String!

@@ -54,7 +54,7 @@ services:
             interval: 10s
             timeout: 5s
             retries: 3
-            start_period: 10s
+            start_period: 15s
         links:
             - postgres
             - redis
@@ -82,10 +82,8 @@ services:
             timeout: 2s
             retries: 5
             start_period: 2s
-        # TODO: remove this
         ports:
             - "5432:5432"
-
     frontend:
         extends: # extends the frontend service from the docker-compose.yaml file in the parent directory
             file: ~/WebstormProjects/PassportEase/docker-compose.yaml

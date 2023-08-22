@@ -1,8 +1,8 @@
 package it.univr.passportease.service.user.impl;
 
-import it.univr.passportease.entity.Availability;
-import it.univr.passportease.entity.Notification;
-import it.univr.passportease.entity.User;
+import it.univr.passportease.dto.output.ReportDetails;
+import it.univr.passportease.entity.*;
+import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.repository.NotificationRepository;
 import it.univr.passportease.repository.ReservationRepository;
@@ -49,6 +49,44 @@ public class UserQueryServiceImpl implements UserQueryService {
     public List<Availability> getUserReservations(String token) {
         UUID id = jwtService.extractId(token);
         return reservationRepository.findByUserId(id);
+    }
+
+    @Override
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
+    public ReportDetails getReportDetailsByAvailabilityID(String availabilityId, String token)
+            throws SecurityException, InvalidAvailabilityIDException {
+         Object userToken = jwtService.getUserOrWorkerFromToken(token);
+         if (!(userToken instanceof User))
+             throw new SecurityException("Only user can access reports");
+
+        Optional<Availability> optionalAvailability = reservationRepository.findById(UUID.fromString(availabilityId));
+
+        if (optionalAvailability.isEmpty())
+            throw new InvalidAvailabilityIDException("Invalid Availability ID");
+
+        Availability availability = optionalAvailability.get();
+        User user = availability.getUser();
+        String fiscalCodeAvailability = user.getFiscalCode();
+
+        if (!fiscalCodeAvailability.equals(((User) userToken).getFiscalCode()))
+            throw new SecurityException("Only user whose record belongs to can access it");
+
+        Office office = availability.getOffice();
+        Request request = availability.getRequest();
+        RequestType requestType = request.getRequestType();
+
+        return new ReportDetails(
+                fiscalCodeAvailability,
+                user.getName(),
+                user.getSurname(),
+                user.getCityOfBirth(),
+                user.getDateOfBirth(),
+                availability.getDate(),
+                request.getStartTime(),
+                requestType.getName(),
+                office.getName(),
+                office.getAddress()
+        );
     }
 
 }
