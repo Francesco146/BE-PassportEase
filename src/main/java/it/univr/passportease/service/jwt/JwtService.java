@@ -26,7 +26,7 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class JwtService {
     // TODO: eliminare
-    private final static String key = "FrancescoTiAmoPeroQuestaPasswordETroppoCortaQuindiDevoAllungarlaUnPoDiPiuAliceCiao";
+    private static final String KEY = "FrancescoTiAmoPeroQuestaPasswordETroppoCortaQuindiDevoAllungarlaUnPoDiPiuAliceCiao";
     @Value("${jwt.secret}")
     private static String accessKey;
     @Value("${refreshtoken.secret}")
@@ -51,14 +51,14 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
-                .setSigningKey(getAccessSignKey())
+                .setSigningKey(getSignKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
     private Boolean isTokenExpired(String token) {
-        /* TODO: Check if this is correct
+        /*
          * Checks for understanding if the token is expired:
          * 1. if the token is expired
          * 2. if the token is not in redis
@@ -102,7 +102,7 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
                 .setNotBefore(new Date(System.currentTimeMillis()))
                 .setId(UUID.randomUUID().toString())
-                .signWith(getAccessSignKey(), SignatureAlgorithm.HS256).compact();
+                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
 
         saveTokenInRedis(id, accessToken);
         return accessToken;
@@ -128,7 +128,7 @@ public class JwtService {
                 .setExpiration(fromNow30Days)
                 .setId(UUID.randomUUID().toString())
                 .setSubject(id.toString())
-                .signWith(getRefreshSignKey(), SignatureAlgorithm.HS256).compact();
+                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
     private String getRoleById(UUID id) throws UserOrWorkerIDNotFoundException {
@@ -141,13 +141,8 @@ public class JwtService {
         }
     }
 
-    private Key getAccessSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(key);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private Key getRefreshSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(key);
+    private Key getSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -157,22 +152,25 @@ public class JwtService {
 
     public void invalidateRefreshToken(String token) throws UserNotFoundException {
         Object userOrWorker = getUserOrWorkerFromToken(token);
-        if (userOrWorker instanceof User) {
-            ((User) userOrWorker).setRefreshToken("");
-            userRepository.save((User) userOrWorker);
-        } else {
-            ((Worker) userOrWorker).setRefreshToken("");
-            workerRepository.save((Worker) userOrWorker);
+        if (userOrWorker instanceof User user) {
+            user.setRefreshToken("");
+            userRepository.save(user);
+        } else if (userOrWorker instanceof Worker worker) {
+            worker.setRefreshToken("");
+            workerRepository.save(worker);
         }
     }
 
     // wrapper function to return User or Worker depending on the token
     public Object getUserOrWorkerFromToken(String token) throws UserNotFoundException {
         UUID id = extractId(token);
-        if (userRepository.findById(id).isPresent())
-            return userRepository.findById(id).get();
-        else if (workerRepository.findById(id).isPresent())
-            return workerRepository.findById(id).get();
+        Optional<User> user = userRepository.findById(id);
+        Optional<Worker> worker = workerRepository.findById(id);
+
+        if (user.isPresent())
+            return user.get();
+        else if (worker.isPresent())
+            return worker.get();
         else
             throw new UserNotFoundException("Invalid User and Worker ID");
     }

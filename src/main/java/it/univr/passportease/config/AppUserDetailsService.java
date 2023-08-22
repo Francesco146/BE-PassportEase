@@ -30,25 +30,21 @@ public class AppUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findById(UUID.fromString(id));
-        Optional<Worker> worker = workerRepository.findById(UUID.fromString(id));
+        Optional<User> optionalUser = userRepository.findById(UUID.fromString(id));
+        Optional<Worker> optionalWorker = workerRepository.findById(UUID.fromString(id));
         List<GrantedAuthority> authorities = new ArrayList<>();
-        if (user.isPresent()) {
+        if (optionalUser.isPresent()) {
             authorities.add(new SimpleGrantedAuthority("USER"));
-            if (redisTemplate.opsForValue().get(id) != null) {
-                authorities.add(new SimpleGrantedAuthority("VALIDATED"));
-            }
-            User _user = user.get();
-            return new AppUserDetails(_user.getId(), _user.getHashPassword(), authorities);
-        } else if (worker.isPresent()) {
+            if (redisTemplate.opsForValue().get(id) != null) authorities.add(new SimpleGrantedAuthority("VALIDATED"));
+
+            User user = optionalUser.get();
+            return new AppUserDetails(user.getId(), user.getHashPassword(), authorities);
+        } else if (optionalWorker.isPresent()) {
             authorities.add(new SimpleGrantedAuthority("WORKER"));
-            Worker _worker = worker.get();
-            if (redisTemplate.opsForValue().get(id) != null) {
-                authorities.add(new SimpleGrantedAuthority("VALIDATED"));
-            }
-            return new AppUserDetails(_worker.getId(), _worker.getHashPassword(), authorities);
-        } else {
-            throw new UsernameNotFoundException("User not found");
-        }
+            Worker worker = optionalWorker.get();
+            if (redisTemplate.opsForValue().get(id) != null) authorities.add(new SimpleGrantedAuthority("VALIDATED"));
+
+            return new AppUserDetails(worker.getId(), worker.getHashPassword(), authorities);
+        } else throw new UsernameNotFoundException("User not found");
     }
 }

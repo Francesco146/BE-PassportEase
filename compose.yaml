@@ -85,7 +85,7 @@ services:
 
     frontend:
         extends: # extends the frontend service from the docker-compose.yaml file in the parent directory
-            file: ~/WebstormProjects/Passportease/docker-compose.yaml
+            file: ~/WebstormProjects/PassportEase/docker-compose.yaml
             service: frontend
         hostname: frontend
         healthcheck: # healthcheck for vite + react server (see if curl response is 200 OK)

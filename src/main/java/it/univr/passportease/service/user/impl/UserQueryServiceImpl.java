@@ -31,7 +31,9 @@ public class UserQueryServiceImpl implements UserQueryService {
     public User getUserDetails(String token) throws UserNotFoundException {
         UUID id = jwtService.extractId(token);
         Optional<User> user = userRepository.findById(id);
-        user.orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (user.isEmpty()) throw new UserNotFoundException("User not found");
+
         return user.get();
     }
 

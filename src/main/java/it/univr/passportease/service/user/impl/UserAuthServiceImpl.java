@@ -38,10 +38,11 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Override
     public LoginOutput login(String fiscalCode, String password) throws UserNotFoundException, WrongPasswordException {
         // get user
-        Optional<User> _user = userRepository.findByFiscalCode(fiscalCode);
-        _user.orElseThrow(() -> new UserNotFoundException("User not found"));
+        Optional<User> optionalUser = userRepository.findByFiscalCode(fiscalCode);
 
-        User user = _user.get();
+        if (optionalUser.isEmpty()) throw new UserNotFoundException("User not found");
+
+        User user = optionalUser.get();
         String userId = user.getId().toString();
 
         Authentication authentication = authenticationManager.authenticate(
@@ -72,7 +73,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         if (citizenRepository.findByFiscalCode(fiscalCode).isEmpty())
             throw new UserNotFoundException("No citizen found with this fiscal code");
 
-        User _user = mapUser.mapRegisterInputDBToUser(
+        User user = mapUser.mapRegisterInputDBToUser(
                 new RegisterInputDB(
                         registerInput,
                         passwordEncoder.encode(registerInput.getPassword()),
@@ -80,7 +81,7 @@ public class UserAuthServiceImpl implements UserAuthService {
                         ""
                 )
         );
-        User addedUser = userRepository.save(_user);
+        User addedUser = userRepository.save(user);
 
         // set refresh token after saving user because we need the user id
         addedUser.setRefreshToken(jwtService.generateRefreshToken(addedUser.getId()));

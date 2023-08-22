@@ -1,7 +1,6 @@
 package it.univr.passportease.config;
 
 import it.univr.passportease.filter.JwtAuthFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,16 +22,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthFilter authFilter;
-
     @Bean
     public UserDetailsService userDetailsService() {
         return new AppUserDetailsService();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter authFilter) throws Exception {
         return http
                 .csrf(csrf -> csrf.ignoringRequestMatchers(request ->
                         request.getServletPath().startsWith("/graphql") ||

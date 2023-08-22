@@ -50,23 +50,16 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         if (worker.isEmpty()) throw new WorkerNotFoundException("Worker not found");
 
         String requestTypeName = requestInput.getRequestType();
-        // delete this
-        // System.out.println(requestTypeName);
-        List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
-        // delete this
-        // for (Office office : offices) System.out.println(office.getName());
-        Date startDate = requestInput.getStartDate();
-        // delete this
-        // System.out.println(startDate);
-        Date endDate = requestInput.getEndDate();
-        // delete this
-        // System.out.println(endDate);
 
-        if (!isWorkersEnoughForRequest(startDate, endDate, offices)) return null;
+        List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
+
+        Date startDate = requestInput.getStartDate();
+        Date endDate = requestInput.getEndDate();
+
+        if (isWorkersEnoughForRequest(startDate, endDate, offices).equals(false))
+            throw new OfficeOverloadedException("Office doesn't have enough workers");
 
         RequestType requestType = getOrCreateRequestType(requestTypeName);
-        // delete this
-        // System.out.println(requestType.getName());
 
         Request request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker.get());
         request = requestRepository.save(request);
@@ -83,24 +76,20 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     private RequestType getOrCreateRequestType(String requestTypeName) throws InvalidRequestTypeException {
-        Optional<RequestType> _requestType = requestTypeRepository.findByName(requestTypeName);
-        if (_requestType.isEmpty()) {
+        Optional<RequestType> requestType = requestTypeRepository.findByName(requestTypeName);
+        if (requestType.isEmpty()) {
             RequestType newRequestType = mapRequestType.mapStringToRequestType(requestTypeName);
             requestTypeRepository.save(newRequestType);
-            _requestType = requestTypeRepository.findByName(requestTypeName);
+            requestType = requestTypeRepository.findByName(requestTypeName);
         }
 
-        if (_requestType.isEmpty()) throw new InvalidRequestTypeException("Error while creating request type");
+        if (requestType.isEmpty()) throw new InvalidRequestTypeException("Error while creating request type");
 
-        return _requestType.get();
+        return requestType.get();
     }
 
     private Boolean isWorkersEnoughForRequest(Date startDate, Date endDate, List<Office> offices)
             throws OfficeOverloadedException {
-        // delete this
-        // System.out.println("totalNumberOfWorker: " + totalNumberOfWorker);
-        // delete this
-        // System.out.println("busyWorkers: " + busyWorkers);
         offices.forEach(office -> {
             long totalNumberOfWorker = workerRepository.countByOffice(office);
             long busyWorkers = requestRepository.countBusyWorkers(
@@ -115,8 +104,6 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     private void setNotifications(Date startDate, Date endDate, List<Office> offices, RequestType requestType) {
-        // delete this
-        // System.out.println("notification: " + notification.getId());
         offices.stream()
                 .map(office -> notificationRepository.findAllByOfficeAndIsReadyAndRequestType(
                                 office, false, requestType

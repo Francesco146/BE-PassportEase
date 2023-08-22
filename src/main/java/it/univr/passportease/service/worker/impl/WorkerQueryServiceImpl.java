@@ -31,9 +31,9 @@ public class WorkerQueryServiceImpl implements WorkerQueryService {
     @Override
     @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
     public Request getRequestByAvailabilityID(String id) throws InvalidAvailabilityIDException {
-        Optional<Availability> _availability = reservationRepository.findById(UUID.fromString(id));
-        if (_availability.isEmpty())
+        Optional<Availability> availability = reservationRepository.findById(UUID.fromString(id));
+        if (availability.isEmpty())
             throw new InvalidAvailabilityIDException("Invalid Availability ID");
-        return _availability.get().getRequest();
+        return availability.get().getRequest();
     }
 }

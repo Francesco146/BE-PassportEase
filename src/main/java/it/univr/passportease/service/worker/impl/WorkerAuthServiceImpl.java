@@ -39,34 +39,33 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
 
     @Override
     public LoginOutput login(String username, String password) throws WrongPasswordException, WorkerNotFoundException {
-        Optional<Worker> worker = workerRepository.findByUsername(username);
-        if (worker.isEmpty()) throw new WorkerNotFoundException("Worker not found");
+        Optional<Worker> optionalWorker = workerRepository.findByUsername(username);
+        if (optionalWorker.isEmpty()) throw new WorkerNotFoundException("Worker not found");
 
-        Worker _worker = worker.get();
+        Worker worker = optionalWorker.get();
 
-        String id = _worker.getId().toString();
+        String id = worker.getId().toString();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(id, password));
 
         if (!authentication.isAuthenticated())
             throw new WrongPasswordException("Invalid credentials");
 
-        _worker.setRefreshToken(jwtService.generateRefreshToken(UUID.fromString(id)));
-        workerRepository.save(_worker);
+        worker.setRefreshToken(jwtService.generateRefreshToken(UUID.fromString(id)));
+        workerRepository.save(worker);
 
         return mapWorker.mapWorkerToLoginOutput(
-                _worker,
+                worker,
                 jwtService.generateAccessToken(UUID.fromString(id))
         );
     }
 
     @Override
     public LoginOutput register(WorkerInput workerInput) throws OfficeNotFoundException {
-        // System.out.println(workerInput.getOfficeName());
+        // TODO: deprecated
 
         Optional<Office> office = officeRepository.findByName(workerInput.getOfficeName());
         if (office.isEmpty()) throw new OfficeNotFoundException("Office not found");
-        // System.out.println(office.get().getName());
 
         Worker worker = new Worker();
         worker.setUsername(workerInput.getUsername());
