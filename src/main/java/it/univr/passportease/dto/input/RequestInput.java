@@ -1,13 +1,13 @@
 package it.univr.passportease.dto.input;
 
-import java.time.LocalTime;
-import java.util.Date;
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,5 +20,6 @@ public class RequestInput {
     private LocalTime startTime;
     private LocalTime endTime;
     private String requestType;
+    private String dependencies;
     private List<String> offices;
 }

@@ -20,6 +20,8 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
+import java.util.UUID;
+
 @Controller
 @AllArgsConstructor
 public class UserMutationController {
@@ -53,12 +55,19 @@ public class UserMutationController {
     }
 
     @MutationMapping
-    public void modifyNotification() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Notification modifyNotification(NotificationInput notificationInput, UUID notificationId) throws RateLimitException {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many modifyNotification attempts");
+        return null;
     }
 
     @MutationMapping
-    public void deleteNotification() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public void deleteNotification(UUID notificationId) throws RateLimitException {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many deleteNotification attempts");
+
+        userMutationService.deleteNotification(notificationId);
     }
 }

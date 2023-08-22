@@ -82,6 +82,9 @@ services:
             timeout: 2s
             retries: 5
             start_period: 2s
+        # TODO: remove this
+        ports:
+            - "5432:5432"
 
     frontend:
         extends: # extends the frontend service from the docker-compose.yaml file in the parent directory

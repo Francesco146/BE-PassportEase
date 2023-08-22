@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -44,5 +45,12 @@ public class UserMutationServiceImpl implements UserMutationService {
         Notification notification = mapNotification.mapNotificationInputDBToNotification(notificationInputDB);
         notificationRepository.save(notification);
         return notification;
+    }
+
+    @Override
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
+    public void deleteNotification(UUID notificationId) {
+        Optional<Notification> notification = notificationRepository.findById(notificationId);
+        notification.ifPresent(notificationRepository::delete);
     }
 }

@@ -1,10 +1,9 @@
 package it.univr.passportease.helper.map;
 
-import java.util.Date;
-
+import it.univr.passportease.entity.RequestType;
 import org.springframework.stereotype.Component;
 
-import it.univr.passportease.entity.RequestType;
+import java.util.Date;
 
 @Component
 public class MapRequestType {
