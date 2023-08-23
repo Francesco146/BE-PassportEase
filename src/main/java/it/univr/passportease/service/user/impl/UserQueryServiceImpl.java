@@ -2,6 +2,7 @@ package it.univr.passportease.service.user.impl;
 
 import it.univr.passportease.dto.output.ReportDetails;
 import it.univr.passportease.entity.*;
+import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.repository.NotificationRepository;
@@ -65,6 +66,9 @@ public class UserQueryServiceImpl implements UserQueryService {
             throw new InvalidAvailabilityIDException("Invalid Availability ID");
 
         Availability availability = optionalAvailability.get();
+        if (!availability.getStatus().equals(Status.TAKEN))
+            throw new InvalidAvailabilityIDException("Can't get report of free availabilities");
+
         User user = availability.getUser();
         String fiscalCodeAvailability = user.getFiscalCode();
 

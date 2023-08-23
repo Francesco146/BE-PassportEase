@@ -1,8 +1,8 @@
 input AvailabilityFilters {
     offices: [OfficeInput!]
     requestTypes: [String!]
-    startDate: String
-    endDate: String
+    startDate: Date
+    endDate: Date
     startTime: String
     endTime: String
 }

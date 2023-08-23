@@ -9,5 +9,5 @@ public interface UserWorkerQueryService {
 
     List<Office> getOffices();
 
-    //List<Availability> getAvailabilities();
+    List<Availability> getAvailabilities();
 }

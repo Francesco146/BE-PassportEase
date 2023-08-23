@@ -24,8 +24,8 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
         return officeRepository.findAll();
     }
 
-   /* @Override
+    @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public List<Availability> getAvailabilites() { return availabilityRepository.find} */
+    public List<Availability> getAvailabilites() { return availabilityRepository.find}
 
 }

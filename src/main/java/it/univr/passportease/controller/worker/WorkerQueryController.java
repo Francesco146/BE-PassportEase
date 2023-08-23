@@ -22,7 +22,7 @@ public class WorkerQueryController {
     private BucketLimiter bucketLimiter;
 
     @QueryMapping
-    public Request getRequestsByAvailabilityId(@Argument("availabilityID") String id) throws InvalidAvailabilityIDException, RateLimitException {
+    public Request getRequestByAvailabilityID(@Argument("availabilityID") String id) throws InvalidAvailabilityIDException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (bucket.tryConsume(1))
             return workerQueryService.getRequestByAvailabilityID(id);

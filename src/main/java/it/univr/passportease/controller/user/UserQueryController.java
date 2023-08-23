@@ -33,7 +33,7 @@ public class UserQueryController {
     }
 
     @QueryMapping
-    public ReportDetails getReportDetailsByAvailabilityId(@Argument("availabilityID") String availabilityId)
+    public ReportDetails getReportDetailsByAvailabilityID(@Argument("availabilityID") String availabilityId)
             throws SecurityException, InvalidAvailabilityIDException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (!bucket.tryConsume(1))

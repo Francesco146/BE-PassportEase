@@ -16,7 +16,7 @@ public interface UserQueryService {
 
     List<Availability> getUserReservations(String token);
 
-    ReportDetails getReportDetailsByAvailabilityID(String id, String token)
+    ReportDetails getReportDetailsByAvailabilityID(String availabilityId, String token)
             throws SecurityException, InvalidAvailabilityIDException;
 
 }

@@ -19,6 +19,4 @@ public class RegisterInput {
     private String cityOfBirth;
     private Date dateOfBirth;
     private String password;
-
-
 }

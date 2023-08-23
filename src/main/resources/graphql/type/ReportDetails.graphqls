@@ -4,9 +4,9 @@ type ReportDetails {
     name: String!
     surname: String!
     cityOfBirth: String!
-    dateOfBirth: String!
-    dateOfAvailability: String!
-    startTime: String!
+    dateOfBirth: Date!
+    dateOfAvailability: Date!
+    startTime: LocalTime!
     nameRequestType: String!
     officeName: String!
     address: String!
