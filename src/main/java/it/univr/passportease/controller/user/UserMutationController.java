@@ -2,12 +2,15 @@ package it.univr.passportease.controller.user;
 
 import io.github.bucket4j.Bucket;
 import it.univr.passportease.dto.input.NotificationInput;
+import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.Worker;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.invalid.InvalidWorkerActionException;
+import it.univr.passportease.exception.notfound.NotificationNotFoundException;
 import it.univr.passportease.exception.notfound.OfficeNotFoundException;
+import it.univr.passportease.exception.notfound.RequestTypeNotFoundException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
@@ -32,8 +35,12 @@ public class UserMutationController {
     private BucketLimiter bucketLimiter;
 
     @MutationMapping
-    public void createReservation() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Availability createReservation(@Argument("availabilityID") String availabilityID) throws RateLimitException {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many createReservation attempts");
+
+        return userMutationService.createReservation(UUID.fromString(availabilityID));
     }
 
     @MutationMapping
@@ -55,15 +62,16 @@ public class UserMutationController {
     }
 
     @MutationMapping
-    public Notification modifyNotification(NotificationInput notificationInput, UUID notificationId) throws RateLimitException {
+    public Notification modifyNotification(@Argument("notification") NotificationInput notificationInput, @Argument("notificationID") UUID notificationId)
+            throws RateLimitException, NotificationNotFoundException, OfficeNotFoundException, RequestTypeNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many modifyNotification attempts");
-        return null;
+        return userMutationService.modifyNotification(notificationInput, notificationId);
     }
 
     @MutationMapping
-    public void deleteNotification(UUID notificationId) throws RateLimitException {
+    public void deleteNotification(@Argument("notificationID") UUID notificationId) throws RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many deleteNotification attempts");

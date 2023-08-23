@@ -6,9 +6,7 @@ import graphql.schema.DataFetchingEnvironment;
 import it.univr.passportease.exception.illegalstate.OfficeOverloadedException;
 import it.univr.passportease.exception.illegalstate.UserAlreadyExistsException;
 import it.univr.passportease.exception.invalid.*;
-import it.univr.passportease.exception.notfound.OfficeNotFoundException;
-import it.univr.passportease.exception.notfound.UserNotFoundException;
-import it.univr.passportease.exception.notfound.WorkerNotFoundException;
+import it.univr.passportease.exception.notfound.*;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
 import it.univr.passportease.exception.security.TokenNotInRedisException;
@@ -142,6 +140,38 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                     .location(environment.getField().getSourceLocation())
                     .build();
 
+        if (exception instanceof NotificationNotFoundException)
+            return GraphqlErrorBuilder.newError()
+                    .errorType(ErrorType.NOT_FOUND)
+                    .message(exception.getMessage())
+                    .path(environment.getExecutionStepInfo().getPath())
+                    .location(environment.getField().getSourceLocation())
+                    .build();
+
+        if (exception instanceof RequestTypeNotFoundException)
+            return GraphqlErrorBuilder.newError()
+                    .errorType(ErrorType.NOT_FOUND)
+                    .message(exception.getMessage())
+                    .path(environment.getExecutionStepInfo().getPath())
+                    .location(environment.getField().getSourceLocation())
+                    .build();
+
+        if (exception instanceof AvailabilityNotFoundException)
+            return GraphqlErrorBuilder.newError()
+                    .errorType(ErrorType.NOT_FOUND)
+                    .message(exception.getMessage())
+                    .path(environment.getExecutionStepInfo().getPath())
+                    .location(environment.getField().getSourceLocation())
+                    .build();
+
+        if (exception instanceof SecurityException)
+            return GraphqlErrorBuilder.newError()
+                    .errorType(ErrorType.UNAUTHORIZED)
+                    .message(exception.getMessage())
+                    .path(environment.getExecutionStepInfo().getPath())
+                    .location(environment.getField().getSourceLocation())
+                    .build();
+        
         return super.resolveToSingleError(exception, environment);
     }
 }
