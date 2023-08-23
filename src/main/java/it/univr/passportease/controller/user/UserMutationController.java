@@ -8,10 +8,7 @@ import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.Worker;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.invalid.InvalidWorkerActionException;
-import it.univr.passportease.exception.notfound.NotificationNotFoundException;
-import it.univr.passportease.exception.notfound.OfficeNotFoundException;
-import it.univr.passportease.exception.notfound.RequestTypeNotFoundException;
-import it.univr.passportease.exception.notfound.UserNotFoundException;
+import it.univr.passportease.exception.notfound.*;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
 import it.univr.passportease.helper.RequestAnalyzer;
@@ -44,8 +41,12 @@ public class UserMutationController {
     }
 
     @MutationMapping
-    public void deleteReservation() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public void deleteReservation(@Argument("availabilityID") String availabilityID) throws RateLimitException, AvailabilityNotFoundException {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many deleteReservation attempts");
+
+        userMutationService.deleteReservation(UUID.fromString(availabilityID));
     }
 
     @MutationMapping
