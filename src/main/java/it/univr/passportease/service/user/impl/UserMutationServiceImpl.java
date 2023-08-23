@@ -95,4 +95,15 @@ public class UserMutationServiceImpl implements UserMutationService {
 
         return availability.get();
     }
+
+    @Override
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
+    public void deleteReservation(UUID availabilityId) throws AvailabilityNotFoundException {
+        Optional<Availability> availability = availabilityRepository.findById(availabilityId);
+
+        if (availability.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
+
+        availability.get().setStatus(Status.FREE);
+        availabilityRepository.save(availability.get());
+    }
 }
