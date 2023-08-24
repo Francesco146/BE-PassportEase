@@ -56,9 +56,9 @@ public class UserQueryServiceImpl implements UserQueryService {
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public ReportDetails getReportDetailsByAvailabilityID(String availabilityId, String token)
             throws SecurityException, InvalidAvailabilityIDException {
-         Object userToken = jwtService.getUserOrWorkerFromToken(token);
-         if (!(userToken instanceof User))
-             throw new SecurityException("Only user can access reports");
+        Object userToken = jwtService.getUserOrWorkerFromToken(token);
+        if (!(userToken instanceof User))
+            throw new SecurityException("Only user can access reports");
 
         Optional<Availability> optionalAvailability = reservationRepository.findById(UUID.fromString(availabilityId));
 
@@ -92,5 +92,4 @@ public class UserQueryServiceImpl implements UserQueryService {
                 office.getAddress()
         );
     }
-
 }

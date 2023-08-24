@@ -14,5 +14,5 @@ import java.util.List;
 public class AvailabilityFilters {
     private List<OfficeInput> offices;
     private List<String> requestTypes;
-    private Date startDate
+    //private Date startDate;
 }

@@ -1,6 +1,5 @@
 package it.univr.passportease.service.impl;
 
-import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Office;
 import it.univr.passportease.repository.AvailabilityRepository;
 import it.univr.passportease.repository.OfficeRepository;
@@ -24,8 +23,10 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
         return officeRepository.findAll();
     }
 
-    @Override
-    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public List<Availability> getAvailabilites() { return availabilityRepository.find}
+    //@Override
+    //@PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
+    //public List<Availability> getAvailabilites() {
+    //    return availabilityRepository.findAll();
+    //}
 
 }

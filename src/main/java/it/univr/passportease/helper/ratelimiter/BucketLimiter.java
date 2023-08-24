@@ -17,7 +17,7 @@ public class BucketLimiter {
     }
 
     public String getMethodName() {
-        // return the name of the method that called this method not the name of this method
+        // return the name of the method that called this method
         return Thread
                 .currentThread()
                 .getStackTrace()[2]

@@ -25,7 +25,7 @@ services:
             - "./acme.json:/acme.json/acme.json"  # Monta la directory per il salvataggio dei certificati ACME
             - "/var/run/docker.sock:/var/run/docker.sock:ro"  # Condividi il socket Docker per la configurazione dinamica
         healthcheck:
-            test: [ "CMD", "wget", "--no-check-certificate", "--spider", "https://localhost" ]
+            test: [ "CMD", "wget", "--no-check-certificate", "--spider", "https://localhost/health" ]
             interval: 10s
             timeout: 5s
             retries: 3
@@ -90,7 +90,7 @@ services:
             service: frontend
         hostname: frontend
         healthcheck: # healthcheck for vite + react server (see if curl response is 200 OK)
-            test: curl --fail --silent localhost:5173/ || exit 1
+            test: curl --fail --silent localhost:5173/health || exit 1
             interval: 10s
             timeout: 5s
             retries: 3

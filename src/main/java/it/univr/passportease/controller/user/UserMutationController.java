@@ -32,12 +32,19 @@ public class UserMutationController {
     private BucketLimiter bucketLimiter;
 
     @MutationMapping
-    public Availability createReservation(@Argument("availabilityID") String availabilityID) throws RateLimitException {
+    public Availability createReservation(@Argument("availabilityID") String availabilityID)
+            throws RateLimitException, AvailabilityNotFoundException, UserNotFoundException {
+
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many createReservation attempts");
 
-        return userMutationService.createReservation(UUID.fromString(availabilityID));
+        Object user = jwtService.getUserOrWorkerFromToken(requestAnalyzer.getTokenFromRequest());
+
+        if (!(user instanceof User))
+            throw new InvalidWorkerActionException("Workers cannot create reservations");
+
+        return userMutationService.createReservation(UUID.fromString(availabilityID), (User) user);
     }
 
     @MutationMapping

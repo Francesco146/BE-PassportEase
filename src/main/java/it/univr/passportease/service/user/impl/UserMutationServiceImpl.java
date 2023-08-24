@@ -5,15 +5,9 @@ import it.univr.passportease.dto.input.NotificationInputDB;
 import it.univr.passportease.entity.*;
 import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
-import it.univr.passportease.exception.notfound.AvailabilityNotFoundException;
-import it.univr.passportease.exception.notfound.NotificationNotFoundException;
-import it.univr.passportease.exception.notfound.OfficeNotFoundException;
-import it.univr.passportease.exception.notfound.RequestTypeNotFoundException;
+import it.univr.passportease.exception.notfound.*;
 import it.univr.passportease.helper.map.MapNotification;
-import it.univr.passportease.repository.AvailabilityRepository;
-import it.univr.passportease.repository.NotificationRepository;
-import it.univr.passportease.repository.OfficeRepository;
-import it.univr.passportease.repository.RequestTypeRepository;
+import it.univr.passportease.repository.*;
 import it.univr.passportease.service.user.UserMutationService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,8 +23,10 @@ public class UserMutationServiceImpl implements UserMutationService {
     private final NotificationRepository notificationRepository;
     private final OfficeRepository officeRepository;
     private final RequestTypeRepository requestTypeRepository;
-    private final MapNotification mapNotification;
     private final AvailabilityRepository availabilityRepository;
+    private final UserRepository userRepository;
+    
+    private final MapNotification mapNotification;
 
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
@@ -86,24 +82,35 @@ public class UserMutationServiceImpl implements UserMutationService {
 
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
-    public Availability createReservation(UUID availabilityId) {
-        Optional<Availability> availability = availabilityRepository.findById(availabilityId);
-        if (availability.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
+    public Availability createReservation(UUID availabilityId, User user)
+            throws AvailabilityNotFoundException, UserNotFoundException {
 
-        availability.get().setStatus(Status.TAKEN);
-        availabilityRepository.save(availability.get());
+        Optional<Availability> availabilityOptional = availabilityRepository.findById(availabilityId);
 
-        return availability.get();
+        if (userRepository.findById(user.getId()).isEmpty()) throw new UserNotFoundException("User not found");
+        if (availabilityOptional.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
+
+        Availability availability = availabilityOptional.get();
+
+        availability.setStatus(Status.TAKEN);
+        availability.setUser(user);
+
+        availabilityRepository.save(availability);
+
+        return availability;
     }
 
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public void deleteReservation(UUID availabilityId) throws AvailabilityNotFoundException {
-        Optional<Availability> availability = availabilityRepository.findById(availabilityId);
+        Optional<Availability> availabilityOptional = availabilityRepository.findById(availabilityId);
 
-        if (availability.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
+        if (availabilityOptional.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
 
-        availability.get().setStatus(Status.FREE);
-        availabilityRepository.save(availability.get());
+        Availability availability = availabilityOptional.get();
+
+        availability.setStatus(Status.FREE);
+        availability.setUser(null);
+        availabilityRepository.save(availability);
     }
 }
