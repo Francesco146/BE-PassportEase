@@ -21,11 +21,14 @@ public class UserWorkerQueryController {
     private BucketLimiter bucketLimiter;
 
     @QueryMapping
-    public List<Availability> getAvailabilities(@Argument("availabilityFilters") AvailabilityFilters availabilityFilters) throws RateLimitException {
+    public List<Availability> getAvailabilities(@Argument("availabilityFilters") AvailabilityFilters availabilityFilters, @Argument("size") Integer size, @Argument("page") Integer page) throws RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many getAvailabilities attempts");
 
-        return availabilityFilters == null ? userWorkerQueryService.getAvailabilities() : userWorkerQueryService.getAvailabilities(availabilityFilters);
+        if (size == null || page == null)
+            return availabilityFilters == null ? userWorkerQueryService.getAvailabilities() : userWorkerQueryService.getAvailabilities(availabilityFilters);
+        else
+            return availabilityFilters == null ? userWorkerQueryService.getAvailabilities(page, size) : userWorkerQueryService.getAvailabilities(availabilityFilters, page, size);
     }
 
     @QueryMapping

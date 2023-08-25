@@ -9,6 +9,7 @@ import it.univr.passportease.repository.OfficeRepository;
 import it.univr.passportease.repository.RequestTypeRepository;
 import it.univr.passportease.service.userworker.UserWorkerQueryService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -39,8 +40,27 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException {
+    public List<Availability> getAvailabilities(Integer page, Integer size) {
+        return availabilityRepository.findAll(PageRequest.of(page, size)).getContent();
+    }
 
+    @Override
+    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
+    public List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException {
+        dataValidation(availabilityFilters);
+
+        return availabilityRepository.findAll(Specification.where(availabilityFilters));
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
+    public List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException {
+        dataValidation(availabilityFilters);
+
+        return availabilityRepository.findAll(Specification.where(availabilityFilters), PageRequest.of(page, size)).getContent();
+    }
+
+    private void dataValidation(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException {
         Date startDate = availabilityFilters.getStartDate();
         Date endDate = availabilityFilters.getEndDate();
         LocalTime startTime = availabilityFilters.getStartTime();
@@ -59,7 +79,7 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
         for (String requestType : availabilityFilters.getRequestTypes())
             if (!requestTypeRepository.existsByName(requestType))
                 throw new InvalidDataFromRequestException("Request type " + requestType + " doesn't exist");
-
-        return availabilityRepository.findAll(Specification.where(availabilityFilters));
     }
+
+
 }

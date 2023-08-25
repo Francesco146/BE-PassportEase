@@ -14,4 +14,8 @@ public interface UserWorkerQueryService {
     List<Availability> getAvailabilities();
 
     List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException;
+
+    List<Availability> getAvailabilities(Integer page, Integer size);
+
+    List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException;
 }

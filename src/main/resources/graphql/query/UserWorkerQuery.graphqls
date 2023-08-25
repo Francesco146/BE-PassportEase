@@ -1,4 +1,4 @@
 extend type Query {
-    getAvailabilities(availabilityFilters: AvailabilityFilters): [Availability]
+    getAvailabilities(availabilityFilters: AvailabilityFilters, page: Int, size: Int): [Availability]
     getOffices: [Office!]!
 }
