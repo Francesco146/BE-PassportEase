@@ -11,5 +11,8 @@ import java.util.UUID;
 @Repository
 public interface OfficeRepository extends JpaRepository<Office, UUID> {
     Optional<Office> findByName(String name);
+
     List<Office> findAllByNameIn(List<String> names);
+
+    boolean existsByName(String name);
 }

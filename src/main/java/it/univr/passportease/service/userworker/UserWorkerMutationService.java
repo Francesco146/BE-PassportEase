@@ -1,10 +1,10 @@
-package it.univr.passportease.service;
+package it.univr.passportease.service.userworker;
 
 import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.exception.invalid.InvalidEmailException;
 import it.univr.passportease.exception.invalid.InvalidRefreshTokenException;
-import it.univr.passportease.exception.invalid.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
+import it.univr.passportease.exception.notfound.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.TokenNotInRedisException;
 import it.univr.passportease.exception.security.WrongPasswordException;

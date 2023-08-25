@@ -34,7 +34,7 @@ public class UserQueryController {
 
     @QueryMapping
     public ReportDetails getReportDetailsByAvailabilityID(@Argument("availabilityID") String availabilityId)
-            throws SecurityException, InvalidAvailabilityIDException, RateLimitException {
+            throws SecurityException, InvalidAvailabilityIDException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many get notifications attempts");
@@ -44,25 +44,28 @@ public class UserQueryController {
     @QueryMapping
     public List<Notification> getUserNotifications() throws AuthenticationCredentialsNotFoundException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return userQueryService.getUserNotifications(requestAnalyzer.getTokenFromRequest());
-        else throw new RateLimitException("Too many get notifications attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many get notifications attempts");
+
+        return userQueryService.getUserNotifications(requestAnalyzer.getTokenFromRequest());
     }
 
     @QueryMapping
     public User getUserDetails() throws AuthenticationCredentialsNotFoundException, RateLimitException, UserNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return userQueryService.getUserDetails(requestAnalyzer.getTokenFromRequest());
-        else throw new RateLimitException("Too many get user details attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many get user details attempts");
+
+        return userQueryService.getUserDetails(requestAnalyzer.getTokenFromRequest());
     }
 
     @QueryMapping
     public List<Availability> getUserReservations() throws AuthenticationCredentialsNotFoundException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return userQueryService.getUserReservations(requestAnalyzer.getTokenFromRequest());
-        else throw new RateLimitException("Too many get user reservations attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many get user reservations attempts");
+
+        return userQueryService.getUserReservations(requestAnalyzer.getTokenFromRequest());
     }
 
 }

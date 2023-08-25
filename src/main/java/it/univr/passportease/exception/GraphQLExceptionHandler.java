@@ -171,7 +171,14 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                     .path(environment.getExecutionStepInfo().getPath())
                     .location(environment.getField().getSourceLocation())
                     .build();
-        
+
+        if (exception instanceof InvalidDataFromRequestException)
+            return GraphqlErrorBuilder.newError()
+                    .errorType(ErrorType.BAD_REQUEST)
+                    .message(exception.getMessage())
+                    .path(environment.getExecutionStepInfo().getPath())
+                    .build();
+
         return super.resolveToSingleError(exception, environment);
     }
 }

@@ -1,5 +1,5 @@
 input AvailabilityFilters {
-    offices: [OfficeInput!]
+    officesName: [String!]
     requestTypes: [String!]
     startDate: Date
     endDate: Date
