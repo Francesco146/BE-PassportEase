@@ -8,4 +8,8 @@ import it.univr.passportease.exception.notfound.WorkerNotFoundException;
 
 public interface WorkerMutationService {
     Request createRequest(String token, RequestInput requestInput) throws WorkerNotFoundException, InvalidRequestTypeException, OfficeOverloadedException;
+
+    Request modifyRequest(String token, String requestID, RequestInput requestInput);
+
+    void deleteRequest(String token, String requestID);
 }

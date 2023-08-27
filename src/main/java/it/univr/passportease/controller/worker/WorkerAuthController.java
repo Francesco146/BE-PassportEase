@@ -26,11 +26,17 @@ public class WorkerAuthController {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
         if (bucket.tryConsume(1))
             return workerAuthService.login(username, password);
-        else throw new RateLimitException("Too many login attempts");
+        else
+            throw new RateLimitException("Too many login attempts");
     }
 
     @MutationMapping
-    public LoginOutput registerWorker(@Argument("workerInput") WorkerInput workerInput) throws RateLimitException, OfficeNotFoundException {
+    public LoginOutput registerWorker(@Argument("workerInput") WorkerInput workerInput)
+            throws RateLimitException, OfficeNotFoundException {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (bucket.tryConsume(1))
             return workerAuthService.register(workerInput);
+        else
+            throw new RateLimitException("Too many register attempts");
     }
 }

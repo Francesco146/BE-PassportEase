@@ -75,8 +75,8 @@ public class UserQueryServiceImpl implements UserQueryService {
         if (!fiscalCodeAvailability.equals(((User) userToken).getFiscalCode()))
             throw new SecurityException("Only user whose record belongs to can access it");
 
-        Office office = availability.getOffice();
         Request request = availability.getRequest();
+        Office office = availability.getOffice();
         RequestType requestType = request.getRequestType();
 
         return new ReportDetails(

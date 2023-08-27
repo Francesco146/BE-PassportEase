@@ -34,14 +34,18 @@ public class WorkerMutationController {
     }
 
     @MutationMapping
-    @PreAuthorize("hasAuthority('WORKER')")
-    public void modifyRequest() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Request modifyRequest(@Argument("requestID") String requestID, @Argument("request") RequestInput requestInput) {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (bucket.tryConsume(1))
+            return workerMutationService.modifyRequest(requestAnalyzer.getTokenFromRequest(), requestID, requestInput);
+        else throw new RateLimitException("Too many modifyRequest attempts");
     }
 
     @MutationMapping
-    @PreAuthorize("hasAuthority('WORKER')")
-    public void deleteRequest() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public void deleteRequest(@Argument("requestID") String requestID) {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (bucket.tryConsume(1))
+            workerMutationService.deleteRequest(requestAnalyzer.getTokenFromRequest(), requestID);
+        else throw new RateLimitException("Too many deleteRequest attempts");
     }
 }

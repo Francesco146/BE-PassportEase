@@ -24,6 +24,8 @@ public class Notification {
     @Column(name = "is_ready")
     private Boolean isReady;
 
+    private String message;
+
     @NonNull
     @Column(name = "start_date")
     private Date startDate;

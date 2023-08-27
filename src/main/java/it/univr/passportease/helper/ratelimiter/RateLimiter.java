@@ -122,6 +122,11 @@ public enum RateLimiter {
         public Bandwidth getLimit() {
             return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
         }
+    },
+    registerWorker {
+        public Bandwidth getLimit() {
+            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+        }
     };
 
     public abstract Bandwidth getLimit();
