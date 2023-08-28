@@ -115,6 +115,8 @@ services:
             interval: 3s
             timeout: 3s
             retries: 30
+        ports:
+            - "6379:6379"
 
 volumes:
     postgres-data:

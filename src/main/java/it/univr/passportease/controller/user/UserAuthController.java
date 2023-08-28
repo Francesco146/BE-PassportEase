@@ -42,6 +42,7 @@ public class UserAuthController {
     }
 
     @MutationMapping
+    //@CrossOrigin(origins = {"http://localhost:8080", "https://localhost:8080"})
     public void logout()
             throws TokenNotInRedisException, RateLimitException, UserNotFoundException, AuthenticationCredentialsNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());

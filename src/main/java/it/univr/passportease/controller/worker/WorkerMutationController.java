@@ -14,7 +14,6 @@ import it.univr.passportease.service.worker.WorkerMutationService;
 import lombok.AllArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -36,16 +35,18 @@ public class WorkerMutationController {
     @MutationMapping
     public Request modifyRequest(@Argument("requestID") String requestID, @Argument("request") RequestInput requestInput) {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return workerMutationService.modifyRequest(requestAnalyzer.getTokenFromRequest(), requestID, requestInput);
-        else throw new RateLimitException("Too many modifyRequest attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many modifyRequest attempts");
+
+        return workerMutationService.modifyRequest(requestAnalyzer.getTokenFromRequest(), requestID, requestInput);
     }
 
     @MutationMapping
     public void deleteRequest(@Argument("requestID") String requestID) {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            workerMutationService.deleteRequest(requestAnalyzer.getTokenFromRequest(), requestID);
-        else throw new RateLimitException("Too many deleteRequest attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many deleteRequest attempts");
+
+        workerMutationService.deleteRequest(requestAnalyzer.getTokenFromRequest(), requestID);
     }
 }

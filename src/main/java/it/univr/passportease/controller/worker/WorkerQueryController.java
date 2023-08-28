@@ -24,16 +24,16 @@ public class WorkerQueryController {
     @QueryMapping
     public Request getRequestByAvailabilityID(@Argument("availabilityID") String id) throws InvalidAvailabilityIDException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return workerQueryService.getRequestByAvailabilityID(id);
-        else throw new RateLimitException("Too many getRequestsByAvailabilityId attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many getRequestByAvailabilityID attempts");
+
+        return workerQueryService.getRequestByAvailabilityID(id);
     }
 
     @QueryMapping
     public List<RequestType> getAllRequestTypes() throws RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return workerQueryService.getAllRequestTypes();
-        else throw new RateLimitException("Too many getAllRequestTypes attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many getAllRequestTypes attempts");
+
+        return workerQueryService.getAllRequestTypes();
     }
 }

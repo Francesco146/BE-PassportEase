@@ -12,11 +12,13 @@ spring:
     graphql:
         # TODO: With Traefik, allowed origins must be set to the domain name of the frontend
         cors:
-            allow-credentials: true
             allowed-origins:
                 - https://localhost
+                - http://localhost
+                - http://localhost:8080
+                - https://localhost:8080
     datasource:
-        url: jdbc:postgresql://postgres:5432/postgres
+        url: jdbc:postgresql://postgres:5432/mydatabase
         username: myuser
         password: secret
     jackson:
@@ -34,6 +36,8 @@ spring:
         redis:
             repositories:
                 enabled: false
+            host: redis
+
 management:
     endpoint:
         health:

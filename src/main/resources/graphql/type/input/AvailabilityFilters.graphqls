@@ -3,6 +3,6 @@ input AvailabilityFilters {
     requestTypes: [String!]
     startDate: Date
     endDate: Date
-    startTime: String
-    endTime: String
+    startTime: LocalTime
+    endTime: LocalTime
 }

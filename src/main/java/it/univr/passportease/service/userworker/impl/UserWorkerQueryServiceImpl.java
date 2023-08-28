@@ -72,13 +72,15 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
         if (startTime != null && endTime != null && startTime.isAfter(endTime))
             throw new InvalidDataFromRequestException("Start time must be before end time");
 
-        for (String officeName : availabilityFilters.getOfficesName())
-            if (!officeRepository.existsByName(officeName))
-                throw new InvalidDataFromRequestException("Office " + officeName + " doesn't exist");
+        if (availabilityFilters.getOfficesName() != null && !availabilityFilters.getOfficesName().isEmpty())
+            for (String officeName : availabilityFilters.getOfficesName())
+                if (!officeRepository.existsByName(officeName))
+                    throw new InvalidDataFromRequestException("Office " + officeName + " doesn't exist");
 
-        for (String requestType : availabilityFilters.getRequestTypes())
-            if (!requestTypeRepository.existsByName(requestType))
-                throw new InvalidDataFromRequestException("Request type " + requestType + " doesn't exist");
+        if (availabilityFilters.getRequestTypes() != null && !availabilityFilters.getRequestTypes().isEmpty())
+            for (String requestType : availabilityFilters.getRequestTypes())
+                if (!requestTypeRepository.existsByName(requestType))
+                    throw new InvalidDataFromRequestException("Request type " + requestType + " doesn't exist");
     }
 
 

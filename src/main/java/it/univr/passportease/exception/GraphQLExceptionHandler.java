@@ -179,6 +179,13 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                     .path(environment.getExecutionStepInfo().getPath())
                     .build();
 
+        if (exception instanceof RequestNotFoundException)
+            return GraphqlErrorBuilder.newError()
+                    .errorType(ErrorType.NOT_FOUND)
+                    .message(exception.getMessage())
+                    .path(environment.getExecutionStepInfo().getPath())
+                    .build();
+
         return super.resolveToSingleError(exception, environment);
     }
 }

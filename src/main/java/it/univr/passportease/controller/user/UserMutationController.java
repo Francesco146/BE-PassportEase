@@ -36,8 +36,7 @@ public class UserMutationController {
             throws RateLimitException, AvailabilityNotFoundException, UserNotFoundException {
 
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (!bucket.tryConsume(1))
-            throw new RateLimitException("Too many createReservation attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many createReservation attempts");
 
         Object user = jwtService.getUserOrWorkerFromToken(requestAnalyzer.getTokenFromRequest());
 
@@ -50,8 +49,7 @@ public class UserMutationController {
     @MutationMapping
     public void deleteReservation(@Argument("availabilityID") String availabilityID) throws RateLimitException, AvailabilityNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (!bucket.tryConsume(1))
-            throw new RateLimitException("Too many deleteReservation attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many deleteReservation attempts");
 
         userMutationService.deleteReservation(UUID.fromString(availabilityID));
     }
@@ -60,12 +58,11 @@ public class UserMutationController {
     public Notification createNotification(@Argument("notification") NotificationInput notificationInput)
             throws UserNotFoundException, InvalidWorkerActionException, AuthenticationCredentialsNotFoundException, RateLimitException, InvalidRequestTypeException, OfficeNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (!bucket.tryConsume(1))
-            throw new RateLimitException("Too many createNotification attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many createNotification attempts");
 
         Object user = jwtService.getUserOrWorkerFromToken(requestAnalyzer.getTokenFromRequest());
-        if (user instanceof Worker)
-            throw new InvalidWorkerActionException("Workers cannot create notifications");
+        if (user instanceof Worker) throw new InvalidWorkerActionException("Workers cannot create notifications");
+        
         return userMutationService.createNotification(notificationInput, (User) user);
     }
 
@@ -73,16 +70,15 @@ public class UserMutationController {
     public Notification modifyNotification(@Argument("notification") NotificationInput notificationInput, @Argument("notificationID") UUID notificationId)
             throws RateLimitException, NotificationNotFoundException, OfficeNotFoundException, RequestTypeNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (!bucket.tryConsume(1))
-            throw new RateLimitException("Too many modifyNotification attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many modifyNotification attempts");
+
         return userMutationService.modifyNotification(notificationInput, notificationId);
     }
 
     @MutationMapping
     public void deleteNotification(@Argument("notificationID") UUID notificationId) throws RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (!bucket.tryConsume(1))
-            throw new RateLimitException("Too many deleteNotification attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many deleteNotification attempts");
 
         userMutationService.deleteNotification(notificationId);
     }
