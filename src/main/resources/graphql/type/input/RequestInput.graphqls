@@ -5,6 +5,5 @@ input RequestInput {
     startTime: LocalTime!
     endTime: LocalTime!
     requestType: String!
-    dependencies: String
     offices: [String!]!
 }
