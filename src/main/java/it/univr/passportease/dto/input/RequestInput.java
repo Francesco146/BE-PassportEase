@@ -20,6 +20,5 @@ public class RequestInput {
     private LocalTime startTime;
     private LocalTime endTime;
     private String requestType;
-    private String dependencies;
     private List<String> offices;
 }

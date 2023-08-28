@@ -24,6 +24,9 @@ public class RequestType {
     @Column(unique = true)
     private String name;
 
+    @Column(name = "has_dependency")
+    private boolean hasDependency;
+
     @Column(name = "created_at")
     private Date createdAt;
 

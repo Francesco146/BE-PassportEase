@@ -264,6 +264,10 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
             throw new RequestNotFoundException("Request not found");
 
         Request request = _request.get();
+        List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
+
+        if(!isWorkersEnoughForRequest(requestInput, offices))
+            throw new OfficeOverloadedException("Office doesn't have enough workers");
 
         // delete and ricreate availabilities
         deleteAvailabilities(request);
@@ -275,7 +279,6 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         request = requestRepository.save(request);
 
         // create new availabilities
-        List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
         createAvailabilities(requestInput.getStartDate(), requestInput.getEndDate(), offices, request);
 
         return request;

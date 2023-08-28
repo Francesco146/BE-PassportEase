@@ -10,6 +10,7 @@ public class MapRequestType {
     public RequestType mapStringToRequestType(String name) {
         RequestType requestType = new RequestType();
         requestType.setName(name);
+        requestType.setHasDependency(true);
         requestType.setCreatedAt(new Date());
         requestType.setUpdatedAt(new Date());
         return requestType;
