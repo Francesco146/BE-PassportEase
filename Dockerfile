@@ -1,17 +1,17 @@
-FROM maven:3.9.3 AS builder
+FROM maven:3.9.4-amazoncorretto-20-debian AS builder
 WORKDIR /build/
 
 # Download dependencies first - Docker Layer Caching
 COPY pom.xml .
-RUN mvn dependency:go-offline
-RUN mvn verify --fail-never
+RUN --mount=type=cache,target=/root/.m2/repository mvn dependency:go-offline
+RUN --mount=type=cache,target=/root/.m2/repository mvn verify --fail-never
 
 # Build the JAR - Skip Tests because we don't have a DB yet
 COPY src ./src/
-RUN mvn clean package -DskipTests -Pnative -o
+RUN --mount=type=cache,target=/root/.m2/repository mvn clean package -DskipTests -Pnative -o
 
 # Run the JAR file stage
-FROM amazoncorretto:20-alpine3.18 AS production
+FROM amazoncorretto:20.0.2-alpine3.18 AS production
 
 # Install curl
 RUN  apk add curl
