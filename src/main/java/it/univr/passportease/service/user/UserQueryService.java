@@ -1,10 +1,12 @@
 package it.univr.passportease.service.user;
 
+import it.univr.passportease.dto.output.ReportDetails;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
+import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.entity.User;
-import it.univr.passportease.dto.output.ReportDetails;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
+import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 
 import java.util.List;
@@ -19,4 +21,5 @@ public interface UserQueryService {
     ReportDetails getReportDetailsByAvailabilityID(String availabilityId, String token)
             throws SecurityException, InvalidAvailabilityIDException;
 
+    List<RequestType> getRequestTypesByUser(String token) throws InvalidRequestTypeException;
 }

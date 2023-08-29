@@ -4,8 +4,10 @@ import io.github.bucket4j.Bucket;
 import it.univr.passportease.dto.output.ReportDetails;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
+import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
+import it.univr.passportease.exception.notfound.RequestTypeNotFoundException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
@@ -28,8 +30,12 @@ public class UserQueryController {
     private RequestAnalyzer requestAnalyzer;
 
     @QueryMapping
-    public void getRequestTypesByUser() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public List<RequestType> getRequestTypesByUser() throws RateLimitException, RequestTypeNotFoundException {
+        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many get request types attempts");
+
+        return userQueryService.getRequestTypesByUser(requestAnalyzer.getTokenFromRequest());
+
     }
 
     @QueryMapping

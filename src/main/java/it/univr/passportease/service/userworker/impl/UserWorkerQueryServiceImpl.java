@@ -41,6 +41,7 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public List<Availability> getAvailabilities(Integer page, Integer size) {
+        // TODO: Old Availability
         return availabilityRepository.findAll(PageRequest.of(page, size)).getContent();
     }
 

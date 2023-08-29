@@ -28,6 +28,20 @@ public enum GraphQLOperations {
                     }
                     """;
         }
+    },
+
+    getRequestTypesByUser {
+        public String getGraphQl(String... args) {
+
+            return """
+                    query {
+                        getRequestTypesByUser {
+                            id
+                            name
+                        }
+                    }
+                    """;
+        }
     };
 
     public abstract String getGraphQl(String... args);

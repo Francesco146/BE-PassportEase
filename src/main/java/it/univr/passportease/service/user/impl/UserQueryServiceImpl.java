@@ -4,8 +4,10 @@ import it.univr.passportease.dto.output.ReportDetails;
 import it.univr.passportease.entity.*;
 import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
+import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.repository.NotificationRepository;
+import it.univr.passportease.repository.RequestTypeRepository;
 import it.univr.passportease.repository.ReservationRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
@@ -14,6 +16,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +28,7 @@ public class UserQueryServiceImpl implements UserQueryService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final ReservationRepository reservationRepository;
+    private final RequestTypeRepository requestTypeRepository;
     private final JwtService jwtService;
 
     @Override
@@ -91,5 +95,34 @@ public class UserQueryServiceImpl implements UserQueryService {
                 office.getName(),
                 office.getAddress()
         );
+    }
+
+    @Override
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
+    public List<RequestType> getRequestTypesByUser(String token) throws InvalidRequestTypeException {
+        UUID userId = jwtService.extractId(token);
+        List<Availability> availabilities = reservationRepository.findByUserId(userId);
+
+        List<RequestType> requestTypesOfUser = availabilities
+                .stream()
+                .filter(availability -> availability.getStatus().equals(Status.TAKEN))
+                .filter(availability -> availability.getDate().after(new Date()))
+                .map(availability -> availability.getRequest().getRequestType())
+                .toList();
+
+        Optional<RequestType> digitalizzazionePassaporto = requestTypeRepository.findByName("Digitalizzazione Passaporto");
+        if (digitalizzazionePassaporto.isEmpty())
+            throw new InvalidRequestTypeException("Digitalizzazione Passaporto not found");
+
+        Optional<RequestType> creazionePassaporto = requestTypeRepository.findByName("Creazione Passaporto");
+        if (creazionePassaporto.isEmpty()) throw new InvalidRequestTypeException("Creazione Passaporto not found");
+
+        if (requestTypesOfUser.contains(digitalizzazionePassaporto.get()) || requestTypesOfUser.contains(creazionePassaporto.get()))
+            return requestTypeRepository.findAll()
+                    .stream()
+                    .filter(requestType -> requestType.getName().equals("Digitalizzazione Passaporto") || requestType.getName().equals("Creazione Passaporto"))
+                    .toList();
+
+        else return List.of(digitalizzazionePassaporto.get(), creazionePassaporto.get());
     }
 }
