@@ -106,7 +106,7 @@ public class UserQueryServiceImpl implements UserQueryService {
         List<RequestType> requestTypesOfUser = availabilities
                 .stream()
                 .filter(availability -> availability.getStatus().equals(Status.TAKEN))
-                .filter(availability -> availability.getDate().after(new Date()))
+                .filter(availability -> availability.getDate().before(new Date()))
                 .map(availability -> availability.getRequest().getRequestType())
                 .toList();
 
@@ -117,11 +117,16 @@ public class UserQueryServiceImpl implements UserQueryService {
         Optional<RequestType> creazionePassaporto = requestTypeRepository.findByName("Creazione Passaporto");
         if (creazionePassaporto.isEmpty()) throw new InvalidRequestTypeException("Creazione Passaporto not found");
 
-        if (requestTypesOfUser.contains(digitalizzazionePassaporto.get()) || requestTypesOfUser.contains(creazionePassaporto.get()))
-            return requestTypeRepository.findAll()
-                    .stream()
-                    .filter(requestType -> requestType.getName().equals("Digitalizzazione Passaporto") || requestType.getName().equals("Creazione Passaporto"))
-                    .toList();
+        List<RequestType> requestTypes = requestTypeRepository.findAll();
+
+        if (requestTypesOfUser.contains(digitalizzazionePassaporto.get()) || requestTypesOfUser.contains(creazionePassaporto.get())) {
+            requestTypes.remove(digitalizzazionePassaporto.get());
+            requestTypes.remove(creazionePassaporto.get());
+            return requestTypes;
+        }
+                   // .stream()
+                    //.filter(requestType -> requestType.getName().equals("Digitalizzazione Passaporto") || requestType.getName().equals("Creazione Passaporto"))
+                    //.toList();
 
         else return List.of(digitalizzazionePassaporto.get(), creazionePassaporto.get());
     }
