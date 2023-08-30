@@ -28,8 +28,6 @@ class UserQueryControllerTest {
     @Autowired
     WebApplicationContext context;
     @Autowired
-    private GraphQlTester graphQlTester;
-    @Autowired
     private JwtService jwtService;
 
     @Test

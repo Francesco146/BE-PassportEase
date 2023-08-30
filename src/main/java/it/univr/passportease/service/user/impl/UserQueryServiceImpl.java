@@ -105,29 +105,26 @@ public class UserQueryServiceImpl implements UserQueryService {
 
         List<RequestType> requestTypesOfUser = availabilities
                 .stream()
-                .filter(availability -> availability.getStatus().equals(Status.TAKEN))
-                .filter(availability -> availability.getDate().before(new Date()))
+                .filter(availability -> availability.getStatus().equals(Status.TAKEN) && availability.getDate().before(new Date()))
                 .map(availability -> availability.getRequest().getRequestType())
+                .distinct()
                 .toList();
 
-        Optional<RequestType> digitalizzazionePassaporto = requestTypeRepository.findByName("Digitalizzazione Passaporto");
-        if (digitalizzazionePassaporto.isEmpty())
-            throw new InvalidRequestTypeException("Digitalizzazione Passaporto not found");
+        RequestType digitalizzazionePassaporto = requestTypeRepository.findByName("Digitalizzazione Passaporto")
+                .orElseThrow(() -> new InvalidRequestTypeException("Digitalizzazione Passaporto not found"));
 
-        Optional<RequestType> creazionePassaporto = requestTypeRepository.findByName("Creazione Passaporto");
-        if (creazionePassaporto.isEmpty()) throw new InvalidRequestTypeException("Creazione Passaporto not found");
+        RequestType creazionePassaporto = requestTypeRepository.findByName("Creazione Passaporto")
+                .orElseThrow(() -> new InvalidRequestTypeException("Creazione Passaporto not found"));
 
-        List<RequestType> requestTypes = requestTypeRepository.findAll();
+        List<RequestType> allRequestTypes = requestTypeRepository.findAll();
 
-        if (requestTypesOfUser.contains(digitalizzazionePassaporto.get()) || requestTypesOfUser.contains(creazionePassaporto.get())) {
-            requestTypes.remove(digitalizzazionePassaporto.get());
-            requestTypes.remove(creazionePassaporto.get());
-            return requestTypes;
-        }
-                   // .stream()
-                    //.filter(requestType -> requestType.getName().equals("Digitalizzazione Passaporto") || requestType.getName().equals("Creazione Passaporto"))
-                    //.toList();
-
-        else return List.of(digitalizzazionePassaporto.get(), creazionePassaporto.get());
+        if (requestTypesOfUser.contains(digitalizzazionePassaporto) || requestTypesOfUser.contains(creazionePassaporto)) {
+            return allRequestTypes
+                    .stream()
+                    .filter(requestType -> !requestType.getName().equals("Digitalizzazione Passaporto") && !requestType.getName().equals("Creazione Passaporto"))
+                    .toList();
+        } else return List.of(digitalizzazionePassaporto, creazionePassaporto);
     }
+
+
 }
