@@ -4,11 +4,12 @@ WORKDIR /build/
 # Download dependencies first - Docker Layer Caching
 COPY pom.xml .
 RUN --mount=type=cache,target=/root/.m2/repository mvn dependency:go-offline
+RUN --mount=type=cache,target=/root/.m2/repository mvn dependency:resolve-plugins
 RUN --mount=type=cache,target=/root/.m2/repository mvn verify --fail-never
 
-# Build the JAR - Skip Tests because we don't have a DB yet
+# Build the JAR
 COPY src ./src/
-RUN --mount=type=cache,target=/root/.m2/repository mvn clean package -DskipTests -Pnative -o
+RUN --mount=type=cache,target=/root/.m2/repository mvn clean package -Pnative -DskipTests
 
 # Run the JAR file stage
 FROM amazoncorretto:20.0.2-alpine3.18 AS production

@@ -13,15 +13,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.UUID;
 
-@SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {"spring.data.redis.host=localhost", "spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase"}
-)
+@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureGraphQlTester
 @AutoConfigureMockMvc
 class UserAuthControllerTest {
@@ -59,7 +58,7 @@ class UserAuthControllerTest {
 
         Assertions.assertNotNull(jwtSet);
 
-        Assertions.assertEquals(UUID.fromString("c1394aeb-0e05-465c-ba05-98dd6fde815c"), loginOutput.id());
+        Assertions.assertEquals(UUID.fromString("09933d03-d5af-40de-a915-89c24dabe84f"), loginOutput.id());
 
         Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
         Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
@@ -72,7 +71,7 @@ class UserAuthControllerTest {
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void logoutUser() {
-        String token = jwtService.generateAccessToken(UUID.fromString("c1394aeb-0e05-465c-ba05-98dd6fde815c"));
+        String token = jwtService.generateAccessToken(UUID.fromString("09933d03-d5af-40de-a915-89c24dabe84f"));
 
         System.out.println("[!] Generated token: " + token);
 

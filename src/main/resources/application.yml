@@ -10,7 +10,6 @@ server:
         enabled: true
 spring:
     graphql:
-        # TODO: With Traefik, allowed origins must be set to the domain name of the frontend
         cors:
             allowed-origins:
                 - https://localhost
@@ -29,7 +28,6 @@ spring:
             ddl-auto: update
         open-in-view: false
     mvc:
-
         servlet:
             load-on-startup: 1
     data:
@@ -37,7 +35,6 @@ spring:
             repositories:
                 enabled: false
             host: redis
-
 management:
     endpoint:
         health:

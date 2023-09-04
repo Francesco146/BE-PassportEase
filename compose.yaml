@@ -2,6 +2,8 @@ services:
     traefik:
         image: traefik:v2.10.4
         hostname: traefik
+        profiles:
+            - prod
         depends_on:
             frontend:
                 condition: service_healthy
@@ -33,6 +35,8 @@ services:
 
     backend:
         hostname: backend
+        profiles:
+            - prod
         build:
             context: .
             dockerfile: Dockerfile
@@ -72,6 +76,28 @@ services:
         image: 'postgres:15.4'
         hostname: postgres
         restart: unless-stopped
+        profiles:
+            - prod
+        environment:
+            - 'POSTGRES_DB=mydatabase'
+            - 'POSTGRES_PASSWORD=secret'
+            - 'POSTGRES_USER=myuser'
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test: [ "CMD-SHELL", "sh -c 'pg_isready -U myuser -d mydatabase'" ]
+            interval: 2s
+            timeout: 2s
+            retries: 5
+            start_period: 2s
+
+
+    postgres_test:
+        image: 'postgres:15.4'
+        hostname: postgres
+        restart: unless-stopped
+        profiles:
+            - test
         environment:
             - 'POSTGRES_DB=mydatabase'
             - 'POSTGRES_PASSWORD=secret'
@@ -91,6 +117,8 @@ services:
             file: ~/WebstormProjects/PassportEase/docker-compose.yaml
             service: frontend
         hostname: frontend
+        profiles:
+            - prod
         healthcheck: # healthcheck for vite + react server (see if curl response is 200 OK)
             test: curl --fail --silent localhost:5173/health || exit 1
             interval: 10s
@@ -107,8 +135,9 @@ services:
             - "traefik.http.services.frontend.loadbalancer.server.port=5173"
             - "traefik.http.routers.frontend.rule=Host(`localhost`)"
             - "traefik.http.routers.frontend.tls.certresolver=resolver"  # Utilizza il resolver dei certificati configurato in Traefik
-
-    redis:
+    redis_test:
+        profiles:
+            - test
         image: 'redis:6.2.13'
         hostname: redis
         restart: unless-stopped
@@ -119,6 +148,17 @@ services:
             retries: 30
         ports:
             - "6379:6379"
+    redis:
+        image: 'redis:6.2.13'
+        hostname: redis
+        profiles:
+            - prod
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 3s
+            timeout: 3s
+            retries: 30
 
 volumes:
     postgres-data:
