@@ -8,28 +8,6 @@ server:
     http2:
         enabled: true
 spring:
-    datasource:
-        driver-class-name: org.h2.Driver
-        url: jdbc:h2:mem:db;MODE=POSTGRESQL;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=DAY
-        username: sa
-        password: sa
-    sql:
-        init:
-            mode: always
-            platform: h2
-    jpa:
-        hibernate:
-            ddl-auto: create-drop
-        open-in-view: false
-        properties:
-            hibernate:
-                dialect: org.hibernate.dialect.H2Dialect
-                format_sql: true
-                jdbc:
-                    lob:
-                        non_contextual_creation: true
-                globally_quoted_identifiers: true
-        defer-datasource-initialization: true
     graphql:
         cors:
             allowed-origins:
@@ -37,9 +15,17 @@ spring:
                 - http://localhost
                 - http://localhost:8080
                 - https://localhost:8080
+    datasource:
+        url: jdbc:postgresql://localhost:5432/mydatabase
+        username: myuser
+        password: secret
     jackson:
         serialization:
             fail-on-empty-beans: false
+    jpa:
+        hibernate:
+            ddl-auto: update
+        open-in-view: false
     mvc:
         servlet:
             load-on-startup: 1
@@ -48,7 +34,6 @@ spring:
             repositories:
                 enabled: false
             host: localhost
-
 management:
     endpoint:
         health:
