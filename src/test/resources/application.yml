@@ -26,6 +26,7 @@ spring:
         hibernate:
             ddl-auto: update
         open-in-view: false
+        defer-datasource-initialization: true
     mvc:
         servlet:
             load-on-startup: 1
