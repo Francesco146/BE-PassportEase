@@ -24,8 +24,8 @@ jobs:
 
             -   name: Update dependency graph
                 uses: advanced-security/maven-dependency-submission-action@c5ad0fd6b977364190852883b46728f25a9617c3
-                env:
-                    PATH: ${{ runner.tool_cache }}/jdk/20/x64/bin:${PATH}
+                with:
+                    maven-command: mvn
     unit-tests:
         needs: build
         permissions: write-all
