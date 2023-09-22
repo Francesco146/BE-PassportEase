@@ -12,7 +12,7 @@ COPY src ./src/
 RUN --mount=type=cache,target=/root/.m2/repository mvn clean package -Pnative -DskipTests
 
 # Run the JAR file stage
-FROM amazoncorretto:20.0.2-alpine3.18 AS production
+FROM amazoncorretto:21.0.0-alpine3.18 AS production
 
 # Install curl
 RUN  apk add curl
