@@ -71,7 +71,10 @@ services:
             - "traefik.http.services.backend.loadbalancer.server.port=8080"
             - "traefik.http.routers.backend.rule=Host(`localhost`)"
             - "traefik.http.routers.backend.tls.certresolver=resolver"  # Utilizza il resolver dei certificati configurato in Traefik
-
+        volumes:
+            -   type: bind
+                source: ./logs
+                target: /usr/src/passportease/logs
     postgres:
         image: 'postgres:15.4'
         hostname: postgres
