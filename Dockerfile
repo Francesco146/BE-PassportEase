@@ -1,4 +1,4 @@
-FROM maven:3.9.4-amazoncorretto-20-debian AS builder
+FROM maven:3-amazoncorretto-21-debian AS builder
 WORKDIR /build/
 
 # Download dependencies first - Docker Layer Caching
