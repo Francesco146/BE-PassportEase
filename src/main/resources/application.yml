@@ -39,3 +39,15 @@ management:
     endpoint:
         health:
             enabled: true
+
+logging:
+    level:
+        org:
+            springframework:
+                web:
+                    servlet:
+                        DispatcherServlet: DEBUG
+                    filter:
+                        CorsFilter: DEBUG
+                    HandlerMapping: DEBUG
+                    HandlerExecutionChain: DEBUG

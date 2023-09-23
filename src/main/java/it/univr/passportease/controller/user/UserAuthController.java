@@ -18,12 +18,14 @@ import it.univr.passportease.helper.ratelimiter.BucketLimiter;
 import it.univr.passportease.service.user.UserAuthService;
 import it.univr.passportease.service.userworker.UserWorkerMutationService;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @AllArgsConstructor
+@Log4j2
 public class UserAuthController {
     private final UserAuthService userAuthService;
     private final UserWorkerMutationService userWorkerMutationService;
@@ -36,9 +38,10 @@ public class UserAuthController {
     public LoginOutput loginUser(@Argument("fiscalCode") String fiscalCode, @Argument("password") String password)
             throws UserNotFoundException, WrongPasswordException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return userAuthService.login(fiscalCode, password);
-        else throw new RateLimitException("Too many login attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many login attempts");
+
+        log.info("Login attempt for user with fiscal code: " + fiscalCode);
+        return userAuthService.login(fiscalCode, password);
     }
 
     @MutationMapping
@@ -46,44 +49,47 @@ public class UserAuthController {
     public void logout()
             throws TokenNotInRedisException, RateLimitException, UserNotFoundException, AuthenticationCredentialsNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            userWorkerMutationService.logout();
-        else throw new RateLimitException("Too many logout attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many logout attempts");
+
+        userWorkerMutationService.logout();
     }
 
     @MutationMapping
     public LoginOutput registerUser(@Argument("registerInput") RegisterInput registerInput)
             throws RateLimitException, UserNotFoundException, UserAlreadyExistsException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return userAuthService.register(registerInput);
-        else throw new RateLimitException("Too many register attempts");
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many register attempts");
+
+        return userAuthService.register(registerInput);
     }
 
     @MutationMapping
     public JWTSet refreshAccessToken(@Argument("refreshToken") String refreshToken)
             throws AuthenticationCredentialsNotFoundException, UserNotFoundException, RateLimitException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return userWorkerMutationService.refreshAccessToken(requestAnalyzer.getTokenFromRequest(), refreshToken);
-        else throw new RateLimitException("Too many refresh attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many refresh attempts");
+
+        return userWorkerMutationService.refreshAccessToken(requestAnalyzer.getTokenFromRequest(), refreshToken);
     }
 
     @MutationMapping
     public void changePassword(@Argument("oldPassword") String oldPassword, @Argument("newPassword") String newPassword)
             throws UserNotFoundException, AuthenticationCredentialsNotFoundException, WrongPasswordException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            userWorkerMutationService.changePassword(oldPassword, newPassword);
-        else throw new RateLimitException("Too many change password attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many change password attempts");
+
+        userWorkerMutationService.changePassword(oldPassword, newPassword);
     }
 
     @MutationMapping
     public String changeEmail(@Argument("newEmail") String newEmail, @Argument("oldEmail") String oldEmail)
             throws UserNotFoundException, InvalidEmailException, RateLimitException, AuthenticationCredentialsNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
-        if (bucket.tryConsume(1))
-            return userWorkerMutationService.changeEmail(newEmail, oldEmail);
-        else throw new RateLimitException("Too many change email attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many change email attempts");
+
+        return userWorkerMutationService.changeEmail(newEmail, oldEmail);
     }
 }
