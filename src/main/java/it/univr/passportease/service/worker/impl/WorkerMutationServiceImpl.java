@@ -111,14 +111,11 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
 
     private boolean isWorkersNotEnoughForRequest(RequestInput requestInput, List<Office> offices)
             throws OfficeOverloadedException {
-        Date startDate = requestInput.getStartDate();
-        Date endDate = requestInput.getEndDate();
-        LocalTime requestStartTime = requestInput.getStartTime();
-        LocalTime requestEndTime = requestInput.getEndTime();
+
 
         for (Office office : offices) {
             long totalNumberOfWorker = workerRepository.countByOffice(office);
-            long busyWorkers = countBusyWorkersInOffice(office, startDate, endDate, requestStartTime, requestEndTime);
+            long busyWorkers = countBusyWorkersInOffice(office, requestInput);
 
             log.info("totalNumberOfWorker: " + totalNumberOfWorker);
             log.info("busyWorkers: " + busyWorkers);
@@ -131,7 +128,12 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         return false;
     }
 
-    private long countBusyWorkersInOffice(Office office, Date startDate, Date endDate, LocalTime requestStartTime, LocalTime requestEndTime) {
+    private long countBusyWorkersInOffice(Office office, RequestInput requestInput) {
+        Date startDate = requestInput.getStartDate();
+        Date endDate = requestInput.getEndDate();
+        LocalTime requestStartTime = requestInput.getStartTime();
+        LocalTime requestEndTime = requestInput.getEndTime();
+
         long busyWorkers = 0;
         List<Request> requests = requestRepository.getOfficeRequests(office.getId(), startDate, endDate);
 
@@ -166,47 +168,52 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         LocalDate start = startDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
         LocalDate end = endDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 
-        LocalTime requestStartTime = request.getStartTime();
-        LocalTime requestEndTime = request.getEndTime();
-
-        long duration = request.getDuration();
-
         List<OfficeWorkingDay> officeWorkingDays = new ArrayList<>();
         for (Office office : offices) officeWorkingDays.addAll(officeWorkingDayRepository.findByOffice(office));
 
         for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
             Day day = Day.valueOf(date.getDayOfWeek().toString());
-            processOfficeWorkingDays(day, officeWorkingDays, date, requestStartTime, requestEndTime, duration, request);
+            processOfficeWorkingDays(
+                    day,
+                    officeWorkingDays,
+                    date,
+                    request
+            );
         }
     }
 
-    private void processOfficeWorkingDays(Day day, List<OfficeWorkingDay> officeWorkingDays, LocalDate date,
-                                          LocalTime requestStartTime, LocalTime requestEndTime, long duration, Request request) {
+    private void processOfficeWorkingDays(Day day, List<OfficeWorkingDay> officeWorkingDays, LocalDate date, Request request) {
         officeWorkingDays.stream().
                 filter(officeWorkingDay ->
                         officeWorkingDay.getDay().equals(day))
                 .forEach(officeWorkingDay ->
-                        processOfficeWorkingDay(officeWorkingDay, date, requestStartTime, requestEndTime, duration, request)
+                        processOfficeWorkingDay(officeWorkingDay, date, request)
                 );
     }
 
-    private void processOfficeWorkingDay(OfficeWorkingDay officeWorkingDay, LocalDate date,
-                                         LocalTime requestStartTime, LocalTime requestEndTime, long duration, Request request) {
+    private void processOfficeWorkingDay(OfficeWorkingDay officeWorkingDay, LocalDate date, Request request) {
 
-        processOfficeWorkingDayTimeSlot(officeWorkingDay.getStartTime1(), officeWorkingDay.getEndTime1(),
-                date, requestStartTime, requestEndTime, duration, request, officeWorkingDay.getOffice()
-        );
+        processOfficeWorkingDayTimeSlot(officeWorkingDay, date, request);
 
         if (officeWorkingDay.getStartTime2() != null && officeWorkingDay.getEndTime2() != null)
-            processOfficeWorkingDayTimeSlot(officeWorkingDay.getStartTime2(), officeWorkingDay.getEndTime2(),
-                    date, requestStartTime, requestEndTime, duration, request, officeWorkingDay.getOffice());
+            processOfficeWorkingDayTimeSlot(officeWorkingDay, date, request);
     }
 
-    private void processOfficeWorkingDayTimeSlot(LocalTime officeStartTime, LocalTime officeEndTime, LocalDate date,
-                                                 LocalTime requestStartTime, LocalTime requestEndTime, long duration,
-                                                 Request request, Office office) {
+    private void processOfficeWorkingDayTimeSlot(OfficeWorkingDay officeWorkingDay, LocalDate date, Request request) {
+
+        LocalTime requestStartTime = request.getStartTime();
+        LocalTime requestEndTime = request.getEndTime();
+
+        long duration = request.getDuration();
+
+        LocalTime officeStartTime = officeWorkingDay.getStartTime2();
+        LocalTime officeEndTime = officeWorkingDay.getEndTime2();
+        Office office = officeWorkingDay.getOffice();
+
+
         LocalTime startTime = getHigherTime(officeStartTime, requestStartTime);
         LocalTime endTime = getLowerTime(officeEndTime, requestEndTime);
+
 
         iterate(startTime, time -> time.isBefore(endTime), time -> time.plusMinutes(duration))
                 .map(time ->
