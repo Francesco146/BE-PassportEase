@@ -18,7 +18,8 @@ jobs:
                 with:
                     java-version: '20'
                     distribution: 'corretto'
-                    cache: maven
+                    cache: 'maven'
+                    check-latest: true
             -   name: Build with Maven
                 run: mvn -B package --file pom.xml -DskipTests
 
