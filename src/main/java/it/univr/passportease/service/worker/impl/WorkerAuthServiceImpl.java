@@ -14,7 +14,6 @@ import it.univr.passportease.repository.WorkerRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.worker.WorkerAuthService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,9 +31,9 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
     private final MapWorker mapWorker;
     private final JwtService jwtService;
     private final OfficeRepository officeRepository;
-    @Autowired
+
     private AuthenticationManager authenticationManager;
-    @Autowired
+
     private PasswordEncoder passwordEncoder;
 
     @Override

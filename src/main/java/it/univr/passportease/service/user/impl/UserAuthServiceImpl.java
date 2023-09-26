@@ -13,7 +13,6 @@ import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.user.UserAuthService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,9 +29,9 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final CitizenRepository citizenRepository;
     private final MapUser mapUser;
     private final JwtService jwtService;
-    @Autowired
+
     private PasswordEncoder passwordEncoder;
-    @Autowired
+
     private AuthenticationManager authenticationManager;
 
     @Override

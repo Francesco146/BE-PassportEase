@@ -21,12 +21,16 @@ import java.util.UUID;
 @Component
 public class AppUserDetailsService implements UserDetailsService {
 
+    private final UserRepository userRepository;
+    private final WorkerRepository workerRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private WorkerRepository workerRepository;
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    public AppUserDetailsService(UserRepository userRepository, WorkerRepository workerRepository, RedisTemplate<String, String> redisTemplate) {
+        this.userRepository = userRepository;
+        this.workerRepository = workerRepository;
+        this.redisTemplate = redisTemplate;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {

@@ -1,8 +1,12 @@
 package it.univr.passportease.config;
 
 import it.univr.passportease.filter.JwtAuthFilter;
+import it.univr.passportease.repository.UserRepository;
+import it.univr.passportease.repository.WorkerRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,11 +24,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@AllArgsConstructor
 public class SecurityConfig {
+    private UserRepository userRepository;
+    private WorkerRepository workerRepository;
+    private RedisTemplate<String, String> redisTemplate;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new AppUserDetailsService();
+        return new AppUserDetailsService(userRepository, workerRepository, redisTemplate);
     }
 
     @Bean

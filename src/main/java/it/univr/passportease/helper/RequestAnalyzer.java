@@ -10,8 +10,13 @@ import org.springframework.stereotype.Service;
 public class RequestAnalyzer {
     private final HttpServletRequest request;
 
-    @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    RequestAnalyzer(JwtService jwtService) {
+        this.jwtService = jwtService;
+        this.request = null;
+    }
 
     public RequestAnalyzer(HttpServletRequest request) {
         this.request = request;
