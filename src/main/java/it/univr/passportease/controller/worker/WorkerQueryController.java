@@ -6,6 +6,7 @@ import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.security.RateLimitException;
 import it.univr.passportease.helper.ratelimiter.BucketLimiter;
+import it.univr.passportease.helper.ratelimiter.RateLimiter;
 import it.univr.passportease.service.worker.WorkerQueryService;
 import lombok.AllArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -23,7 +24,7 @@ public class WorkerQueryController {
 
     @QueryMapping
     public Request getRequestByAvailabilityID(@Argument("availabilityID") String id) throws InvalidAvailabilityIDException, RateLimitException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.GET_REPORT_DETAILS_BY_AVAILABILITY_ID);
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many getRequestByAvailabilityID attempts");
 
         return workerQueryService.getRequestByAvailabilityID(id);
@@ -31,7 +32,7 @@ public class WorkerQueryController {
 
     @QueryMapping
     public List<RequestType> getAllRequestTypes() throws RateLimitException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.GET_ALL_REQUEST_TYPES);
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many getAllRequestTypes attempts");
 
         return workerQueryService.getAllRequestTypes();

@@ -15,6 +15,7 @@ import it.univr.passportease.exception.security.TokenNotInRedisException;
 import it.univr.passportease.exception.security.WrongPasswordException;
 import it.univr.passportease.helper.RequestAnalyzer;
 import it.univr.passportease.helper.ratelimiter.BucketLimiter;
+import it.univr.passportease.helper.ratelimiter.RateLimiter;
 import it.univr.passportease.service.user.UserAuthService;
 import it.univr.passportease.service.userworker.UserWorkerMutationService;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,7 @@ public class UserAuthController {
     @MutationMapping
     public LoginOutput loginUser(@Argument("fiscalCode") String fiscalCode, @Argument("password") String password)
             throws UserNotFoundException, WrongPasswordException, RateLimitException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.LOGIN_USER);
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many login attempts");
 
         log.info("Login attempt for user with fiscal code: " + fiscalCode);
@@ -48,7 +49,7 @@ public class UserAuthController {
     //@CrossOrigin(origins = {"http://localhost:8080", "https://localhost:8080"})
     public void logout()
             throws TokenNotInRedisException, RateLimitException, UserNotFoundException, AuthenticationCredentialsNotFoundException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.LOGOUT);
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many logout attempts");
 
         userWorkerMutationService.logout();
@@ -57,7 +58,7 @@ public class UserAuthController {
     @MutationMapping
     public LoginOutput registerUser(@Argument("registerInput") RegisterInput registerInput)
             throws RateLimitException, UserNotFoundException, UserAlreadyExistsException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.REGISTER_USER);
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many register attempts");
 
         return userAuthService.register(registerInput);
@@ -66,7 +67,7 @@ public class UserAuthController {
     @MutationMapping
     public JWTSet refreshAccessToken(@Argument("refreshToken") String refreshToken)
             throws AuthenticationCredentialsNotFoundException, UserNotFoundException, RateLimitException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.REFRESH_ACCESS_TOKEN);
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many refresh attempts");
 
@@ -76,7 +77,7 @@ public class UserAuthController {
     @MutationMapping
     public void changePassword(@Argument("oldPassword") String oldPassword, @Argument("newPassword") String newPassword)
             throws UserNotFoundException, AuthenticationCredentialsNotFoundException, WrongPasswordException, RateLimitException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.CHANGE_PASSWORD);
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many change password attempts");
 
@@ -86,7 +87,7 @@ public class UserAuthController {
     @MutationMapping
     public String changeEmail(@Argument("newEmail") String newEmail, @Argument("oldEmail") String oldEmail)
             throws UserNotFoundException, InvalidEmailException, RateLimitException, AuthenticationCredentialsNotFoundException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.CHANGE_EMAIL);
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many change email attempts");
 

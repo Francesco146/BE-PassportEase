@@ -36,7 +36,8 @@ jobs:
                 with:
                     java-version: '20'
                     distribution: 'corretto'
-                    cache: maven
+                    cache: 'maven'
+                    check-latest: true
             -   name: Stop existing postgres and redis
                 run: docker compose --profile test down
 

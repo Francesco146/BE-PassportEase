@@ -3,131 +3,135 @@ package it.univr.passportease.helper.ratelimiter;
 import io.github.bucket4j.Bandwidth;
 
 public enum RateLimiter {
-    getRequestTypesByUser {
+    GET_REQUEST_TYPES_BY_USER {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    getReportDetailsByAvailabilityID {
+    GET_REPORT_DETAILS_BY_AVAILABILITY_ID {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    getUserNotifications {
+    GET_USER_NOTIFICATIONS {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    getUserDetails {
+    GET_USER_DETAILS {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    getUserReservations {
+    GET_USER_RESERVATIONS {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    loginUser {
+    LOGIN_USER {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    logout {
+    LOGOUT {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    registerUser {
+    REGISTER_USER {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    refreshAccessToken {
+    REFRESH_ACCESS_TOKEN {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    changePassword {
+    CHANGE_PASSWORD {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    createReservation {
+    CREATE_RESERVATION {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    deleteReservation {
+    DELETE_RESERVATION {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    createNotification {
+    CREATE_NOTIFICATION {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    modifyNotification {
+    MODIFY_NOTIFICATION {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    deleteNotification {
+    DELETE_NOTIFICATION {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    changeEmail {
+    CHANGE_EMAIL {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    getRequestByAvailabilityID {
+    GET_REQUEST_BY_AVAILABILITY_ID {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    getAllRequestTypes {
+    GET_ALL_REQUEST_TYPES {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    getAvailabilities {
+    GET_AVAILABILITIES {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    getOffices {
+    GET_OFFICES {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(5);
         }
     },
-    loginWorker {
+    LOGIN_WORKER {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    createRequest {
+    CREATE_REQUEST {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    modifyRequest {
+    MODIFY_REQUEST {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    deleteRequest {
+    DELETE_REQUEST {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     },
-    registerWorker {
+    REGISTER_WORKER {
         public Bandwidth getLimit() {
-            return Bandwidth.simple(1, java.time.Duration.ofSeconds(1));
+            return getBandwidth(1);
         }
     };
 
     public abstract Bandwidth getLimit();
+
+    Bandwidth getBandwidth(int seconds) {
+        return Bandwidth.simple(1, java.time.Duration.ofSeconds(seconds));
+    }
 }

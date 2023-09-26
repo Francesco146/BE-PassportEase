@@ -10,6 +10,7 @@ import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoun
 import it.univr.passportease.exception.security.RateLimitException;
 import it.univr.passportease.helper.RequestAnalyzer;
 import it.univr.passportease.helper.ratelimiter.BucketLimiter;
+import it.univr.passportease.helper.ratelimiter.RateLimiter;
 import it.univr.passportease.service.worker.WorkerMutationService;
 import lombok.AllArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -26,7 +27,7 @@ public class WorkerMutationController {
     @MutationMapping
     public Request createRequest(@Argument("request") RequestInput requestInput)
             throws AuthenticationCredentialsNotFoundException, WorkerNotFoundException, InvalidRequestTypeException, OfficeOverloadedException, RateLimitException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.CREATE_REQUEST);
         if (bucket.tryConsume(1))
             return workerMutationService.createRequest(requestAnalyzer.getTokenFromRequest(), requestInput);
         else throw new RateLimitException("Too many createRequest attempts");
@@ -34,7 +35,7 @@ public class WorkerMutationController {
 
     @MutationMapping
     public Request modifyRequest(@Argument("requestID") String requestID, @Argument("request") RequestInput requestInput) {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.MODIFY_REQUEST);
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many modifyRequest attempts");
 
@@ -43,7 +44,7 @@ public class WorkerMutationController {
 
     @MutationMapping
     public void deleteRequest(@Argument("requestID") String requestID) {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.DELETE_REQUEST);
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many deleteRequest attempts");
 
