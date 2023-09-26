@@ -16,6 +16,8 @@ import it.univr.passportease.repository.*;
 import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.worker.WorkerMutationService;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +25,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+import static java.util.stream.Stream.iterate;
+
 @Service
+@Log4j2
 @AllArgsConstructor
 public class WorkerMutationServiceImpl implements WorkerMutationService {
     private final JwtService jwtService;
@@ -42,27 +47,41 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     private final MapRequestOffice mapRequestOffice;
     private final MapAvailability mapAvailability;
 
+    @NotNull
+    private static Notification getNotification(Request request, Availability availability) {
+        Notification notification = new Notification();
+        notification.setIsReady(true);
+        notification.setMessage("La tua richiesta è stata cancellata");
+        notification.setStartDate(new Date());
+        notification.setEndDate(new Date());
+        notification.setOffice(availability.getOffice());
+        notification.setUser(availability.getUser());
+        notification.setRequestType(request.getRequestType());
+        notification.setCreatedAt(new Date());
+        notification.setUpdatedAt(new Date());
+        return notification;
+    }
+
     @Override
     @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
     public Request createRequest(String token, RequestInput requestInput)
             throws WorkerNotFoundException, InvalidRequestTypeException, OfficeOverloadedException {
         // get worker from db
-        UUID workerId = jwtService.extractId(token);
-        Optional<Worker> worker = workerRepository.findById(workerId);
-        if (worker.isEmpty())
-            throw new WorkerNotFoundException("Worker not found");
+        Worker worker = workerRepository.findById(jwtService.extractId(token)).orElseThrow(() ->
+                new WorkerNotFoundException("Worker not found")
+        );
 
         String requestTypeName = requestInput.getRequestType();
         List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
         Date startDate = requestInput.getStartDate();
         Date endDate = requestInput.getEndDate();
 
-        if (!isWorkersEnoughForRequest(requestInput, offices))
+        if (isWorkersNotEnoughForRequest(requestInput, offices))
             throw new OfficeOverloadedException("Office doesn't have enough workers");
 
         RequestType requestType = getOrCreateRequestType(requestTypeName);
 
-        Request request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker.get());
+        Request request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker);
         request = requestRepository.save(request);
         for (Office office : offices) {
             RequestOffice requestOffice = mapRequestOffice.mapRequestAndOfficeToRequestOffice(request, office);
@@ -90,7 +109,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         return requestType.get();
     }
 
-    private Boolean isWorkersEnoughForRequest(RequestInput requestInput, List<Office> offices)
+    private boolean isWorkersNotEnoughForRequest(RequestInput requestInput, List<Office> offices)
             throws OfficeOverloadedException {
         Date startDate = requestInput.getStartDate();
         Date endDate = requestInput.getEndDate();
@@ -99,29 +118,33 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
 
         for (Office office : offices) {
             long totalNumberOfWorker = workerRepository.countByOffice(office);
-            System.out.println("totalNumberOfWorker: " + totalNumberOfWorker);
-            long busyWorkers = 0;
-            List<Request> requests = requestRepository.getOfficeRequests(
-                    office.getId(),
-                    startDate,
-                    endDate);
+            long busyWorkers = countBusyWorkersInOffice(office, startDate, endDate, requestStartTime, requestEndTime);
 
-            for (Request request : requests) {
-                if (isRequestDateInsideNotificationDate(startDate, endDate, request.getStartDate(),
-                        request.getEndDate())) {
-                    LocalTime startTime = request.getStartTime();
-                    LocalTime endTime = request.getEndTime();
-                    if (isTimeInsideTime(requestStartTime, requestEndTime, startTime, endTime))
-                        busyWorkers++;
-                }
-            }
-            System.out.println("busyWorkers: " + busyWorkers);
+            log.info("totalNumberOfWorker: " + totalNumberOfWorker);
+            log.info("busyWorkers: " + busyWorkers);
+
             if (busyWorkers >= totalNumberOfWorker) {
-                System.out.println("Office " + office.getName() + " doesn't have enough workers");
-                return false;
+                log.info("Office " + office.getName() + " doesn't have enough workers");
+                return true;
             }
         }
-        return true;
+        return false;
+    }
+
+    private long countBusyWorkersInOffice(Office office, Date startDate, Date endDate, LocalTime requestStartTime, LocalTime requestEndTime) {
+        long busyWorkers = 0;
+        List<Request> requests = requestRepository.getOfficeRequests(office.getId(), startDate, endDate);
+
+        for (Request request : requests)
+            if (isRequestDateInsideNotificationDate(startDate, endDate, request.getStartDate(), request.getEndDate())) {
+                LocalTime startTime = request.getStartTime();
+                LocalTime endTime = request.getEndTime();
+                if (isTimeInsideTime(requestStartTime, requestEndTime, startTime, endTime))
+                    busyWorkers++;
+            }
+
+        log.info("Office " + office.getName() + " - busyWorkers: " + busyWorkers);
+        return busyWorkers;
     }
 
     private void setNotifications(Date startDate, Date endDate, List<Office> offices, RequestType requestType) {
@@ -149,44 +172,48 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         long duration = request.getDuration();
 
         List<OfficeWorkingDay> officeWorkingDays = new ArrayList<>();
-        for (Office office : offices) {
-            officeWorkingDays.addAll(officeWorkingDayRepository.findByOffice(office));
-        }
+        for (Office office : offices) officeWorkingDays.addAll(officeWorkingDayRepository.findByOffice(office));
 
         for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
-            String dayOfWeek = date.getDayOfWeek().toString();
-            Day day = Day.valueOf(dayOfWeek);
-            for (OfficeWorkingDay officeWorkingDay : officeWorkingDays) {
-                if (officeWorkingDay.getDay().equals(day)) {
-                    LocalTime officeStartTime1 = officeWorkingDay.getStartTime1();
-                    LocalTime officeEndTime1 = officeWorkingDay.getEndTime1();
-
-                    LocalTime startTime = getHigherTime(officeStartTime1, requestStartTime);
-                    LocalTime endTime = getLowerTime(officeEndTime1, requestEndTime);
-
-                    for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
-                        Availability availability = mapAvailability.mapRequestToAvailability(request,
-                                officeWorkingDay.getOffice(), date, time);
-                        availabilityRepository.save(availability);
-                    }
-
-                    LocalTime officeStartTime2 = officeWorkingDay.getStartTime2();
-                    LocalTime officeEndTime2 = officeWorkingDay.getEndTime2();
-                    if (officeStartTime2 != null && officeEndTime2 != null) {
-                        startTime = getHigherTime(officeStartTime2, requestStartTime);
-                        endTime = getLowerTime(officeEndTime2, requestEndTime);
-
-                        for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
-                            Availability availability = mapAvailability.mapRequestToAvailability(request,
-                                    officeWorkingDay.getOffice(), date, time);
-                            availabilityRepository.save(availability);
-                        }
-                    }
-                }
-            }
+            Day day = Day.valueOf(date.getDayOfWeek().toString());
+            processOfficeWorkingDays(day, officeWorkingDays, date, requestStartTime, requestEndTime, duration, request);
         }
-
     }
+
+    private void processOfficeWorkingDays(Day day, List<OfficeWorkingDay> officeWorkingDays, LocalDate date,
+                                          LocalTime requestStartTime, LocalTime requestEndTime, long duration, Request request) {
+        officeWorkingDays.stream().
+                filter(officeWorkingDay ->
+                        officeWorkingDay.getDay().equals(day))
+                .forEach(officeWorkingDay ->
+                        processOfficeWorkingDay(officeWorkingDay, date, requestStartTime, requestEndTime, duration, request)
+                );
+    }
+
+    private void processOfficeWorkingDay(OfficeWorkingDay officeWorkingDay, LocalDate date,
+                                         LocalTime requestStartTime, LocalTime requestEndTime, long duration, Request request) {
+
+        processOfficeWorkingDayTimeSlot(officeWorkingDay.getStartTime1(), officeWorkingDay.getEndTime1(),
+                date, requestStartTime, requestEndTime, duration, request, officeWorkingDay.getOffice()
+        );
+
+        if (officeWorkingDay.getStartTime2() != null && officeWorkingDay.getEndTime2() != null)
+            processOfficeWorkingDayTimeSlot(officeWorkingDay.getStartTime2(), officeWorkingDay.getEndTime2(),
+                    date, requestStartTime, requestEndTime, duration, request, officeWorkingDay.getOffice());
+    }
+
+    private void processOfficeWorkingDayTimeSlot(LocalTime officeStartTime, LocalTime officeEndTime, LocalDate date,
+                                                 LocalTime requestStartTime, LocalTime requestEndTime, long duration,
+                                                 Request request, Office office) {
+        LocalTime startTime = getHigherTime(officeStartTime, requestStartTime);
+        LocalTime endTime = getLowerTime(officeEndTime, requestEndTime);
+
+        iterate(startTime, time -> time.isBefore(endTime), time -> time.plusMinutes(duration))
+                .map(time ->
+                        mapAvailability.mapRequestToAvailability(request, office, date, time))
+                .forEach(availabilityRepository::save);
+    }
+
 
     private LocalTime getHigherTime(LocalTime time1, LocalTime time2) {
         return time1.isAfter(time2) ? time1 : time2;
@@ -197,21 +224,20 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     private boolean isRequestDateInsideNotificationDate(Date requestStartDate, Date requestEndDate,
-            Date notificationStartDate, Date notificationEndDate) {
+                                                        Date notificationStartDate, Date notificationEndDate) {
+
         boolean isRequestStartDateAfterNotificationStartDate = requestStartDate.after(notificationStartDate);
         boolean isRequestStartDateEqualsNotificationStartDate = requestStartDate.equals(notificationStartDate);
         boolean isRequestEndDateBeforeNotificationEndDate = requestEndDate.before(notificationEndDate);
         boolean isRequestEndDateEqualsNotificationEndDate = requestEndDate.equals(notificationEndDate);
-        boolean isRequestStartDateBeforeNotificationEndDate = requestStartDate.before(notificationEndDate);
-        boolean isRequestEndDateAfterNotificationEndDate = requestEndDate.after(notificationEndDate);
-        boolean isRequestStartDateBeforeNotificationStartDate = requestStartDate.before(notificationStartDate);
-        boolean isRequestEndDateAfterNotificationStartDate = requestEndDate.after(notificationStartDate);
 
         // 1. requestDates are between notificationStartDate and notificationEndDate
         if ((isRequestStartDateAfterNotificationStartDate || isRequestStartDateEqualsNotificationStartDate) &&
                 (isRequestEndDateBeforeNotificationEndDate || isRequestEndDateEqualsNotificationEndDate))
             return true;
 
+        boolean isRequestStartDateBeforeNotificationEndDate = requestStartDate.before(notificationEndDate);
+        boolean isRequestEndDateAfterNotificationEndDate = requestEndDate.after(notificationEndDate);
         // 2. requestStartDate is after notificationStartDate but before
         // notificationEndDate and requestEndDate is after notificationEndDate
         if (isRequestStartDateAfterNotificationStartDate &&
@@ -219,27 +245,28 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
                 isRequestEndDateAfterNotificationEndDate)
             return true;
 
+        boolean isRequestStartDateBeforeNotificationStartDate = requestStartDate.before(notificationStartDate);
+        boolean isRequestEndDateAfterNotificationStartDate = requestEndDate.after(notificationStartDate);
         // 3. requestStartDate is before notificationStartDate and requestEndDate is
         // after notificationStartDate
         return isRequestStartDateBeforeNotificationStartDate && isRequestEndDateAfterNotificationStartDate;
     }
 
     private boolean isTimeInsideTime(LocalTime requestStartTime, LocalTime requestEndTime, LocalTime startTime,
-            LocalTime endTime) {
+                                     LocalTime endTime) {
+
         boolean isRequestStartTimeAfterStartTime = requestStartTime.isAfter(startTime);
         boolean isRequestStartTimeEqualsStartTime = requestStartTime.equals(startTime);
         boolean isRequestEndTimeBeforeEndTime = requestEndTime.isBefore(endTime);
         boolean isRequestEndTimeEqualsEndTime = requestEndTime.equals(endTime);
-        boolean isRequestStartTimeBeforeEndTime = requestStartTime.isBefore(endTime);
-        boolean isRequestEndTimeAfterEndTime = requestEndTime.isAfter(endTime);
-        boolean isRequestStartTimeBeforeStartTime = requestStartTime.isBefore(startTime);
-        boolean isRequestEndTimeAfterStartTime = requestEndTime.isAfter(startTime);
 
         // 1. requestTimes are between startTime and endTime
         if ((isRequestStartTimeAfterStartTime || isRequestStartTimeEqualsStartTime) &&
                 (isRequestEndTimeBeforeEndTime || isRequestEndTimeEqualsEndTime))
             return true;
 
+        boolean isRequestStartTimeBeforeEndTime = requestStartTime.isBefore(endTime);
+        boolean isRequestEndTimeAfterEndTime = requestEndTime.isAfter(endTime);
         // 2. requestStartTime is after startTime but before endTime and requestEndTime
         // is after endTime
         if (isRequestStartTimeAfterStartTime &&
@@ -247,6 +274,8 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
                 isRequestEndTimeAfterEndTime)
             return true;
 
+        boolean isRequestStartTimeBeforeStartTime = requestStartTime.isBefore(startTime);
+        boolean isRequestEndTimeAfterStartTime = requestEndTime.isAfter(startTime);
         // 3. requestStartTime is before startTime and requestEndTime is after startTime
         return isRequestStartTimeBeforeStartTime && isRequestEndTimeAfterStartTime;
     }
@@ -254,19 +283,17 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     @Override
     public Request modifyRequest(String token, String requestID, RequestInput requestInput) {
         // get worker from db
-        UUID workerId = jwtService.extractId(token);
-        Optional<Worker> worker = workerRepository.findById(workerId);
-        if (worker.isEmpty())
-            throw new WorkerNotFoundException("Worker not found");
+        Worker worker = workerRepository.findById(jwtService.extractId(token)).orElseThrow(() ->
+                new WorkerNotFoundException("Worker not found")
+        );
 
-        Optional<Request> _request = requestRepository.findById(UUID.fromString(requestID));
-        if (_request.isEmpty())
-            throw new RequestNotFoundException("Request not found");
+        Request request = requestRepository.findById(UUID.fromString(requestID)).orElseThrow(() ->
+                new RequestNotFoundException("Request not found")
+        );
 
-        Request request = _request.get();
         List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
 
-        if(!isWorkersEnoughForRequest(requestInput, offices))
+        if (isWorkersNotEnoughForRequest(requestInput, offices))
             throw new OfficeOverloadedException("Office doesn't have enough workers");
 
         // delete and ricreate availabilities
@@ -275,7 +302,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         // update request
         String requestTypeName = requestInput.getRequestType();
         RequestType requestType = getOrCreateRequestType(requestTypeName);
-        request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker.get());
+        request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker);
         request = requestRepository.save(request);
 
         // create new availabilities
@@ -287,16 +314,15 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     @Override
     public void deleteRequest(String token, String requestID) {
         // get worker from db
-        UUID workerId = jwtService.extractId(token);
-        Optional<Worker> worker = workerRepository.findById(workerId);
+
+        Optional<Worker> worker = workerRepository.findById(jwtService.extractId(token));
         if (worker.isEmpty())
             throw new WorkerNotFoundException("Worker not found");
 
-        Optional<Request> _request = requestRepository.findById(UUID.fromString(requestID));
-        if (_request.isEmpty())
-            throw new RequestNotFoundException("Request not found");
+        Request request = requestRepository.findById(UUID.fromString(requestID)).orElseThrow(() ->
+                new RequestNotFoundException("Request not found")
+        );
 
-        Request request = _request.get();
 
         deleteAvailabilities(request);
 
@@ -307,29 +333,18 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     private void deleteAvailabilities(Request request) {
         // delete and ricreate availabilities
         List<Availability> availabilities = availabilityRepository.findByRequestId(request.getId());
-        for (Availability availability : availabilities) {
-            if (availability.getUser() != null) {
-                // create user notification
-                Notification notification = new Notification();
-                notification.setIsReady(true);
-                notification.setMessage("La tua richiesta è stata cancellata");
-                notification.setStartDate(new Date());
-                notification.setEndDate(new Date());
-                notification.setOffice(availability.getOffice());
-                notification.setUser(availability.getUser());
-                notification.setRequestType(request.getRequestType());
-                notification.setCreatedAt(new Date());
-                notification.setUpdatedAt(new Date());
-                notificationRepository.save(notification);
-            }
-            if (!availability.getStatus().equals(Status.TIMEDOUT))
-                availabilityRepository.delete(availability);
-        }
+
+        availabilities.forEach(availability -> {
+                    // create user notification
+                    if (availability.getUser() != null)
+                        notificationRepository.save(getNotification(request, availability));
+                    if (!availability.getStatus().equals(Status.TIMEDOUT))
+                        availabilityRepository.delete(availability);
+                }
+        );
 
         // delete requestOffice
         List<RequestOffice> requestOffices = requestOfficeRepository.findByRequestId(request.getId());
-        for (RequestOffice requestOffice : requestOffices) {
-            requestOfficeRepository.delete(requestOffice);
-        }
+        requestOfficeRepository.deleteAll(requestOffices);
     }
 }
