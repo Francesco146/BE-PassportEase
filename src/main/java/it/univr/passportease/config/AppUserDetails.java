@@ -16,7 +16,7 @@ public class AppUserDetails implements UserDetails {
     public AppUserDetails(UUID id, String hashPassword, List<GrantedAuthority> authorities) {
         name = id.toString();
         password = hashPassword;
-        this.authorities = authorities;
+        this.authorities = List.copyOf(authorities);
     }
 
     @Override

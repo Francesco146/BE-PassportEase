@@ -93,7 +93,7 @@ class UserAuthControllerTest {
 
 
         Assertions.assertNotNull(response);
-        response.errors().verify();
+        Assertions.assertDoesNotThrow(response.errors()::verify);
 
         System.out.println("[!] Logout output: \n" + logoutJson() + "\n");
 

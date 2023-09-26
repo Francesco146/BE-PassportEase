@@ -25,7 +25,7 @@ public class UserMutationServiceImpl implements UserMutationService {
     private final RequestTypeRepository requestTypeRepository;
     private final AvailabilityRepository availabilityRepository;
     private final UserRepository userRepository;
-    
+
     private final MapNotification mapNotification;
 
     @Override
@@ -87,7 +87,7 @@ public class UserMutationServiceImpl implements UserMutationService {
 
         Optional<Availability> availabilityOptional = availabilityRepository.findById(availabilityId);
 
-        if (userRepository.findById(user.getId()).isEmpty()) throw new UserNotFoundException("User not found");
+        if (userRepository.existsById(user.getId())) throw new UserNotFoundException("User not found");
         if (availabilityOptional.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
 
         Availability availability = availabilityOptional.get();
