@@ -8,6 +8,7 @@ import it.univr.passportease.exception.notfound.WorkerNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
 import it.univr.passportease.exception.security.WrongPasswordException;
 import it.univr.passportease.helper.ratelimiter.BucketLimiter;
+import it.univr.passportease.helper.ratelimiter.RateLimiter;
 import it.univr.passportease.service.worker.WorkerAuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -23,7 +24,7 @@ public class WorkerAuthController {
     @MutationMapping
     public LoginOutput loginWorker(@Argument("username") String username, @Argument("password") String password)
             throws WorkerNotFoundException, WrongPasswordException, RateLimitException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.LOGIN_WORKER);
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many login attempts");
 
@@ -33,7 +34,7 @@ public class WorkerAuthController {
     @MutationMapping
     public LoginOutput registerWorker(@Argument("workerInput") WorkerInput workerInput)
             throws RateLimitException, OfficeNotFoundException {
-        Bucket bucket = bucketLimiter.resolveBucket(bucketLimiter.getMethodName());
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.REGISTER_WORKER);
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many register attempts");
 

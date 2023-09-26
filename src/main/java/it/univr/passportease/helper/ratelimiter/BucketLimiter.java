@@ -10,17 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BucketLimiter {
     private final Map<String, Bucket> bucketCache = new ConcurrentHashMap<>();
 
-    public Bucket resolveBucket(String methodName) {
-        return bucketCache.computeIfAbsent(methodName, k -> Bucket.builder()
+    public Bucket resolveBucket(RateLimiter methodName) {
+        return bucketCache.computeIfAbsent(methodName.name(), k -> Bucket.builder()
                 .addLimit(RateLimiter.valueOf(k).getLimit())
                 .build());
-    }
-
-    public String getMethodName() {
-        // return the name of the method that called this method
-        return Thread
-                .currentThread()
-                .getStackTrace()[2]
-                .getMethodName();
     }
 }
