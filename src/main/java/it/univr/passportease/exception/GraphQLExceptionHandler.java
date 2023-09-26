@@ -7,10 +7,7 @@ import it.univr.passportease.exception.illegalstate.OfficeOverloadedException;
 import it.univr.passportease.exception.illegalstate.UserAlreadyExistsException;
 import it.univr.passportease.exception.invalid.*;
 import it.univr.passportease.exception.notfound.*;
-import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
-import it.univr.passportease.exception.security.TokenNotInRedisException;
-import it.univr.passportease.exception.security.WrongPasswordException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
@@ -18,174 +15,83 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter {
+    private static GraphQLError notFoundError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
+        return GraphqlErrorBuilder.newError()
+                .errorType(ErrorType.NOT_FOUND)
+                .message(exception.getMessage())
+                .path(environment.getExecutionStepInfo().getPath())
+                .location(environment.getField().getSourceLocation())
+                .build();
+    }
+
+    private static GraphQLError unauthorizedError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
+        return GraphqlErrorBuilder.newError()
+                .errorType(ErrorType.UNAUTHORIZED)
+                .message(exception.getMessage())
+                .path(environment.getExecutionStepInfo().getPath())
+                .location(environment.getField().getSourceLocation())
+                .build();
+    }
+
+    private static GraphQLError badRequestError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
+        return GraphqlErrorBuilder.newError()
+                .errorType(ErrorType.BAD_REQUEST)
+                .message(exception.getMessage())
+                .path(environment.getExecutionStepInfo().getPath())
+                .location(environment.getField().getSourceLocation())
+                .build();
+    }
+
+    private static GraphQLError forbiddenError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
+        return GraphqlErrorBuilder.newError()
+                .errorType(ErrorType.FORBIDDEN)
+                .message(exception.getMessage())
+                .path(environment.getExecutionStepInfo().getPath())
+                .location(environment.getField().getSourceLocation())
+                .build();
+    }
+
+    private boolean isNotFound(@NotNull Throwable exception) {
+        return exception instanceof OfficeNotFoundException ||
+                exception instanceof UserNotFoundException ||
+                exception instanceof WorkerNotFoundException ||
+                exception instanceof UserOrWorkerIDNotFoundException ||
+                exception instanceof NotificationNotFoundException ||
+                exception instanceof RequestTypeNotFoundException ||
+                exception instanceof AvailabilityNotFoundException ||
+                exception instanceof RequestNotFoundException;
+    }
+
+    private boolean isBadRequest(@NotNull Throwable exception) {
+        return exception instanceof InvalidAvailabilityIDException ||
+                exception instanceof InvalidEmailException ||
+                exception instanceof InvalidRequestTypeException ||
+                exception instanceof InvalidWorkerActionException ||
+                exception instanceof OfficeOverloadedException ||
+                exception instanceof UserAlreadyExistsException ||
+                exception instanceof InvalidDataFromRequestException;
+    }
+
+    private boolean isUnauthorized(@NotNull Throwable exception) {
+        return exception instanceof InvalidRefreshTokenException ||
+                exception instanceof SecurityException;
+    }
+
+    private boolean isForbidden(@NotNull Throwable exception) {
+        return exception instanceof RateLimitException;
+    }
+
     @Override
     protected GraphQLError resolveToSingleError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
-        if (exception instanceof RateLimitException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.FORBIDDEN)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof WrongPasswordException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.UNAUTHORIZED)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof TokenNotInRedisException) {
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.UNAUTHORIZED)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-        }
-        if (exception instanceof AuthenticationCredentialsNotFoundException) {
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.UNAUTHORIZED)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-        }
-        if (exception instanceof InvalidAvailabilityIDException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.BAD_REQUEST)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof InvalidEmailException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.BAD_REQUEST)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof InvalidRequestTypeException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.BAD_REQUEST)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof InvalidWorkerActionException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.BAD_REQUEST)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof OfficeNotFoundException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.NOT_FOUND)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof OfficeOverloadedException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.BAD_REQUEST)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof UserAlreadyExistsException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.BAD_REQUEST)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof UserNotFoundException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.NOT_FOUND)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof WorkerNotFoundException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.NOT_FOUND)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof InvalidRefreshTokenException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.UNAUTHORIZED)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof UserOrWorkerIDNotFoundException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.NOT_FOUND)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof NotificationNotFoundException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.NOT_FOUND)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof RequestTypeNotFoundException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.NOT_FOUND)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof AvailabilityNotFoundException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.NOT_FOUND)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof SecurityException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.UNAUTHORIZED)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .location(environment.getField().getSourceLocation())
-                    .build();
-
-        if (exception instanceof InvalidDataFromRequestException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.BAD_REQUEST)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .build();
-
-        if (exception instanceof RequestNotFoundException)
-            return GraphqlErrorBuilder.newError()
-                    .errorType(ErrorType.NOT_FOUND)
-                    .message(exception.getMessage())
-                    .path(environment.getExecutionStepInfo().getPath())
-                    .build();
-
-        return super.resolveToSingleError(exception, environment);
+        if (isForbidden(exception))
+            return forbiddenError(exception, environment);
+        else if (isUnauthorized(exception))
+            return unauthorizedError(exception, environment);
+        else if (isBadRequest(exception))
+            return badRequestError(exception, environment);
+        else if (isNotFound(exception))
+            return notFoundError(exception, environment);
+        else
+            return super.resolveToSingleError(exception, environment);
     }
 }
