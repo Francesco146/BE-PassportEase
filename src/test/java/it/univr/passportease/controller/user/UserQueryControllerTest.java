@@ -53,7 +53,7 @@ class UserQueryControllerTest {
 
         Assertions.assertNotNull(response);
 
-        response.errors().verify();
+        Assertions.assertDoesNotThrow(response.errors()::verify);
 
         List<RequestType> requestType = response.path("data.getRequestTypesByUser").entityList(RequestType.class).get();
 

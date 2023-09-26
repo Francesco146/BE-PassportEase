@@ -37,10 +37,19 @@ public class Category {
         if (this == o) return true;
         if (o == null) return false;
 
-        Class<?> oEffectiveClass = o instanceof HibernateProxy oInstance ?
-                oInstance.getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy thisInstance ?
-                thisInstance.getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        Class<?> oEffectiveClass;
+        Class<?> thisEffectiveClass;
+
+        if (o instanceof HibernateProxy oInstance)
+            oEffectiveClass = oInstance.getHibernateLazyInitializer().getPersistentClass();
+        else
+            oEffectiveClass = o.getClass();
+
+        if (this instanceof HibernateProxy thisInstance)
+            thisEffectiveClass = thisInstance.getHibernateLazyInitializer().getPersistentClass();
+        else
+            thisEffectiveClass = this.getClass();
+
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof Category category)
@@ -50,6 +59,8 @@ public class Category {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy hibernateProxy ? hibernateProxy.getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+        if (this instanceof HibernateProxy hibernateProxy)
+            return hibernateProxy.getHibernateLazyInitializer().getPersistentClass().hashCode();
+        return getClass().hashCode();
     }
 }
