@@ -48,7 +48,7 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException {
-        dataValidation(availabilityFilters);
+        filtersValidation(availabilityFilters);
 
         return availabilityRepository.findAll(Specification.where(availabilityFilters));
     }
@@ -56,12 +56,12 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException {
-        dataValidation(availabilityFilters);
+        filtersValidation(availabilityFilters);
 
         return availabilityRepository.findAll(Specification.where(availabilityFilters), PageRequest.of(page, size)).getContent();
     }
 
-    private void dataValidation(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException {
+    private void filtersValidation(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException {
         Date startDate = availabilityFilters.getStartDate();
         Date endDate = availabilityFilters.getEndDate();
         LocalTime startTime = availabilityFilters.getStartTime();
@@ -74,14 +74,30 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
             throw new InvalidDataFromRequestException("Start time must be before end time");
 
         if (availabilityFilters.getOfficesName() != null && !availabilityFilters.getOfficesName().isEmpty())
-            for (String officeName : availabilityFilters.getOfficesName())
-                if (!officeRepository.existsByName(officeName))
-                    throw new InvalidDataFromRequestException("Office " + officeName + " doesn't exist");
+            validateOffices(availabilityFilters);
 
         if (availabilityFilters.getRequestTypes() != null && !availabilityFilters.getRequestTypes().isEmpty())
-            for (String requestType : availabilityFilters.getRequestTypes())
-                if (!requestTypeRepository.existsByName(requestType))
-                    throw new InvalidDataFromRequestException("Request type " + requestType + " doesn't exist");
+            validateRequestTypes(availabilityFilters);
+    }
+
+    private void validateRequestTypes(AvailabilityFilters availabilityFilters) {
+        availabilityFilters.getRequestTypes().stream()
+                .filter(requestType ->
+                        !requestTypeRepository.existsByName(requestType))
+                .forEach(requestType -> {
+                            throw new InvalidDataFromRequestException("Request type " + requestType + " doesn't exist");
+                        }
+                );
+    }
+
+    private void validateOffices(AvailabilityFilters availabilityFilters) {
+        availabilityFilters.getOfficesName().stream()
+                .filter(officeName ->
+                        !officeRepository.existsByName(officeName))
+                .forEach(officeName -> {
+                            throw new InvalidDataFromRequestException("Office " + officeName + " doesn't exist");
+                        }
+                );
     }
 
 
