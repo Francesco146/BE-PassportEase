@@ -10,17 +10,14 @@ import org.springframework.stereotype.Service;
 public class RequestAnalyzer {
     private final HttpServletRequest request;
 
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
     @Autowired
-    RequestAnalyzer(JwtService jwtService) {
+    RequestAnalyzer(JwtService jwtService, HttpServletRequest request) {
         this.jwtService = jwtService;
-        this.request = null;
-    }
-
-    public RequestAnalyzer(HttpServletRequest request) {
         this.request = request;
     }
+
 
     public String getTokenFromRequest() throws AuthenticationCredentialsNotFoundException {
         String authorizationHeader = request.getHeader("Authorization");
