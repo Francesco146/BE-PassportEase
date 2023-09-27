@@ -36,4 +36,4 @@ WORKDIR /usr/src/passportease
 COPY --from=builder /build/target/*.jar ./passportease.jar
 
 # Run the web service on container startup.
-ENTRYPOINT ["native-image","-jar","./passportease.jar"]
+ENTRYPOINT ["java","-jar","./passportease.jar"]
