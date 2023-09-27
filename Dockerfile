@@ -1,5 +1,11 @@
-FROM maven:3-amazoncorretto-21-debian AS builder
+FROM vegardit/graalvm-maven:21.0.0 AS builder
 WORKDIR /build/
+
+# Log the version of GraalVM, Maven and Java
+RUN echo "Java Version:" && echo $(java -version)
+RUN echo "GraalVM Version:" && echo $(native-image --version)
+RUN echo "Maven Version:" && echo $(mvn -version)
+
 
 # Download dependencies first - Docker Layer Caching
 COPY pom.xml .
@@ -12,13 +18,16 @@ COPY src ./src/
 RUN --mount=type=cache,target=/root/.m2/repository mvn clean package -Pnative -DskipTests
 
 # Run the JAR file stage
-FROM amazoncorretto:21.0.0-alpine3.18 AS production
+FROM ghcr.io/graalvm/native-image-community:21.0.0 AS production
 
-# Install curl
-RUN  apk add curl
+RUN echo "Java Version:" && echo $(java -version)
+RUN echo "GraalVM Version:" && echo $(native-image --version)
+
+# Install curl with rpm
+RUN microdnf install curl
 
 # Add a spring user to run our application so that it doesn't need to run as root
-RUN addgroup --system spring && adduser --system spring --ingroup spring
+RUN groupadd spring && adduser -g spring spring
 USER spring:spring
 
 WORKDIR /usr/src/passportease
@@ -27,4 +36,4 @@ WORKDIR /usr/src/passportease
 COPY --from=builder /build/target/*.jar ./passportease.jar
 
 # Run the web service on container startup.
-ENTRYPOINT ["java","-jar","./passportease.jar"]
+ENTRYPOINT ["native-image","-jar","./passportease.jar"]
