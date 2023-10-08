@@ -2,7 +2,6 @@ package it.univr.passportease.service.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import it.univr.passportease.entity.User;
@@ -18,7 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.*;
 import java.util.function.Function;
 
@@ -49,12 +48,11 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignKey())
+        return Jwts.parser()
+                .verifyWith(getSignKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public Boolean isTokenExpired(String token) {
@@ -93,16 +91,21 @@ public class JwtService {
 
     private String createAccessToken(Map<String, Object> claims, UUID id) throws UserOrWorkerIDNotFoundException {
         claims.put("role", getRoleById(id));
+        claims.put("typ", "JWT");
+
+        Date now = new Date(System.currentTimeMillis());
+        Date exp15Minutes = new Date(System.currentTimeMillis() + 1000 * 60 * 15);
 
         String accessToken = Jwts.builder()
-                .setHeaderParam("typ", "JWT")
-                .setClaims(claims)
-                .setSubject(id.toString())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
-                .setNotBefore(new Date(System.currentTimeMillis()))
-                .setId(UUID.randomUUID().toString())
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+                .signWith(getSignKey())
+                .claims().add(claims)
+                .subject(id.toString())
+                .issuedAt(now)
+                .expiration(exp15Minutes)
+                .notBefore(now)
+                .id(UUID.randomUUID().toString())
+                .and().compact();
+
 
         saveTokenInRedis(id, accessToken);
         return accessToken;
@@ -122,13 +125,31 @@ public class JwtService {
         long expMillisFor30Days = nowMillis + 1000L * 60 * 60 * 24 * 30; // 30 days
         Date fromNow30Days = new Date(expMillisFor30Days);
 
-        return Jwts.builder()
-                .setHeaderParam("typ", "JWT")
-                .setIssuedAt(now)
-                .setExpiration(fromNow30Days)
-                .setId(UUID.randomUUID().toString())
-                .setSubject(id.toString())
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+        String refreshtoken = Jwts.builder()
+                .signWith(getSignKey())
+                .claims().add("typ", "JWT")
+                .issuedAt(now)
+                .expiration(fromNow30Days)
+                .id(UUID.randomUUID().toString())
+                .subject(id.toString())
+                .and().compact();
+
+        saveRefreshTokenInDB(id, refreshtoken);
+
+        return refreshtoken;
+    }
+
+    private void saveRefreshTokenInDB(UUID id, String refreshtoken) {
+        Optional<User> user = userRepository.findById(id);
+        Optional<Worker> worker = workerRepository.findById(id);
+
+        if (user.isPresent()) {
+            user.get().setRefreshToken(refreshtoken);
+            userRepository.save(user.get());
+        } else if (worker.isPresent()) {
+            worker.get().setRefreshToken(refreshtoken);
+            workerRepository.save(worker.get());
+        }
     }
 
     private String getRoleById(UUID id) throws UserOrWorkerIDNotFoundException {
@@ -141,7 +162,7 @@ public class JwtService {
         }
     }
 
-    private Key getSignKey() {
+    private SecretKey getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
