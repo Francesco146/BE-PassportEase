@@ -11,8 +11,9 @@ public class BucketLimiter {
     private final Map<String, Bucket> bucketCache = new ConcurrentHashMap<>();
 
     public Bucket resolveBucket(RateLimiter methodName) {
-        return bucketCache.computeIfAbsent(methodName.name(), k -> Bucket.builder()
-                .addLimit(RateLimiter.valueOf(k).getLimit())
-                .build());
+        return bucketCache.computeIfAbsent(methodName.name(), call -> Bucket.builder()
+                .addLimit(RateLimiter.valueOf(call).getLimit())
+                .build()
+        );
     }
 }

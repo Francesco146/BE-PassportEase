@@ -132,6 +132,9 @@ public enum RateLimiter {
     public abstract Bandwidth getLimit();
 
     Bandwidth getBandwidth(int seconds) {
-        return Bandwidth.simple(1, java.time.Duration.ofSeconds(seconds));
+        return Bandwidth.builder()
+                .capacity(1)
+                .refillGreedy(1, java.time.Duration.ofSeconds(seconds))
+                .build();
     }
 }
