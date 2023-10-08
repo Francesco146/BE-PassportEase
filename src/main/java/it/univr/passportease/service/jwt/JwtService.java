@@ -48,10 +48,10 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return (Claims) Jwts.parser()
+        return Jwts.parser()
                 .verifyWith(getSignKey())
                 .build()
-                .parse(token)
+                .parseSignedClaims(token)
                 .getPayload();
     }
 
