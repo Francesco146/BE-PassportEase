@@ -52,7 +52,7 @@ public class User {
     private Boolean active;
 
     @NonNull
-    @Column(name = "refresh_token")
+    @Column(name = "refresh_token", length = 1024)
     private String refreshToken;
 
     @Column(name = "created_at")

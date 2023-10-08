@@ -1,13 +1,17 @@
 jwt:
     secret: ${JWT_SECRET}
+
+refreshtoken:
+    secret: ${REFRESH_TOKEN_SECRET}
+
 server:
     error:
         include-message: always
     port: 8080
-
     forward-headers-strategy: framework
     http2:
         enabled: true
+
 spring:
     graphql:
         cors:
@@ -35,6 +39,7 @@ spring:
             repositories:
                 enabled: false
             host: redis
+
 management:
     endpoint:
         health:
