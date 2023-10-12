@@ -11,6 +11,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "citizens")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
