@@ -1,16 +1,20 @@
 package it.univr.passportease.controller.user;
 
-import it.univr.passportease.dto.input.RegisterInput;
 import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
+import it.univr.passportease.entity.Citizen;
 import it.univr.passportease.graphql.GraphQLOperations;
+import it.univr.passportease.repository.CitizenRepository;
+import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import jakarta.transaction.Transactional;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -18,19 +22,23 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 /*
-* TODO
-*  finire registerUser
-*  refreshAccessToken
-* */
+ * TODO
+ *  refreshAccessToken
+ * */
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureGraphQlTester
 @AutoConfigureMockMvc
+@Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserAuthControllerTest {
     @Autowired
     WebApplicationContext context;
@@ -41,11 +49,55 @@ class UserAuthControllerTest {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CitizenRepository citizenRepository;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    @SneakyThrows(ParseException.class)
+    @BeforeAll
+    void createMockUser() {
+        // save user if not exists
+        if (!citizenRepository.existsByFiscalCode("NTLZLD98R52G273R"))
+            citizenRepository.save(new Citizen(
+                            UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"),
+                            "NTLZLD98R52G273R",
+                            "Zelda",
+                            "NotLink",
+                            "Palermo",
+                            new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()),
+                            "1234567890",
+                            new Date(),
+                            new Date()
+                    )
+            );
+
+        System.out.println("\u001B[33m");
+        System.out.println("[!] Mock User Created");
+        System.out.println("\u001B[0m");
+    }
+
+    @AfterAll
+    void deleteMockUser() {
+        userRepository.deleteByFiscalCode("NTLZLD98R52G273R");
+        citizenRepository.deleteByFiscalCode("NTLZLD98R52G273R");
+        Objects.requireNonNull(redisTemplate.getConnectionFactory())
+                .getConnection()
+                .serverCommands()
+                .flushAll();
+
+        System.out.println("\u001B[33m");
+        System.out.println("[!] Mock User Deleted");
+        System.out.println("\u001B[0m");
+    }
+
     @Test
     void loginUser() {
         final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
 
-        String loginUser = GraphQLOperations.loginUser.getGraphQl("BLSCLL96D55E463O", "ciao");
+        String loginUser = GraphQLOperations.loginUser.getGraphQl("NTLZLD98R52G273R", "ciao");
 
         System.out.println("[!] Login query: \n" + loginUser + "\n");
 
@@ -66,7 +118,7 @@ class UserAuthControllerTest {
 
         Assertions.assertNotNull(jwtSet);
 
-        Assertions.assertEquals(UUID.fromString("09933d03-d5af-40de-a915-89c24dabe84f"), loginOutput.id());
+        Assertions.assertEquals(UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"), loginOutput.id());
 
         Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
         Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
@@ -79,7 +131,7 @@ class UserAuthControllerTest {
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void logoutUser() {
-        String token = jwtService.generateAccessToken(UUID.fromString("fce25167-0c05-46f1-bbc4-7b83ef8ab1a9"));
+        String token = jwtService.generateAccessToken(UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"));
 
         System.out.println("[!] Generated token: " + token);
 
@@ -114,18 +166,22 @@ class UserAuthControllerTest {
     void registerUser() {
         final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
 
-        String registerUser = GraphQLOperations.registerUser.getGraphQl("NTLZLD98R52G273R",
+        String registerUser = GraphQLOperations.registerUser.getGraphQl(
+                "NTLZLD98R52G273R",
                 "zeldanotlink@gmail.com",
                 "Zelda",
                 "NotLink",
                 "Palermo",
                 "1998-10-12",
-                "ciao");
+                "ciao"
+        );
+
 
         System.out.println("[!] registerUser query: \n" + registerUser + "\n");
 
         LoginOutput loginOutput = graphQlTester
-                .mutate().build()
+                .mutate()
+                .build()
                 .document(registerUser)
                 .execute()
                 .path("data.registerUser")
@@ -153,7 +209,7 @@ class UserAuthControllerTest {
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void changePassword() {
-        String token = jwtService.generateAccessToken(UUID.fromString("fce25167-0c05-46f1-bbc4-7b83ef8ab1a9"));
+        String token = jwtService.generateAccessToken(UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"));
 
         System.out.println("[!] Generated token: " + token);
 
@@ -186,15 +242,15 @@ class UserAuthControllerTest {
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void changeEmail() {
-        String token = jwtService.generateAccessToken(UUID.fromString("fce25167-0c05-46f1-bbc4-7b83ef8ab1a9"));
+        String token = jwtService.generateAccessToken(UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"));
 
         System.out.println("[!] Generated token: " + token);
 
-        String changeEmail = GraphQLOperations.changeEmail.getGraphQl("gaymommy@gmail.com", "dio@candrtde.porco");
+        String changeEmail = GraphQLOperations.changeEmail.getGraphQl("zeldanotlink@gmail.com", "dio@candrtde.porco");
 
         System.out.println("[!] changeEmail query: \n" + changeEmail + "\n");
 
-       GraphQlTester.Response response = HttpGraphQlTester.builder(
+        GraphQlTester.Response response = HttpGraphQlTester.builder(
                         MockMvcWebTestClient.bindToApplicationContext(context)
                                 .configureClient()
                                 .baseUrl("http://localhost:8080/graphql")
@@ -209,7 +265,9 @@ class UserAuthControllerTest {
         Assertions.assertNotNull(response);
         Assertions.assertDoesNotThrow(response.errors()::verify);
 
-        String newEmail = response.path("data.changeEmail").entity(String.class).get();
+        String newEmail = response.path("data.changeEmail")
+                .entity(String.class)
+                .get();
 
         System.out.println("[!] changeEmail output: \n" + changeEmailJson(newEmail) + "\n");
 
