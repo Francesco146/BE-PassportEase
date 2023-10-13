@@ -1,0 +1,29 @@
+services:
+    postgres_test:
+        image: 'postgres:15.4'
+        hostname: postgres
+        restart: unless-stopped
+        volumes:
+            - ./testing.sql:/docker-entrypoint-initdb.d/testing.sql
+        env_file:
+            - test.env
+        healthcheck:
+            test: [ "CMD-SHELL", "sh -c 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}'" ]
+            interval: 2s
+            timeout: 2s
+            retries: 5
+            start_period: 2s
+        ports:
+            - "5432:5432"
+
+    redis_test:
+        image: 'redis:6.2.13'
+        hostname: redis
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 3s
+            timeout: 3s
+            retries: 30
+        ports:
+            - "6379:6379"

@@ -2,8 +2,6 @@ services:
     traefik:
         image: traefik:v2.10.4
         hostname: traefik
-        profiles:
-            - prod
         depends_on:
             frontend:
                 condition: service_healthy
@@ -35,8 +33,6 @@ services:
 
     backend:
         hostname: backend
-        profiles:
-            - prod
         build:
             context: .
             dockerfile: Dockerfile
@@ -47,14 +43,8 @@ services:
                 condition: service_healthy
             redis:
                 condition: service_healthy
-        environment:
-            - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/mydatabase'
-            - 'SPRING_DATASOURCE_USERNAME=myuser'
-            - 'SPRING_DATASOURCE_PASSWORD=secret'
-            - 'SPRING_REDIS_HOST=redis'
-            - 'SPRING_REDIS_PORT=6379'
-            - 'SPRING_JPA_HIBERNATE_DDL-AUTO=update'
-            - 'SPRING_JPA_OPEN-IN-VIEW=false'
+        env_file:
+            - prod.env
         healthcheck:
             test: curl --fail --silent localhost:8080/actuator/health | grep UP || exit 1
             interval: 10s
@@ -75,53 +65,27 @@ services:
             -   type: bind
                 source: ./logs
                 target: /usr/src/passportease/logs
+
     postgres:
         image: 'postgres:15.4'
         hostname: postgres
         restart: unless-stopped
-        profiles:
-            - prod
-        environment:
-            - 'POSTGRES_DB=mydatabase'
-            - 'POSTGRES_PASSWORD=secret'
-            - 'POSTGRES_USER=myuser'
+        env_file:
+            - prod.env
         volumes:
             - postgres-data:/var/lib/postgresql/data
         healthcheck:
-            test: [ "CMD-SHELL", "sh -c 'pg_isready -U myuser -d mydatabase'" ]
+            test: [ "CMD-SHELL", "sh -c 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}'" ]
             interval: 2s
             timeout: 2s
             retries: 5
             start_period: 2s
 
-
-    postgres_test:
-        image: 'postgres:15.4'
-        hostname: postgres
-        restart: unless-stopped
-        profiles:
-            - test
-        environment:
-            - 'POSTGRES_DB=mydatabase'
-            - 'POSTGRES_PASSWORD=secret'
-            - 'POSTGRES_USER=myuser'
-        volumes:
-            - postgres-data:/var/lib/postgresql/data
-        healthcheck:
-            test: [ "CMD-SHELL", "sh -c 'pg_isready -U myuser -d mydatabase'" ]
-            interval: 2s
-            timeout: 2s
-            retries: 5
-            start_period: 2s
-        ports:
-            - "5432:5432"
     frontend:
         extends: # extends the frontend service from the docker-compose.yaml file in the parent directory
             file: ~/WebstormProjects/PassportEase/docker-compose.yaml
             service: frontend
         hostname: frontend
-        profiles:
-            - prod
         healthcheck: # healthcheck for vite + react server (see if curl response is 200 OK)
             test: curl --fail --silent localhost:5173/health || exit 1
             interval: 10s
@@ -138,24 +102,10 @@ services:
             - "traefik.http.services.frontend.loadbalancer.server.port=5173"
             - "traefik.http.routers.frontend.rule=Host(`localhost`)"
             - "traefik.http.routers.frontend.tls.certresolver=resolver"  # Utilizza il resolver dei certificati configurato in Traefik
-    redis_test:
-        profiles:
-            - test
-        image: 'redis:6.2.13'
-        hostname: redis
-        restart: unless-stopped
-        healthcheck:
-            test: [ "CMD", "redis-cli", "ping" ]
-            interval: 3s
-            timeout: 3s
-            retries: 30
-        ports:
-            - "6379:6379"
+
     redis:
         image: 'redis:6.2.13'
         hostname: redis
-        profiles:
-            - prod
         restart: unless-stopped
         healthcheck:
             test: [ "CMD", "redis-cli", "ping" ]

@@ -12,6 +12,7 @@ import it.univr.passportease.repository.CitizenRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.user.UserAuthService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Transactional
 @AllArgsConstructor
 public class UserAuthServiceImpl implements UserAuthService {
     private final UserRepository userRepository;
@@ -80,11 +82,11 @@ public class UserAuthServiceImpl implements UserAuthService {
                         ""
                 )
         );
-        User addedUser = userRepository.save(user);
+        User addedUser = userRepository.saveAndFlush(user);
 
         // set refresh token after saving user because we need the user id
         addedUser.setRefreshToken(jwtService.generateRefreshToken(addedUser.getId()));
-        userRepository.save(addedUser);
+        userRepository.saveAndFlush(addedUser);
 
         return mapUser.mapUserToLoginOutput(
                 addedUser,

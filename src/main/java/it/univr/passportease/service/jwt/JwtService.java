@@ -10,6 +10,7 @@ import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.notfound.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import java.util.*;
 import java.util.function.Function;
 
 @Service
+@Transactional
 @AllArgsConstructor
 public class JwtService {
     // TODO: eliminare
@@ -153,13 +155,9 @@ public class JwtService {
     }
 
     private String getRoleById(UUID id) throws UserOrWorkerIDNotFoundException {
-        if (workerRepository.findById(id).isPresent()) {
-            return "worker";
-        } else if (userRepository.findById(id).isPresent()) {
-            return "user";
-        } else {
-            throw new UserOrWorkerIDNotFoundException("ID does not belong to either Worker or User");
-        }
+        if (workerRepository.findById(id).isPresent()) return "worker";
+        else if (userRepository.findById(id).isPresent()) return "user";
+        throw new UserOrWorkerIDNotFoundException("ID does not belong to either Worker or User");
     }
 
     private SecretKey getSignKey() {
@@ -192,7 +190,6 @@ public class JwtService {
             return user.get();
         else if (worker.isPresent())
             return worker.get();
-        else
-            throw new UserNotFoundException("Invalid User and Worker ID");
+        throw new UserNotFoundException("Invalid User or Worker ID");
     }
 }

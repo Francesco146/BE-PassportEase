@@ -1,6 +1,7 @@
 package it.univr.passportease.repository;
 
 import it.univr.passportease.entity.Availability;
+import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
+@Transactional
 public interface AvailabilityRepository extends JpaRepository<Availability, UUID>, JpaSpecificationExecutor<Availability> {
     @NotNull
     List<Availability> findAll(@NotNull Specification<Availability> specification);

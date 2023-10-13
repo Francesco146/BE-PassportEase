@@ -1,6 +1,7 @@
 package it.univr.passportease.repository;
 
 import it.univr.passportease.entity.Request;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
+@Transactional
 public interface RequestRepository extends JpaRepository<Request, UUID> {
     @Query(value = "SELECT r.id, r.duration, r.start_date, r.end_date, r.start_time, r.end_time, r.worker_id, r.request_type_id, r.created_at, r.updated_at " +
             "FROM requests r, requests_offices ro, offices o " +
