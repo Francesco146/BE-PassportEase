@@ -7,7 +7,6 @@ import it.univr.passportease.graphql.GraphQLOperations;
 import it.univr.passportease.repository.CitizenRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
-import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +36,12 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureGraphQlTester
 @AutoConfigureMockMvc
-@Transactional
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserAuthControllerTest {
+
+    private static UUID MOCK_USER_ID;
+
     @Autowired
     WebApplicationContext context;
 
@@ -60,9 +62,9 @@ class UserAuthControllerTest {
     @BeforeAll
     void createMockUser() {
         // save user if not exists
-        if (!citizenRepository.existsByFiscalCode("NTLZLD98R52G273R"))
-            citizenRepository.save(new Citizen(
-                            UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"),
+        if (citizenRepository.findByFiscalCode("NTLZLD98R52G273R").isEmpty())
+            citizenRepository.saveAndFlush(new Citizen(
+                            UUID.randomUUID(),
                             "NTLZLD98R52G273R",
                             "Zelda",
                             "NotLink",
@@ -118,7 +120,7 @@ class UserAuthControllerTest {
 
         Assertions.assertNotNull(jwtSet);
 
-        Assertions.assertEquals(UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"), loginOutput.id());
+        Assertions.assertEquals(MOCK_USER_ID, loginOutput.id());
 
         Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
         Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
@@ -131,7 +133,12 @@ class UserAuthControllerTest {
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void logoutUser() {
-        String token = jwtService.generateAccessToken(UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"));
+        if (MOCK_USER_ID == null)
+            registerUser();
+
+        System.out.println("[!] ID: " + MOCK_USER_ID);
+
+        String token = jwtService.generateAccessToken(MOCK_USER_ID);
 
         System.out.println("[!] Generated token: " + token);
 
@@ -163,6 +170,7 @@ class UserAuthControllerTest {
     }
 
     @Test
+    @Order(1)
     void registerUser() {
         final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
 
@@ -175,7 +183,6 @@ class UserAuthControllerTest {
                 "1998-10-12",
                 "ciao"
         );
-
 
         System.out.println("[!] registerUser query: \n" + registerUser + "\n");
 
@@ -198,8 +205,12 @@ class UserAuthControllerTest {
 
         Assertions.assertNotNull(loginOutput.id());
 
+        MOCK_USER_ID = loginOutput.id();
+
         Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
         Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
+
+        // TODO: qua userRepository contiene lo user
 
         System.out.println("\u001B[32m");
         System.out.println("[!] Registration successful");
@@ -209,7 +220,12 @@ class UserAuthControllerTest {
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void changePassword() {
-        String token = jwtService.generateAccessToken(UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"));
+        if (MOCK_USER_ID == null)
+            registerUser();
+
+        System.out.println("[!] ID: " + MOCK_USER_ID);
+
+        String token = jwtService.generateAccessToken(MOCK_USER_ID);
 
         System.out.println("[!] Generated token: " + token);
 
@@ -242,11 +258,16 @@ class UserAuthControllerTest {
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void changeEmail() {
-        String token = jwtService.generateAccessToken(UUID.fromString("5442f171-f4d1-425b-bf4d-f047e499baa5"));
+        if (MOCK_USER_ID == null)
+            registerUser();
+
+        System.out.println("[!] ID: " + MOCK_USER_ID);
+
+        String token = jwtService.generateAccessToken(MOCK_USER_ID);
 
         System.out.println("[!] Generated token: " + token);
 
-        String changeEmail = GraphQLOperations.changeEmail.getGraphQl("zeldanotlink@gmail.com", "dio@candrtde.porco");
+        String changeEmail = GraphQLOperations.changeEmail.getGraphQl("dio@candrtde.porco", "zeldanotlink@gmail.com");
 
         System.out.println("[!] changeEmail query: \n" + changeEmail + "\n");
 
