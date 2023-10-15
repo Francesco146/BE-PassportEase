@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -54,7 +53,7 @@ public class RequestType {
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof RequestType requestType)
-            return getId() != null && Objects.equals(getId(), requestType.getId());
+            return getId().equals(requestType.getId());
         return false;
     }
 

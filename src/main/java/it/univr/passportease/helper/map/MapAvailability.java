@@ -13,10 +13,9 @@ import java.util.Date;
 @Component
 public class MapAvailability {
     public Availability mapRequestToAvailability(Request request, Office office, LocalDate localDate, LocalTime time) {
+        Date date = java.sql.Date.valueOf(localDate);
         Availability availability = new Availability();
         availability.setStatus(Status.FREE);
-        // cast LocalDate to Date
-        Date date = Date.from(localDate.atStartOfDay().atZone(java.time.ZoneId.systemDefault()).toInstant());
         availability.setDate(date);
         availability.setTime(time);
         availability.setRequest(request);

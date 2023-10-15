@@ -6,7 +6,6 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalTime;
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -76,7 +75,7 @@ public class Request {
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof Request request)
-            return getId() != null && Objects.equals(getId(), request.getId());
+            return getId().equals(request.getId());
         return false;
     }
 

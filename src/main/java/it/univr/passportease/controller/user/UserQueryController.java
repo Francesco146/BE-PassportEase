@@ -27,6 +27,7 @@ import java.util.List;
 public class UserQueryController {
 
     private final UserQueryService userQueryService;
+
     BucketLimiter bucketLimiter;
     private RequestAnalyzer requestAnalyzer;
 
@@ -36,7 +37,6 @@ public class UserQueryController {
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many get request types attempts");
 
         return userQueryService.getRequestTypesByUser(requestAnalyzer.getTokenFromRequest());
-
     }
 
     @QueryMapping

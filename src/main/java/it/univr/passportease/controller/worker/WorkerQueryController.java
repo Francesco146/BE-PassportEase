@@ -20,6 +20,7 @@ import java.util.List;
 public class WorkerQueryController {
 
     private final WorkerQueryService workerQueryService;
+
     private BucketLimiter bucketLimiter;
 
     @QueryMapping

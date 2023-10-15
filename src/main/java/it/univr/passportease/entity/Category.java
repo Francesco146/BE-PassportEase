@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -53,7 +52,7 @@ public class Category {
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof Category category)
-            return getId() != null && Objects.equals(getId(), category.getId());
+            return getId().equals(category.getId());
         return false;
     }
 

@@ -26,6 +26,7 @@ import java.util.UUID;
 class UserQueryControllerTest {
     @Autowired
     WebApplicationContext context;
+
     @Autowired
     private JwtService jwtService;
 
@@ -55,7 +56,10 @@ class UserQueryControllerTest {
 
         Assertions.assertDoesNotThrow(response.errors()::verify);
 
-        List<RequestType> requestType = response.path("data.getRequestTypesByUser").entityList(RequestType.class).get();
+        List<RequestType> requestType = response
+                .path("data.getRequestTypesByUser")
+                .entityList(RequestType.class)
+                .get();
 
         requestType.forEach(System.out::println);
 

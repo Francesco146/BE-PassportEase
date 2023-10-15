@@ -18,8 +18,10 @@ import org.springframework.stereotype.Controller;
 @Controller
 @AllArgsConstructor
 public class WorkerAuthController {
+
     private final WorkerAuthService workerAuthService;
-    BucketLimiter bucketLimiter;
+
+    private BucketLimiter bucketLimiter;
 
     @MutationMapping
     public LoginOutput loginWorker(@Argument("username") String username, @Argument("password") String password)

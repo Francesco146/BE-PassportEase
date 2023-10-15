@@ -23,6 +23,7 @@ public class AppUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final WorkerRepository workerRepository;
+
     private final RedisTemplate<String, String> redisTemplate;
 
     @Autowired

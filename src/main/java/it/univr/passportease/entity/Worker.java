@@ -5,13 +5,12 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @RequiredArgsConstructor
 @Table(name = "workers")
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -69,7 +68,7 @@ public class Worker {
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof Worker worker)
-            return getId() != null && Objects.equals(getId(), worker.getId());
+            return getId().equals(worker.getId());
         return false;
     }
 

@@ -62,19 +62,21 @@ class UserAuthControllerTest {
     @BeforeAll
     void createMockUser() {
         // save user if not exists
-        if (citizenRepository.findByFiscalCode("NTLZLD98R52G273R").isEmpty())
-            citizenRepository.saveAndFlush(new Citizen(
-                            UUID.randomUUID(),
-                            "NTLZLD98R52G273R",
-                            "Zelda",
-                            "NotLink",
-                            "Palermo",
-                            new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()),
-                            "1234567890",
-                            new Date(),
-                            new Date()
-                    )
-            );
+        if (citizenRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent()) {
+            citizenRepository.deleteByFiscalCode("NTLZLD98R52G273R");
+            userRepository.deleteByFiscalCode("NTLZLD98R52G273R");
+        }
+
+        Citizen citizen = new Citizen();
+
+        citizen.setFiscalCode("NTLZLD98R52G273R");
+        citizen.setName("Zelda");
+        citizen.setSurname("NotLink");
+        citizen.setCityOfBirth("Palermo");
+        citizen.setDateOfBirth(new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()));
+        citizen.setHealthCardNumber("1234567890");
+
+        citizenRepository.save(citizen);
 
         System.out.println("\u001B[33m");
         System.out.println("[!] Mock User Created");
@@ -92,6 +94,52 @@ class UserAuthControllerTest {
 
         System.out.println("\u001B[33m");
         System.out.println("[!] Mock User Deleted");
+        System.out.println("\u001B[0m");
+    }
+
+    @Test
+    @Order(1)
+    void registerUser() {
+        final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
+
+        String registerUser = GraphQLOperations.registerUser.getGraphQl(
+                "NTLZLD98R52G273R",
+                "zeldanotlink@gmail.com",
+                "Zelda",
+                "NotLink",
+                "Palermo",
+                "1998-10-12",
+                "ciao"
+        );
+
+        System.out.println("[!] registerUser query: \n" + registerUser + "\n");
+
+        LoginOutput loginOutput = graphQlTester
+                .mutate()
+                .build()
+                .document(registerUser)
+                .execute()
+                .path("data.registerUser")
+                .entity(LoginOutput.class)
+                .get();
+
+        System.out.println("[!] registerUser output: \n" + loginOutputToJson(loginOutput) + "\n");
+
+        Assertions.assertNotNull(loginOutput);
+
+        JWTSet jwtSet = loginOutput.jwtSet();
+
+        Assertions.assertNotNull(jwtSet);
+
+        Assertions.assertNotNull(loginOutput.id());
+
+        MOCK_USER_ID = loginOutput.id();
+
+        Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
+        Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
+
+        System.out.println("\u001B[32m");
+        System.out.println("[!] Registration successful");
         System.out.println("\u001B[0m");
     }
 
@@ -166,54 +214,6 @@ class UserAuthControllerTest {
 
         System.out.println("\u001B[32m");
         System.out.println("[!] Logout successful");
-        System.out.println("\u001B[0m");
-    }
-
-    @Test
-    @Order(1)
-    void registerUser() {
-        final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
-
-        String registerUser = GraphQLOperations.registerUser.getGraphQl(
-                "NTLZLD98R52G273R",
-                "zeldanotlink@gmail.com",
-                "Zelda",
-                "NotLink",
-                "Palermo",
-                "1998-10-12",
-                "ciao"
-        );
-
-        System.out.println("[!] registerUser query: \n" + registerUser + "\n");
-
-        LoginOutput loginOutput = graphQlTester
-                .mutate()
-                .build()
-                .document(registerUser)
-                .execute()
-                .path("data.registerUser")
-                .entity(LoginOutput.class)
-                .get();
-
-        System.out.println("[!] registerUser output: \n" + loginOutputToJson(loginOutput) + "\n");
-
-        Assertions.assertNotNull(loginOutput);
-
-        JWTSet jwtSet = loginOutput.jwtSet();
-
-        Assertions.assertNotNull(jwtSet);
-
-        Assertions.assertNotNull(loginOutput.id());
-
-        MOCK_USER_ID = loginOutput.id();
-
-        Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
-        Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
-
-        // TODO: qua userRepository contiene lo user
-
-        System.out.println("\u001B[32m");
-        System.out.println("[!] Registration successful");
         System.out.println("\u001B[0m");
     }
 

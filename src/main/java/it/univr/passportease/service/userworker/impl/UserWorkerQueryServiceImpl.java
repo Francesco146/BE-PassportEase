@@ -34,31 +34,18 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public List<Availability> getAvailabilities() {
-        return availabilityRepository.findAll();
-    }
-
-    @Override
-    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public List<Availability> getAvailabilities(Integer page, Integer size) {
-        // TODO: Old Availability
-        return availabilityRepository.findAll(PageRequest.of(page, size)).getContent();
-    }
-
-    @Override
-    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException {
-        filtersValidation(availabilityFilters);
-
-        return availabilityRepository.findAll(Specification.where(availabilityFilters));
-    }
-
-    @Override
-    @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException {
-        filtersValidation(availabilityFilters);
 
-        return availabilityRepository.findAll(Specification.where(availabilityFilters), PageRequest.of(page, size)).getContent();
+        boolean wantFiltered = availabilityFilters != null;
+        boolean wantPaged = size != null && page != null;
+
+        if (!wantFiltered)
+            return wantPaged ?
+                    availabilityRepository.findAll(PageRequest.of(page, size)).getContent() : availabilityRepository.findAll();
+
+        filtersValidation(availabilityFilters);
+        return wantPaged ?
+                availabilityRepository.findAll(Specification.where(availabilityFilters), PageRequest.of(page, size)).getContent() : availabilityRepository.findAll(Specification.where(availabilityFilters));
     }
 
     private void filtersValidation(AvailabilityFilters availabilityFilters) throws InvalidDataFromRequestException {
@@ -81,9 +68,11 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
     }
 
     private void validateRequestTypes(AvailabilityFilters availabilityFilters) {
-        availabilityFilters.getRequestTypes().stream()
+        availabilityFilters
+                .getRequestTypes()
+                .stream()
                 .filter(requestType ->
-                        !requestTypeRepository.existsByName(requestType))
+                        requestTypeRepository.findByName(requestType).isEmpty())
                 .forEach(requestType -> {
                             throw new InvalidDataFromRequestException("Request type " + requestType + " doesn't exist");
                         }
@@ -91,9 +80,11 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
     }
 
     private void validateOffices(AvailabilityFilters availabilityFilters) {
-        availabilityFilters.getOfficesName().stream()
+        availabilityFilters
+                .getOfficesName()
+                .stream()
                 .filter(officeName ->
-                        !officeRepository.existsByName(officeName))
+                        officeRepository.findByName(officeName).isEmpty())
                 .forEach(officeName -> {
                             throw new InvalidDataFromRequestException("Office " + officeName + " doesn't exist");
                         }

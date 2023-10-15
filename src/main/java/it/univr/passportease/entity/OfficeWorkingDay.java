@@ -7,7 +7,6 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalTime;
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -72,7 +71,7 @@ public class OfficeWorkingDay {
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof OfficeWorkingDay officeWorkingDay)
-            return getId() != null && Objects.equals(getId(), officeWorkingDay.getId());
+            return getId().equals(officeWorkingDay.getId());
         return false;
     }
 

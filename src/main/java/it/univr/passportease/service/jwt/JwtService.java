@@ -10,10 +10,8 @@ import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.notfound.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -23,15 +21,13 @@ import java.util.*;
 import java.util.function.Function;
 
 @Service
-@Transactional
 @AllArgsConstructor
 public class JwtService {
-    // TODO: eliminare
-    private static final String KEY = "FrancescoTiAmoPeroQuestaPasswordETroppoCortaQuindiDevoAllungarlaUnPoDiPiuAliceCiao";
-    @Value("${jwt.secret}")
-    private static String accessKey;
-    @Value("${refreshtoken.secret}")
-    private static String refreshKey;
+    @NonNull
+    private static final String ACCESS_TOKEN_KEY = System.getenv("ACCESS_KEY");
+    @NonNull
+    private static final String REFRESH_TOKEN_KEY = System.getenv("REFRESH_KEY");
+
     private final WorkerRepository workerRepository;
     private final UserRepository userRepository;
     private RedisTemplate<String, String> redisTemplate;
@@ -51,7 +47,7 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSignKey())
+                .verifyWith(getAccessSignKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -78,9 +74,10 @@ public class JwtService {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String id = extractId(token).toString();
 
-        if (redisTemplate.opsForValue().get(id) == null) return false;
+        String tokenInRedis = redisTemplate.opsForValue().get(id);
 
-        @NonNull String tokenInRedis = Objects.requireNonNull(redisTemplate.opsForValue().get(id));
+        if (tokenInRedis == null) return false;
+
         return id.equals(userDetails.getUsername()) &&
                 !isTokenExpired(token) &&
                 (tokenInRedis.equals(token));
@@ -99,7 +96,7 @@ public class JwtService {
         Date exp15Minutes = new Date(System.currentTimeMillis() + 1000 * 60 * 15);
 
         String accessToken = Jwts.builder()
-                .signWith(getSignKey())
+                .signWith(getAccessSignKey())
                 .claims().add(claims)
                 .subject(id.toString())
                 .issuedAt(now)
@@ -128,7 +125,7 @@ public class JwtService {
         Date fromNow30Days = new Date(expMillisFor30Days);
 
         String refreshtoken = Jwts.builder()
-                .signWith(getSignKey())
+                .signWith(getRefreshSignKey())
                 .claims().add("typ", "JWT")
                 .issuedAt(now)
                 .expiration(fromNow30Days)
@@ -160,8 +157,13 @@ public class JwtService {
         throw new UserOrWorkerIDNotFoundException("ID does not belong to either Worker or User");
     }
 
-    private SecretKey getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(KEY);
+    private SecretKey getAccessSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(ACCESS_TOKEN_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private SecretKey getRefreshSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(REFRESH_TOKEN_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

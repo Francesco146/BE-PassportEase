@@ -16,6 +16,8 @@ public class MapUser {
     public User mapRegisterInputDBToUser(RegisterInputDB registerInputDB) {
         RegisterInput registerInput = registerInputDB.getRegisterInput();
         User user = new User();
+        user.setCreatedAt(new Date());
+        user.setUpdatedAt(new Date());
         user.setFiscalCode(registerInput.getFiscalCode());
         user.setEmail(registerInput.getEmail());
         user.setName(registerInput.getName());
@@ -25,8 +27,6 @@ public class MapUser {
         user.setHashPassword(registerInputDB.getHashPassword());
         user.setActive(registerInputDB.getActive());
         user.setRefreshToken(registerInputDB.getRefreshToken());
-        user.setCreatedAt(new Date());
-        user.setUpdatedAt(new Date());
         return user;
     }
 
@@ -35,6 +35,7 @@ public class MapUser {
                 user.getId(),
                 new JWTSet(
                         accessToken,
-                        user.getRefreshToken()));
+                        user.getRefreshToken())
+        );
     }
 }

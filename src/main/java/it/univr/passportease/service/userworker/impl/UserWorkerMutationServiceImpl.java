@@ -27,9 +27,12 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class UserWorkerMutationServiceImpl implements UserWorkerMutationService {
     private static final Pattern EMAIL_VALID_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
     private final WorkerRepository workerRepository;
     private final UserRepository userRepository;
+
     private final JwtService jwtService;
+
     private RequestAnalyzer requestAnalyzer;
     private PasswordEncoder passwordEncoder;
 

@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -57,7 +56,7 @@ public class CitizenCategory {
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof CitizenCategory citizenCategory)
-            return getId() != null && Objects.equals(getId(), citizenCategory.getId());
+            return getId().equals(citizenCategory.getId());
         return false;
     }
 

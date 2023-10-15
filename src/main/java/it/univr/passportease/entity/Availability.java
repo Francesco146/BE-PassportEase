@@ -7,7 +7,6 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalTime;
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -73,7 +72,7 @@ public class Availability {
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof Availability availability)
-            return getId() != null && Objects.equals(getId(), availability.getId());
+            return getId().equals(availability.getId());
         return false;
     }
 
