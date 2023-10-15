@@ -5,13 +5,11 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "citizens")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -70,7 +68,7 @@ public class Citizen {
         if (thisEffectiveClass != oEffectiveClass) return false;
 
         if (o instanceof Citizen citizen)
-            return getId() != null && Objects.equals(getId(), citizen.getId());
+            return getId().equals(citizen.getId());
         return false;
     }
 

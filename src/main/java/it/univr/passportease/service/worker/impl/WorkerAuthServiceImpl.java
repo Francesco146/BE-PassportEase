@@ -27,13 +27,15 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class WorkerAuthServiceImpl implements WorkerAuthService {
+
     private final WorkerRepository workerRepository;
-    private final MapWorker mapWorker;
-    private final JwtService jwtService;
     private final OfficeRepository officeRepository;
 
-    private AuthenticationManager authenticationManager;
+    private final MapWorker mapWorker;
 
+    private final JwtService jwtService;
+
+    private AuthenticationManager authenticationManager;
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -60,20 +62,20 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
     }
 
     @Override
+    @Deprecated
     public LoginOutput register(WorkerInput workerInput) throws OfficeNotFoundException {
-        // TODO: deprecated
 
         Optional<Office> office = officeRepository.findByName(workerInput.getOfficeName());
         if (office.isEmpty()) throw new OfficeNotFoundException("Office not found");
 
         Worker worker = new Worker();
-        worker.setUsername(workerInput.getUsername());
-        worker.setEmail(workerInput.getEmail());
         worker.setHashPassword(passwordEncoder.encode(workerInput.getPassword()));
-        worker.setRefreshToken("");
-        worker.setOffice(office.get());
         worker.setCreatedAt(new Date());
         worker.setUpdatedAt(new Date());
+        worker.setUsername(workerInput.getUsername());
+        worker.setEmail(workerInput.getEmail());
+        worker.setRefreshToken("");
+        worker.setOffice(office.get());
 
         Worker addedWorker = workerRepository.save(worker);
         String refreshToken = jwtService.generateRefreshToken(addedWorker.getId());

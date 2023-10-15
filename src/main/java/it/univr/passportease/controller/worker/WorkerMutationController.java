@@ -20,17 +20,20 @@ import org.springframework.stereotype.Controller;
 @Controller
 @AllArgsConstructor
 public class WorkerMutationController {
+
     private final WorkerMutationService workerMutationService;
-    private RequestAnalyzer requestAnalyzer;
+
     private BucketLimiter bucketLimiter;
+    private RequestAnalyzer requestAnalyzer;
 
     @MutationMapping
     public Request createRequest(@Argument("request") RequestInput requestInput)
             throws AuthenticationCredentialsNotFoundException, WorkerNotFoundException, InvalidRequestTypeException, OfficeOverloadedException, RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.CREATE_REQUEST);
-        if (bucket.tryConsume(1))
-            return workerMutationService.createRequest(requestAnalyzer.getTokenFromRequest(), requestInput);
-        else throw new RateLimitException("Too many createRequest attempts");
+        if (!bucket.tryConsume(1))
+            throw new RateLimitException("Too many createRequest attempts");
+
+        return workerMutationService.createRequest(requestAnalyzer.getTokenFromRequest(), requestInput);
     }
 
     @MutationMapping

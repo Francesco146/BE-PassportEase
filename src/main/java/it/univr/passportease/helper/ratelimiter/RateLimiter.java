@@ -131,6 +131,11 @@ public enum RateLimiter {
 
     public abstract Bandwidth getLimit();
 
+    Bandwidth getBandwidth() {
+        // Default value
+        return getBandwidth(1);
+    }
+
     Bandwidth getBandwidth(int seconds) {
         return Bandwidth.builder()
                 .capacity(1)

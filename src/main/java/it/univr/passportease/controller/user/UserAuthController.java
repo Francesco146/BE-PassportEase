@@ -28,10 +28,11 @@ import org.springframework.stereotype.Controller;
 @AllArgsConstructor
 @Log4j2
 public class UserAuthController {
+
     private final UserAuthService userAuthService;
     private final UserWorkerMutationService userWorkerMutationService;
-    private final BucketLimiter bucketLimiter;
 
+    private final BucketLimiter bucketLimiter;
     private RequestAnalyzer requestAnalyzer;
 
 
@@ -46,7 +47,6 @@ public class UserAuthController {
     }
 
     @MutationMapping
-    //@CrossOrigin(origins = {"http://localhost:8080", "https://localhost:8080"})
     public void logout()
             throws TokenNotInRedisException, RateLimitException, UserNotFoundException, AuthenticationCredentialsNotFoundException {
         Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.LOGOUT);

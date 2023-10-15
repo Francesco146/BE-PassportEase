@@ -18,7 +18,9 @@ import java.util.List;
 @Controller
 @AllArgsConstructor
 public class UserWorkerQueryController {
+
     private final UserWorkerQueryService userWorkerQueryService;
+
     private BucketLimiter bucketLimiter;
 
     @QueryMapping
@@ -26,10 +28,7 @@ public class UserWorkerQueryController {
         Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.GET_AVAILABILITIES);
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many getAvailabilities attempts");
 
-        if (size == null || page == null)
-            return availabilityFilters == null ? userWorkerQueryService.getAvailabilities() : userWorkerQueryService.getAvailabilities(availabilityFilters);
-        else
-            return availabilityFilters == null ? userWorkerQueryService.getAvailabilities(page, size) : userWorkerQueryService.getAvailabilities(availabilityFilters, page, size);
+        return userWorkerQueryService.getAvailabilities(availabilityFilters, page, size);
     }
 
     @QueryMapping

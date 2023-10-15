@@ -21,10 +21,7 @@ import java.io.IOException;
 @AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-
     private JwtService jwtService;
-
-
     private AppUserDetailsService userDetailsService;
 
     @Override
@@ -33,6 +30,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String id = null;
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             id = jwtService.extractId(token).toString();

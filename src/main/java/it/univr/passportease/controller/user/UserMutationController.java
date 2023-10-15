@@ -5,7 +5,6 @@ import it.univr.passportease.dto.input.NotificationInput;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.User;
-import it.univr.passportease.entity.Worker;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.invalid.InvalidWorkerActionException;
 import it.univr.passportease.exception.notfound.*;
@@ -29,8 +28,9 @@ public class UserMutationController {
 
     private final UserMutationService userMutationService;
     private final JwtService jwtService;
-    private RequestAnalyzer requestAnalyzer;
+
     private BucketLimiter bucketLimiter;
+    private RequestAnalyzer requestAnalyzer;
 
     @MutationMapping
     public Availability createReservation(@Argument("availabilityID") String availabilityID)
@@ -62,7 +62,7 @@ public class UserMutationController {
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many createNotification attempts");
 
         Object user = jwtService.getUserOrWorkerFromToken(requestAnalyzer.getTokenFromRequest());
-        if (user instanceof Worker) throw new InvalidWorkerActionException("Workers cannot create notifications");
+        if (!(user instanceof User)) throw new InvalidWorkerActionException("Workers cannot create notifications");
 
         return userMutationService.createNotification(notificationInput, (User) user);
     }

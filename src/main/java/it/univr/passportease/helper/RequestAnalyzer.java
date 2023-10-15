@@ -8,8 +8,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RequestAnalyzer {
-    private final HttpServletRequest request;
 
+    private static final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
+    private final HttpServletRequest request;
     private final JwtService jwtService;
 
     @Autowired
@@ -21,7 +22,9 @@ public class RequestAnalyzer {
 
     public String getTokenFromRequest() throws AuthenticationCredentialsNotFoundException {
         String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ") || jwtService.isTokenExpired(authorizationHeader.substring(7)))
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ") ||
+                Boolean.TRUE.equals(jwtService.isTokenExpired(authorizationHeader.substring(7))) ||
+                !authorizationHeader.substring(7).matches(JWT_REGEX))
             throw new AuthenticationCredentialsNotFoundException("Invalid token or no token provided");
         return authorizationHeader.substring(7);
     }

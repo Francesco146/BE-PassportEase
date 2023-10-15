@@ -66,10 +66,11 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
     public Request createRequest(String token, RequestInput requestInput)
             throws WorkerNotFoundException, InvalidRequestTypeException, OfficeOverloadedException {
-        // get worker from db
-        Worker worker = workerRepository.findById(jwtService.extractId(token)).orElseThrow(() ->
-                new WorkerNotFoundException("Worker not found")
-        );
+
+        Worker worker = workerRepository.findById(jwtService.extractId(token))
+                .orElseThrow(() ->
+                        new WorkerNotFoundException("Worker not found")
+                );
 
         String requestTypeName = requestInput.getRequestType();
         List<Office> offices = officeRepository.findAllByNameIn(requestInput.getOffices());
@@ -183,8 +184,8 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     private void processOfficeWorkingDays(Day day, List<OfficeWorkingDay> officeWorkingDays, LocalDate date, Request request) {
-        officeWorkingDays.stream().
-                filter(officeWorkingDay ->
+        officeWorkingDays.stream()
+                .filter(officeWorkingDay ->
                         officeWorkingDay.getDay().equals(day))
                 .forEach(officeWorkingDay ->
                         processOfficeWorkingDay(officeWorkingDay, date, request)

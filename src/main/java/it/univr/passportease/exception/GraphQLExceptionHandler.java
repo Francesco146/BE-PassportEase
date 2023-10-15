@@ -91,7 +91,7 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
             return badRequestError(exception, environment);
         else if (isNotFound(exception))
             return notFoundError(exception, environment);
-        else
-            return super.resolveToSingleError(exception, environment);
+
+        return super.resolveToSingleError(exception, environment);
     }
 }
