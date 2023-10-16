@@ -27,11 +27,6 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
-/*
- * TODO
- *  refreshAccessToken
- * */
-
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureGraphQlTester
@@ -41,6 +36,8 @@ import java.util.UUID;
 class UserAuthControllerTest {
 
     private static UUID MOCK_USER_ID;
+    private static String REFRESH_TOKEN;
+    private static final String BASE_URL = "http://localhost:8080/graphql";
 
     @Autowired
     WebApplicationContext context;
@@ -138,6 +135,8 @@ class UserAuthControllerTest {
         Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
         Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
 
+        REFRESH_TOKEN = jwtSet.refreshToken();
+
         System.out.println("\u001B[32m");
         System.out.println("[!] Registration successful");
         System.out.println("\u001B[0m");
@@ -173,6 +172,8 @@ class UserAuthControllerTest {
         Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
         Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
 
+        REFRESH_TOKEN = jwtSet.refreshToken();
+
         System.out.println("\u001B[32m");
         System.out.println("[!] Login successful");
         System.out.println("\u001B[0m");
@@ -197,7 +198,7 @@ class UserAuthControllerTest {
         GraphQlTester.Response response = HttpGraphQlTester.builder(
                         MockMvcWebTestClient.bindToApplicationContext(context)
                                 .configureClient()
-                                .baseUrl("http://localhost:8080/graphql")
+                                .baseUrl(BASE_URL)
                                 .build()
                                 .mutate()
                 )
@@ -236,7 +237,7 @@ class UserAuthControllerTest {
         GraphQlTester.Response response = HttpGraphQlTester.builder(
                         MockMvcWebTestClient.bindToApplicationContext(context)
                                 .configureClient()
-                                .baseUrl("http://localhost:8080/graphql")
+                                .baseUrl(BASE_URL)
                                 .build()
                                 .mutate()
                 )
@@ -274,7 +275,7 @@ class UserAuthControllerTest {
         GraphQlTester.Response response = HttpGraphQlTester.builder(
                         MockMvcWebTestClient.bindToApplicationContext(context)
                                 .configureClient()
-                                .baseUrl("http://localhost:8080/graphql")
+                                .baseUrl(BASE_URL)
                                 .build()
                                 .mutate()
                 )
@@ -294,6 +295,52 @@ class UserAuthControllerTest {
 
         System.out.println("\u001B[32m");
         System.out.println("[!] Change Email successful");
+        System.out.println("\u001B[0m");
+    }
+
+    @Test
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
+    void refreshAccessToken(){
+        if (MOCK_USER_ID == null)
+            registerUser();
+        if (REFRESH_TOKEN == null)
+            loginUser();
+
+        System.out.println("[!] ID: " + MOCK_USER_ID);
+
+        String token = jwtService.generateAccessToken(MOCK_USER_ID);
+
+        System.out.println("[!] Generated token: " + token);
+
+        String refreshAccessToken = GraphQLOperations.refreshAccessToken.getGraphQl(REFRESH_TOKEN);
+
+        System.out.println("[!] refreshAccessToken query: \n" + refreshAccessToken + "\n");
+
+        GraphQlTester.Response response = HttpGraphQlTester.builder(
+                        MockMvcWebTestClient.bindToApplicationContext(context)
+                                .configureClient()
+                                .baseUrl(BASE_URL)
+                                .build()
+                                .mutate()
+                )
+                .headers(headers -> headers.setBearerAuth(token))
+                .build()
+                .document(refreshAccessToken)
+                .execute();
+
+        Assertions.assertNotNull(response);
+        Assertions.assertDoesNotThrow(response.errors()::verify);
+
+        JWTSet jwtSet = response.path("data.refreshAccessToken")
+                .entity(JWTSet.class)
+                .get();
+
+        String newToken = jwtSet.accessToken();
+
+        System.out.println("[!] refreshAccessToken output: \n" + newToken + "\n");
+
+        System.out.println("\u001B[32m");
+        System.out.println("[!] Refresh Access Token successful");
         System.out.println("\u001B[0m");
     }
 
