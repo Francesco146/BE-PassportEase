@@ -1,10 +1,5 @@
 package it.univr.passportease.graphql;
 
-import it.univr.passportease.dto.input.RegisterInput;
-import jdk.jfr.Registered;
-
-import java.util.Date;
-
 public enum GraphQLOperations {
     loginUser {
         public String getGraphQl(String... args) {
@@ -101,6 +96,25 @@ public enum GraphQLOperations {
                    }
                    """;
            return String.format(changeEmail, newEmail, oldEmail);
+        }
+    },
+
+    refreshAccessToken{
+        public String getGraphQl(String... args) {
+            String refreshToken = args[0];
+
+            String refreshAccessToken = """
+                    mutation {
+                        refreshAccessToken(
+                            refreshToken: "%s"
+                        )
+                        {
+                            accessToken
+                            refreshToken
+                        }
+                    }
+                    """;
+            return String.format(refreshAccessToken, refreshToken);
         }
     },
 
