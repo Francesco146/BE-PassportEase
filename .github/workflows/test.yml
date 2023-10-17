@@ -62,7 +62,7 @@ jobs:
                 run: docker compose -f compose.test.yaml up -d
 
             -   name: Set test.env in environment
-                run: export $(cat test.env | xargs)
+                run: cat test.env >> $GITHUB_ENV
 
             -   name: Run Unit Tests
                 run: mvn -B test --file pom.xml
