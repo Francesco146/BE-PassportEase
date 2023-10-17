@@ -34,6 +34,7 @@ jobs:
                 uses: advanced-security/maven-dependency-submission-action@v3.0.2
     unit-tests:
         needs: build
+        environment: Unit-Tests
         permissions: write-all
         runs-on: self-hosted
 
