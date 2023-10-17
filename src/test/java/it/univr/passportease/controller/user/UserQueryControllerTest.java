@@ -28,9 +28,6 @@ import java.util.UUID;
 class UserQueryControllerTest {
 
     private static final String BASE_URL = "http://localhost:8080/graphql";
-    private static final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
-    private static UUID MOCK_USER_ID;
-    private static JWT REFRESH_TOKEN;
     @Autowired
     WebApplicationContext context;
     @Autowired
