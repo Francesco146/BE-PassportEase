@@ -55,16 +55,16 @@ jobs:
                     fi
 
             -   name: Stop existing postgres and redis
-                run: docker compose -f compose.test.yml down
+                run: docker compose -f compose.test.yaml down
 
             -   name: Start postgres and redis
-                run: docker compose -f compose.test.yml up -d
+                run: docker compose -f compose.test.yaml up -d
 
             -   name: Set test.env in environment
-                run: export $(cat test.env | xargs)
+                run: cat test.env >> $GITHUB_ENV
 
             -   name: Run Unit Tests
                 run: mvn -B test --file pom.xml
 
             -   name: Stop Postgres and Redis
-                run: docker compose -f compose.test.yml down
+                run: docker compose -f compose.test.yaml down
