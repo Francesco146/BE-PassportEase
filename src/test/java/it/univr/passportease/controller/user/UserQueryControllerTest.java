@@ -2,7 +2,9 @@ package it.univr.passportease.controller.user;
 
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.graphql.GraphQLOperations;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.service.jwt.JwtService;
+import lombok.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,33 +26,53 @@ import java.util.UUID;
 @AutoConfigureGraphQlTester
 @AutoConfigureMockMvc
 class UserQueryControllerTest {
+
+    private static final String BASE_URL = "http://localhost:8080/graphql";
+    private static final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
+    private static UUID MOCK_USER_ID;
+    private static JWT REFRESH_TOKEN;
     @Autowired
     WebApplicationContext context;
-
+    @Autowired
+    private GraphQlTester graphQlTester;
     @Autowired
     private JwtService jwtService;
+
+    Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass, JWT bearerToken) {
+        if (bearerToken == null)
+            return graphQlTester
+                    .mutate()
+                    .build()
+                    .document(graphQlDocument)
+                    .execute()
+                    .path(pathResponse)
+                    .entity(objectClass)
+                    .get();
+
+        return HttpGraphQlTester.builder(
+                        MockMvcWebTestClient.bindToApplicationContext(context)
+                                .configureClient()
+                                .baseUrl(BASE_URL)
+                                .build()
+                                .mutate()
+                )
+                .headers(headers -> headers.setBearerAuth(bearerToken.getToken()))
+                .build()
+                .document(graphQlDocument)
+                .execute();
+    }
 
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void getRequestTypesByUser() {
 
-        String token = jwtService.generateAccessToken(UUID.fromString("320eb378-47ed-4316-87ce-1f344993e4dc"));
+        JWT token = jwtService.generateAccessToken(UUID.fromString("320eb378-47ed-4316-87ce-1f344993e4dc"));
 
         System.out.println("[!] Generated token: \n" + token + "\n");
 
         String getRequestTypesByUser = GraphQLOperations.getRequestTypesByUser.getGraphQl();
 
-        GraphQlTester.Response response = HttpGraphQlTester.builder(
-                        MockMvcWebTestClient.bindToApplicationContext(context)
-                                .configureClient()
-                                .baseUrl("http://localhost:8080/graphql")
-                                .build()
-                                .mutate()
-                )
-                .headers(headers -> headers.setBearerAuth(token))
-                .build()
-                .document(getRequestTypesByUser)
-                .execute();
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getRequestTypesByUser, "data.getRequestTypesByUser", null, token);
 
         Assertions.assertNotNull(response);
 

@@ -4,9 +4,11 @@ import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.entity.Citizen;
 import it.univr.passportease.graphql.GraphQLOperations;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.repository.CitizenRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,19 +37,17 @@ import java.util.UUID;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserAuthControllerTest {
 
-    private static UUID MOCK_USER_ID;
-    private static String REFRESH_TOKEN;
     private static final String BASE_URL = "http://localhost:8080/graphql";
+    private static final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
+    private static UUID MOCK_USER_ID;
+    private static JWT REFRESH_TOKEN;
 
     @Autowired
     WebApplicationContext context;
-
     @Autowired
     private GraphQlTester graphQlTester;
-
     @Autowired
     private JwtService jwtService;
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -97,7 +97,6 @@ class UserAuthControllerTest {
     @Test
     @Order(1)
     void registerUser() {
-        final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
 
         String registerUser = GraphQLOperations.registerUser.getGraphQl(
                 "NTLZLD98R52G273R",
@@ -111,14 +110,7 @@ class UserAuthControllerTest {
 
         System.out.println("[!] registerUser query: \n" + registerUser + "\n");
 
-        LoginOutput loginOutput = graphQlTester
-                .mutate()
-                .build()
-                .document(registerUser)
-                .execute()
-                .path("data.registerUser")
-                .entity(LoginOutput.class)
-                .get();
+        LoginOutput loginOutput = (LoginOutput) makeGraphQLRequest(registerUser, "data.registerUser", LoginOutput.class, null);
 
         System.out.println("[!] registerUser output: \n" + loginOutputToJson(loginOutput) + "\n");
 
@@ -135,15 +127,14 @@ class UserAuthControllerTest {
         Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
         Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
 
-        REFRESH_TOKEN = jwtSet.refreshToken();
-
-        System.out.println("\u001B[32m");
-        System.out.println("[!] Registration successful");
-        System.out.println("\u001B[0m");
+        REFRESH_TOKEN = new JWT(jwtSet.refreshToken());
     }
 
     @Test
     void loginUser() {
+        if (MOCK_USER_ID == null)
+            registerUser();
+
         final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
 
         String loginUser = GraphQLOperations.loginUser.getGraphQl("NTLZLD98R52G273R", "ciao");
@@ -151,13 +142,7 @@ class UserAuthControllerTest {
         System.out.println("[!] Login query: \n" + loginUser + "\n");
 
 
-        LoginOutput loginOutput = graphQlTester
-                .mutate().build()
-                .document(loginUser)
-                .execute()
-                .path("data.loginUser")
-                .entity(LoginOutput.class)
-                .get();
+        LoginOutput loginOutput = (LoginOutput) makeGraphQLRequest(loginUser, "data.loginUser", LoginOutput.class, null);
 
         System.out.println("[!] Login output: \n" + loginOutputToJson(loginOutput) + "\n");
 
@@ -172,11 +157,31 @@ class UserAuthControllerTest {
         Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
         Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
 
-        REFRESH_TOKEN = jwtSet.refreshToken();
+        REFRESH_TOKEN = new JWT(jwtSet.refreshToken());
+    }
 
-        System.out.println("\u001B[32m");
-        System.out.println("[!] Login successful");
-        System.out.println("\u001B[0m");
+    Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass, JWT bearerToken) {
+        if (bearerToken == null)
+            return graphQlTester
+                    .mutate()
+                    .build()
+                    .document(graphQlDocument)
+                    .execute()
+                    .path(pathResponse)
+                    .entity(objectClass)
+                    .get();
+
+        return HttpGraphQlTester.builder(
+                        MockMvcWebTestClient.bindToApplicationContext(context)
+                                .configureClient()
+                                .baseUrl(BASE_URL)
+                                .build()
+                                .mutate()
+                )
+                .headers(headers -> headers.setBearerAuth(bearerToken.getToken()))
+                .build()
+                .document(graphQlDocument)
+                .execute();
     }
 
     @Test
@@ -187,7 +192,7 @@ class UserAuthControllerTest {
 
         System.out.println("[!] ID: " + MOCK_USER_ID);
 
-        String token = jwtService.generateAccessToken(MOCK_USER_ID);
+        JWT token = jwtService.generateAccessToken(MOCK_USER_ID);
 
         System.out.println("[!] Generated token: " + token);
 
@@ -195,27 +200,12 @@ class UserAuthControllerTest {
 
         System.out.println("[!] Logout query: \n" + logout + "\n");
 
-        GraphQlTester.Response response = HttpGraphQlTester.builder(
-                        MockMvcWebTestClient.bindToApplicationContext(context)
-                                .configureClient()
-                                .baseUrl(BASE_URL)
-                                .build()
-                                .mutate()
-                )
-                .headers(headers -> headers.setBearerAuth(token))
-                .build()
-                .document(logout)
-                .execute();
-
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(logout, "data.logout", null, token);
 
         Assertions.assertNotNull(response);
         Assertions.assertDoesNotThrow(response.errors()::verify);
 
         System.out.println("[!] Logout output: \n" + logoutJson() + "\n");
-
-        System.out.println("\u001B[32m");
-        System.out.println("[!] Logout successful");
-        System.out.println("\u001B[0m");
     }
 
     @Test
@@ -224,9 +214,7 @@ class UserAuthControllerTest {
         if (MOCK_USER_ID == null)
             registerUser();
 
-        System.out.println("[!] ID: " + MOCK_USER_ID);
-
-        String token = jwtService.generateAccessToken(MOCK_USER_ID);
+        JWT token = jwtService.generateAccessToken(MOCK_USER_ID);
 
         System.out.println("[!] Generated token: " + token);
 
@@ -234,26 +222,12 @@ class UserAuthControllerTest {
 
         System.out.println("[!] changePassword query: \n" + changePassword + "\n");
 
-        GraphQlTester.Response response = HttpGraphQlTester.builder(
-                        MockMvcWebTestClient.bindToApplicationContext(context)
-                                .configureClient()
-                                .baseUrl(BASE_URL)
-                                .build()
-                                .mutate()
-                )
-                .headers(headers -> headers.setBearerAuth(token))
-                .build()
-                .document(changePassword)
-                .execute();
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(changePassword, "data.changePassword", null, token);
 
         Assertions.assertNotNull(response);
         Assertions.assertDoesNotThrow(response.errors()::verify);
 
         System.out.println("[!] changePassword output: \n" + changePasswordJson() + "\n");
-
-        System.out.println("\u001B[32m");
-        System.out.println("[!] Change Password successful");
-        System.out.println("\u001B[0m");
     }
 
     @Test
@@ -262,9 +236,7 @@ class UserAuthControllerTest {
         if (MOCK_USER_ID == null)
             registerUser();
 
-        System.out.println("[!] ID: " + MOCK_USER_ID);
-
-        String token = jwtService.generateAccessToken(MOCK_USER_ID);
+        JWT token = jwtService.generateAccessToken(MOCK_USER_ID);
 
         System.out.println("[!] Generated token: " + token);
 
@@ -272,17 +244,7 @@ class UserAuthControllerTest {
 
         System.out.println("[!] changeEmail query: \n" + changeEmail + "\n");
 
-        GraphQlTester.Response response = HttpGraphQlTester.builder(
-                        MockMvcWebTestClient.bindToApplicationContext(context)
-                                .configureClient()
-                                .baseUrl(BASE_URL)
-                                .build()
-                                .mutate()
-                )
-                .headers(headers -> headers.setBearerAuth(token))
-                .build()
-                .document(changeEmail)
-                .execute();
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(changeEmail, "data.changeEmail", null, token);
 
         Assertions.assertNotNull(response);
         Assertions.assertDoesNotThrow(response.errors()::verify);
@@ -292,41 +254,25 @@ class UserAuthControllerTest {
                 .get();
 
         System.out.println("[!] changeEmail output: \n" + changeEmailJson(newEmail) + "\n");
-
-        System.out.println("\u001B[32m");
-        System.out.println("[!] Change Email successful");
-        System.out.println("\u001B[0m");
     }
 
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
-    void refreshAccessToken(){
+    void refreshAccessToken() {
         if (MOCK_USER_ID == null)
             registerUser();
         if (REFRESH_TOKEN == null)
             loginUser();
 
-        System.out.println("[!] ID: " + MOCK_USER_ID);
-
-        String token = jwtService.generateAccessToken(MOCK_USER_ID);
+        JWT token = jwtService.generateAccessToken(MOCK_USER_ID);
 
         System.out.println("[!] Generated token: " + token);
 
-        String refreshAccessToken = GraphQLOperations.refreshAccessToken.getGraphQl(REFRESH_TOKEN);
+        String refreshAccessToken = GraphQLOperations.refreshAccessToken.getGraphQl(REFRESH_TOKEN.getToken());
 
         System.out.println("[!] refreshAccessToken query: \n" + refreshAccessToken + "\n");
 
-        GraphQlTester.Response response = HttpGraphQlTester.builder(
-                        MockMvcWebTestClient.bindToApplicationContext(context)
-                                .configureClient()
-                                .baseUrl(BASE_URL)
-                                .build()
-                                .mutate()
-                )
-                .headers(headers -> headers.setBearerAuth(token))
-                .build()
-                .document(refreshAccessToken)
-                .execute();
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(refreshAccessToken, "data.refreshAccessToken", null, token);
 
         Assertions.assertNotNull(response);
         Assertions.assertDoesNotThrow(response.errors()::verify);
@@ -335,13 +281,11 @@ class UserAuthControllerTest {
                 .entity(JWTSet.class)
                 .get();
 
-        String newToken = jwtSet.accessToken();
 
-        System.out.println("[!] refreshAccessToken output: \n" + newToken + "\n");
+        Assertions.assertTrue(jwtSet.accessToken().matches(JWT_REGEX));
+        Assertions.assertTrue(jwtSet.refreshToken().matches(JWT_REGEX));
 
-        System.out.println("\u001B[32m");
-        System.out.println("[!] Refresh Access Token successful");
-        System.out.println("\u001B[0m");
+        System.out.println("[!] refreshAccessToken output: \n" + jwtSet.accessToken() + "\n");
     }
 
     private String loginOutputToJson(LoginOutput loginOutput) {

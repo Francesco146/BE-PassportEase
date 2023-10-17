@@ -13,6 +13,7 @@ import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoun
 import it.univr.passportease.exception.security.RateLimitException;
 import it.univr.passportease.exception.security.TokenNotInRedisException;
 import it.univr.passportease.exception.security.WrongPasswordException;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.helper.RequestAnalyzer;
 import it.univr.passportease.helper.ratelimiter.BucketLimiter;
 import it.univr.passportease.helper.ratelimiter.RateLimiter;
@@ -71,7 +72,7 @@ public class UserAuthController {
         if (!bucket.tryConsume(1))
             throw new RateLimitException("Too many refresh attempts");
 
-        return userWorkerMutationService.refreshAccessToken(requestAnalyzer.getTokenFromRequest(), refreshToken);
+        return userWorkerMutationService.refreshAccessToken(requestAnalyzer.getTokenFromRequest(), new JWT(refreshToken));
     }
 
     @MutationMapping

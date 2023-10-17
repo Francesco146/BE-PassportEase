@@ -10,6 +10,7 @@ import it.univr.passportease.exception.notfound.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.TokenNotInRedisException;
 import it.univr.passportease.exception.security.WrongPasswordException;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.helper.RequestAnalyzer;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
@@ -39,7 +40,7 @@ public class UserWorkerMutationServiceImpl implements UserWorkerMutationService 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public void logout() throws UserNotFoundException, TokenNotInRedisException, AuthenticationCredentialsNotFoundException {
-        String accessToken = requestAnalyzer.getTokenFromRequest();
+        JWT accessToken = requestAnalyzer.getTokenFromRequest();
         jwtService.invalidateRefreshToken(accessToken);
         if (!jwtService.invalidateAccessToken(accessToken))
             throw new TokenNotInRedisException("Error while invalidating access token");
@@ -47,35 +48,35 @@ public class UserWorkerMutationServiceImpl implements UserWorkerMutationService 
 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public JWTSet refreshAccessToken(String token, String refreshToken) throws UserNotFoundException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException {
+    public JWTSet refreshAccessToken(JWT token, JWT refreshToken) throws UserNotFoundException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException {
         Object userOrWorker = jwtService.getUserOrWorkerFromToken(token);
 
         UUID id = jwtService.extractId(token);
         if (id == null)
             throw new UserOrWorkerIDNotFoundException("Token has been corrupted token.id is null");
 
-        String newRefreshToken = jwtService.generateRefreshToken(id);
+        JWT newRefreshToken = jwtService.generateRefreshToken(id);
 
         if (userOrWorker instanceof User user) {
-            if (!user.getRefreshToken().equals(refreshToken))
+            if (!user.getRefreshToken().equals(refreshToken.getToken()))
                 throw new InvalidRefreshTokenException("Invalid user refresh token");
-            user.setRefreshToken(newRefreshToken);
+            user.setRefreshToken(newRefreshToken.getToken());
             userRepository.save(user);
         } else if (userOrWorker instanceof Worker worker) {
-            if (!worker.getRefreshToken().equals(refreshToken))
+            if (!worker.getRefreshToken().equals(refreshToken.getToken()))
                 throw new InvalidRefreshTokenException("Invalid worker refresh token");
-            worker.setRefreshToken(newRefreshToken);
+            worker.setRefreshToken(newRefreshToken.getToken());
             workerRepository.save(worker);
         }
 
-        return new JWTSet(jwtService.generateAccessToken(id), newRefreshToken);
+        return new JWTSet(jwtService.generateAccessToken(id).getToken(), newRefreshToken.getToken());
     }
 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public void changePassword(String oldPassword, String newPassword)
             throws UserNotFoundException, WrongPasswordException, AuthenticationCredentialsNotFoundException {
-        String accessToken = requestAnalyzer.getTokenFromRequest();
+        JWT accessToken = requestAnalyzer.getTokenFromRequest();
 
         Object userOrWorker = jwtService.getUserOrWorkerFromToken(accessToken);
 
@@ -97,7 +98,7 @@ public class UserWorkerMutationServiceImpl implements UserWorkerMutationService 
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public String changeEmail(String newEmail, String oldEmail)
             throws UserNotFoundException, InvalidEmailException, AuthenticationCredentialsNotFoundException {
-        String accessToken = requestAnalyzer.getTokenFromRequest();
+        JWT accessToken = requestAnalyzer.getTokenFromRequest();
 
         if (!emailValid(newEmail))
             throw new InvalidEmailException("Invalid email");

@@ -5,6 +5,7 @@ import it.univr.passportease.dto.input.RegisterInputDB;
 import it.univr.passportease.dto.output.JWTSet;
 import it.univr.passportease.dto.output.LoginOutput;
 import it.univr.passportease.entity.User;
+import it.univr.passportease.helper.JWT;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -30,11 +31,11 @@ public class MapUser {
         return user;
     }
 
-    public LoginOutput mapUserToLoginOutput(User user, String accessToken) {
+    public LoginOutput mapUserToLoginOutput(User user, JWT accessToken) {
         return new LoginOutput(
                 user.getId(),
                 new JWTSet(
-                        accessToken,
+                        accessToken.getToken(),
                         user.getRefreshToken())
         );
     }

@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findById(@NotNull UUID id);
 
     void deleteByFiscalCode(String fiscalCode);
+
+    boolean existsById(@NotNull UUID id);
 }

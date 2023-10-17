@@ -8,6 +8,7 @@ import it.univr.passportease.entity.Worker;
 import it.univr.passportease.exception.notfound.OfficeNotFoundException;
 import it.univr.passportease.exception.notfound.WorkerNotFoundException;
 import it.univr.passportease.exception.security.WrongPasswordException;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.helper.map.MapWorker;
 import it.univr.passportease.repository.OfficeRepository;
 import it.univr.passportease.repository.WorkerRepository;
@@ -52,7 +53,7 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
         if (!authentication.isAuthenticated())
             throw new WrongPasswordException("Invalid credentials");
 
-        worker.setRefreshToken(jwtService.generateRefreshToken(UUID.fromString(id)));
+        worker.setRefreshToken(jwtService.generateRefreshToken(UUID.fromString(id)).getToken());
         workerRepository.save(worker);
 
         return mapWorker.mapWorkerToLoginOutput(
@@ -78,18 +79,18 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
         worker.setOffice(office.get());
 
         Worker addedWorker = workerRepository.save(worker);
-        String refreshToken = jwtService.generateRefreshToken(addedWorker.getId());
+        JWT refreshToken = jwtService.generateRefreshToken(addedWorker.getId());
 
-        addedWorker.setRefreshToken(refreshToken);
+        addedWorker.setRefreshToken(refreshToken.getToken());
         workerRepository.save(addedWorker);
 
-        String accessToken = jwtService.generateAccessToken(addedWorker.getId());
+        JWT accessToken = jwtService.generateAccessToken(addedWorker.getId());
 
         return new LoginOutput(
                 addedWorker.getId(),
                 new JWTSet(
-                        accessToken,
-                        refreshToken
+                        accessToken.getToken(),
+                        refreshToken.getToken()
                 )
         );
     }

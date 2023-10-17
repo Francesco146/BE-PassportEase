@@ -8,6 +8,7 @@ import it.univr.passportease.exception.illegalstate.OfficeOverloadedException;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.RequestNotFoundException;
 import it.univr.passportease.exception.notfound.WorkerNotFoundException;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.helper.map.MapAvailability;
 import it.univr.passportease.helper.map.MapRequest;
 import it.univr.passportease.helper.map.MapRequestOffice;
@@ -64,7 +65,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
 
     @Override
     @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
-    public Request createRequest(String token, RequestInput requestInput)
+    public Request createRequest(JWT token, RequestInput requestInput)
             throws WorkerNotFoundException, InvalidRequestTypeException, OfficeOverloadedException {
 
         Worker worker = workerRepository.findById(jwtService.extractId(token))
@@ -289,7 +290,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     @Override
-    public Request modifyRequest(String token, String requestID, RequestInput requestInput) {
+    public Request modifyRequest(JWT token, String requestID, RequestInput requestInput) {
         // get worker from db
         Worker worker = workerRepository.findById(jwtService.extractId(token)).orElseThrow(() ->
                 new WorkerNotFoundException("Worker not found")
@@ -320,7 +321,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     @Override
-    public void deleteRequest(String token, String requestID) {
+    public void deleteRequest(JWT token, String requestID) {
         // get worker from db
 
         Optional<Worker> worker = workerRepository.findById(jwtService.extractId(token));

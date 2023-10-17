@@ -1,6 +1,7 @@
 package it.univr.passportease.filter;
 
 import it.univr.passportease.config.AppUserDetailsService;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.service.jwt.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,11 +29,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
             throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        String token = null;
+        JWT token = new JWT();
         String id = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
+            token.setToken(authHeader.substring(7));
             id = jwtService.extractId(token).toString();
         }
 

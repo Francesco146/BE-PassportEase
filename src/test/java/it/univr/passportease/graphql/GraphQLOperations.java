@@ -32,13 +32,13 @@ public enum GraphQLOperations {
 
     registerUser {
         public String getGraphQl(String... args) {
-           String fiscalCode = args[0];
-           String email = args[1];
-           String name = args[2];
-           String surname = args[3];
-           String cityOfBirth = args[4];
-           String dateOfBirth = args[5];
-           String password = args[6];
+            String fiscalCode = args[0];
+            String email = args[1];
+            String name = args[2];
+            String surname = args[3];
+            String cityOfBirth = args[4];
+            String dateOfBirth = args[5];
+            String password = args[6];
 
             String registerUser = """
                     mutation {
@@ -87,19 +87,19 @@ public enum GraphQLOperations {
             String newEmail = args[0];
             String oldEmail = args[1];
 
-           String changeEmail = """
-                   mutation {
-                       changeEmail(
-                           newEmail: "%s"
-                           oldEmail: "%s"
-                       )
-                   }
-                   """;
-           return String.format(changeEmail, newEmail, oldEmail);
+            String changeEmail = """
+                    mutation {
+                        changeEmail(
+                            newEmail: "%s"
+                            oldEmail: "%s"
+                        )
+                    }
+                    """;
+            return String.format(changeEmail, newEmail, oldEmail);
         }
     },
 
-    refreshAccessToken{
+    refreshAccessToken {
         public String getGraphQl(String... args) {
             String refreshToken = args[0];
 

@@ -8,11 +8,12 @@ import it.univr.passportease.exception.notfound.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.TokenNotInRedisException;
 import it.univr.passportease.exception.security.WrongPasswordException;
+import it.univr.passportease.helper.JWT;
 
 public interface UserWorkerMutationService {
     void logout() throws TokenNotInRedisException, UserNotFoundException, AuthenticationCredentialsNotFoundException;
 
-    JWTSet refreshAccessToken(String token, String refreshToken) throws UserNotFoundException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException;
+    JWTSet refreshAccessToken(JWT token, JWT refreshToken) throws UserNotFoundException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException;
 
     void changePassword(String oldPassword, String newPassword) throws UserNotFoundException, WrongPasswordException, AuthenticationCredentialsNotFoundException;
 
