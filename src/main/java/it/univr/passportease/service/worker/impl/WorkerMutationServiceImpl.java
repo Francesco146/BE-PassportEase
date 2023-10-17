@@ -235,58 +235,13 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     private boolean isRequestDateInsideNotificationDate(Date requestStartDate, Date requestEndDate,
                                                         Date notificationStartDate, Date notificationEndDate) {
 
-        boolean isRequestStartDateAfterNotificationStartDate = requestStartDate.after(notificationStartDate);
-        boolean isRequestStartDateEqualsNotificationStartDate = requestStartDate.equals(notificationStartDate);
-        boolean isRequestEndDateBeforeNotificationEndDate = requestEndDate.before(notificationEndDate);
-        boolean isRequestEndDateEqualsNotificationEndDate = requestEndDate.equals(notificationEndDate);
-
-        // 1. requestDates are between notificationStartDate and notificationEndDate
-        if ((isRequestStartDateAfterNotificationStartDate || isRequestStartDateEqualsNotificationStartDate) &&
-                (isRequestEndDateBeforeNotificationEndDate || isRequestEndDateEqualsNotificationEndDate))
-            return true;
-
-        boolean isRequestStartDateBeforeNotificationEndDate = requestStartDate.before(notificationEndDate);
-        boolean isRequestEndDateAfterNotificationEndDate = requestEndDate.after(notificationEndDate);
-        // 2. requestStartDate is after notificationStartDate but before
-        // notificationEndDate and requestEndDate is after notificationEndDate
-        if (isRequestStartDateAfterNotificationStartDate &&
-                isRequestStartDateBeforeNotificationEndDate &&
-                isRequestEndDateAfterNotificationEndDate)
-            return true;
-
-        boolean isRequestStartDateBeforeNotificationStartDate = requestStartDate.before(notificationStartDate);
-        boolean isRequestEndDateAfterNotificationStartDate = requestEndDate.after(notificationStartDate);
-        // 3. requestStartDate is before notificationStartDate and requestEndDate is
-        // after notificationStartDate
-        return isRequestStartDateBeforeNotificationStartDate && isRequestEndDateAfterNotificationStartDate;
+        return !(notificationEndDate.before(requestStartDate) || notificationStartDate.after(requestEndDate));
     }
 
     private boolean isTimeInsideTime(LocalTime requestStartTime, LocalTime requestEndTime, LocalTime startTime,
                                      LocalTime endTime) {
 
-        boolean isRequestStartTimeAfterStartTime = requestStartTime.isAfter(startTime);
-        boolean isRequestStartTimeEqualsStartTime = requestStartTime.equals(startTime);
-        boolean isRequestEndTimeBeforeEndTime = requestEndTime.isBefore(endTime);
-        boolean isRequestEndTimeEqualsEndTime = requestEndTime.equals(endTime);
-
-        // 1. requestTimes are between startTime and endTime
-        if ((isRequestStartTimeAfterStartTime || isRequestStartTimeEqualsStartTime) &&
-                (isRequestEndTimeBeforeEndTime || isRequestEndTimeEqualsEndTime))
-            return true;
-
-        boolean isRequestStartTimeBeforeEndTime = requestStartTime.isBefore(endTime);
-        boolean isRequestEndTimeAfterEndTime = requestEndTime.isAfter(endTime);
-        // 2. requestStartTime is after startTime but before endTime and requestEndTime
-        // is after endTime
-        if (isRequestStartTimeAfterStartTime &&
-                isRequestStartTimeBeforeEndTime &&
-                isRequestEndTimeAfterEndTime)
-            return true;
-
-        boolean isRequestStartTimeBeforeStartTime = requestStartTime.isBefore(startTime);
-        boolean isRequestEndTimeAfterStartTime = requestEndTime.isAfter(startTime);
-        // 3. requestStartTime is before startTime and requestEndTime is after startTime
-        return isRequestStartTimeBeforeStartTime && isRequestEndTimeAfterStartTime;
+        return !(endTime.isBefore(requestStartTime) || startTime.isAfter(requestEndTime));
     }
 
     @Override

@@ -55,13 +55,13 @@ jobs:
                     fi
 
             -   name: Stop existing postgres and redis
-                run: docker compose --profile test down
+                run: docker compose -f compose.test.yaml down
 
             -   name: Start postgres and redis
-                run: docker compose --profile test up -d
+                run: docker compose -f compose.test.yaml up -d
 
             -   name: Run Unit Tests
                 run: mvn -B test --file pom.xml
 
             -   name: Stop Postgres and Redis
-                run: docker compose --profile test down
+                run: docker compose -f compose.test.yaml down
