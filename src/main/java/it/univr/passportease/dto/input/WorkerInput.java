@@ -1,4 +1,5 @@
 package it.univr.passportease.dto.input;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

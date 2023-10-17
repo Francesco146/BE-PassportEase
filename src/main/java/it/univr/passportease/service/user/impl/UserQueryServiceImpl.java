@@ -6,6 +6,7 @@ import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.repository.NotificationRepository;
 import it.univr.passportease.repository.RequestTypeRepository;
 import it.univr.passportease.repository.ReservationRepository;
@@ -33,7 +34,7 @@ public class UserQueryServiceImpl implements UserQueryService {
 
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
-    public User getUserDetails(String token) throws UserNotFoundException {
+    public User getUserDetails(JWT token) throws UserNotFoundException {
         UUID id = jwtService.extractId(token);
         Optional<User> user = userRepository.findById(id);
 
@@ -44,21 +45,21 @@ public class UserQueryServiceImpl implements UserQueryService {
 
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
-    public List<Notification> getUserNotifications(String token) {
+    public List<Notification> getUserNotifications(JWT token) {
         UUID id = jwtService.extractId(token);
         return notificationRepository.findByUserId(id);
     }
 
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
-    public List<Availability> getUserReservations(String token) {
+    public List<Availability> getUserReservations(JWT token) {
         UUID id = jwtService.extractId(token);
         return reservationRepository.findByUserId(id);
     }
 
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
-    public ReportDetails getReportDetailsByAvailabilityID(String availabilityId, String token)
+    public ReportDetails getReportDetailsByAvailabilityID(String availabilityId, JWT token)
             throws SecurityException, InvalidAvailabilityIDException {
         Object userToken = jwtService.getUserOrWorkerFromToken(token);
         if (!(userToken instanceof User))
@@ -99,7 +100,7 @@ public class UserQueryServiceImpl implements UserQueryService {
 
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
-    public List<RequestType> getRequestTypesByUser(String token) throws InvalidRequestTypeException {
+    public List<RequestType> getRequestTypesByUser(JWT token) throws InvalidRequestTypeException {
         UUID userId = jwtService.extractId(token);
         List<Availability> availabilities = reservationRepository.findByUserId(userId);
 

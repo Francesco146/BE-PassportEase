@@ -20,12 +20,18 @@ public class RequestAnalyzer {
     }
 
 
-    public String getTokenFromRequest() throws AuthenticationCredentialsNotFoundException {
+    public JWT getTokenFromRequest() throws AuthenticationCredentialsNotFoundException {
         String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ") ||
-                Boolean.TRUE.equals(jwtService.isTokenExpired(authorizationHeader.substring(7))) ||
-                !authorizationHeader.substring(7).matches(JWT_REGEX))
-            throw new AuthenticationCredentialsNotFoundException("Invalid token or no token provided");
-        return authorizationHeader.substring(7);
+
+        if (authorizationHeader == null)
+            throw new AuthenticationCredentialsNotFoundException("No token provided");
+
+        if (!authorizationHeader.substring(7).matches(JWT_REGEX) || !authorizationHeader.startsWith("Bearer "))
+            throw new AuthenticationCredentialsNotFoundException("Invalid token provided");
+
+        if (Boolean.TRUE.equals(jwtService.isTokenExpired(new JWT(authorizationHeader.substring(7)))))
+            throw new AuthenticationCredentialsNotFoundException("Expired token provided");
+
+        return new JWT(authorizationHeader.substring(7));
     }
 }

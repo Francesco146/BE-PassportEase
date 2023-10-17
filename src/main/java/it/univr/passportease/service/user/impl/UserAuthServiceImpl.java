@@ -53,7 +53,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         if (!authentication.isAuthenticated()) throw new WrongPasswordException("Authentication failed");
 
         user.setRefreshToken(
-                jwtService.generateRefreshToken(UUID.fromString(userId))
+                jwtService.generateRefreshToken(UUID.fromString(userId)).getToken()
         );
         userRepository.save(user);
 
@@ -84,7 +84,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         User addedUser = userRepository.save(user);
 
         // set refresh token after saving user because we need the user id
-        addedUser.setRefreshToken(jwtService.generateRefreshToken(addedUser.getId()));
+        addedUser.setRefreshToken(jwtService.generateRefreshToken(addedUser.getId()).getToken());
         userRepository.save(addedUser);
 
         return mapUser.mapUserToLoginOutput(

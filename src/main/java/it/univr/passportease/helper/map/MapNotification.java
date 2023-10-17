@@ -1,13 +1,11 @@
 package it.univr.passportease.helper.map;
 
-import java.util.Date;
-
-import org.springframework.stereotype.Component;
-
 import it.univr.passportease.dto.input.NotificationInputDB;
 import it.univr.passportease.entity.Notification;
-
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 @AllArgsConstructor
 @Component

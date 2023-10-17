@@ -8,6 +8,8 @@ import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.Worker;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.notfound.UserOrWorkerIDNotFoundException;
+import it.univr.passportease.helper.JWT;
+import it.univr.passportease.helper.Roles;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
@@ -32,28 +34,28 @@ public class JwtService {
     private final UserRepository userRepository;
     private RedisTemplate<String, String> redisTemplate;
 
-    public UUID extractId(String token) {
+    public UUID extractId(JWT token) {
         return UUID.fromString(extractClaim(token, Claims::getSubject));
     }
 
-    public Date extractExpiration(String token) {
+    public Date extractExpiration(JWT token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(JWT token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    private Claims extractAllClaims(JWT token) {
         return Jwts.parser()
                 .verifyWith(getAccessSignKey())
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(token.getToken())
                 .getPayload();
     }
 
-    public Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(JWT token) {
         /*
          * Checks for understanding if the token is expired:
          * 1. if the token is expired
@@ -64,38 +66,36 @@ public class JwtService {
          */
         return extractExpiration(token).before(new Date()) &&
                 redisTemplate.opsForValue().get(extractId(token).toString()) == null &&
-                !Objects.equals(redisTemplate.opsForValue().get(extractId(token).toString()), token) &&
+                !Objects.equals(redisTemplate.opsForValue().get(extractId(token).toString()), token.getToken()) &&
                 extractAllClaims(token).get("nbf") != null &&
                 extractAllClaims(token).get("nbf", Date.class).after(new Date()) &&
                 extractAllClaims(token).get("iat") != null &&
                 extractAllClaims(token).get("iat", Date.class).after(new Date());
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateToken(JWT token, UserDetails userDetails) {
         final String id = extractId(token).toString();
 
-        String tokenInRedis = redisTemplate.opsForValue().get(id);
-
-        if (tokenInRedis == null) return false;
+        JWT tokenInRedis = new JWT(Objects.requireNonNull(redisTemplate.opsForValue().get(id)));
 
         return id.equals(userDetails.getUsername()) &&
                 !isTokenExpired(token) &&
                 (tokenInRedis.equals(token));
     }
 
-    public String generateAccessToken(UUID id) throws UserOrWorkerIDNotFoundException {
+    public JWT generateAccessToken(UUID id) throws UserOrWorkerIDNotFoundException {
         Map<String, Object> claims = new HashMap<>();
         return createAccessToken(claims, id);
     }
 
-    private String createAccessToken(Map<String, Object> claims, UUID id) throws UserOrWorkerIDNotFoundException {
-        claims.put("role", getRoleById(id));
+    private JWT createAccessToken(Map<String, Object> claims, UUID id) throws UserOrWorkerIDNotFoundException {
+        claims.put("role", getRoleById(id).toString());
         claims.put("typ", "JWT");
 
         Date now = new Date(System.currentTimeMillis());
         Date exp15Minutes = new Date(System.currentTimeMillis() + 1000 * 60 * 15);
 
-        String accessToken = Jwts.builder()
+        JWT accessToken = new JWT(Jwts.builder()
                 .signWith(getAccessSignKey())
                 .claims().add(claims)
                 .subject(id.toString())
@@ -103,57 +103,59 @@ public class JwtService {
                 .expiration(exp15Minutes)
                 .notBefore(now)
                 .id(UUID.randomUUID().toString())
-                .and().compact();
+                .and().compact()
+        );
 
 
         saveTokenInRedis(id, accessToken);
         return accessToken;
     }
 
-    private void saveTokenInRedis(UUID id, String token) {
-        redisTemplate.opsForValue().set(id.toString(), token);
+    private void saveTokenInRedis(UUID id, JWT token) {
+        redisTemplate.opsForValue().set(id.toString(), token.getToken());
     }
 
-    public String generateRefreshToken(UUID id) {
+    public JWT generateRefreshToken(UUID id) {
         return createRefreshToken(id);
     }
 
-    private String createRefreshToken(UUID id) {
+    private JWT createRefreshToken(UUID id) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         long expMillisFor30Days = nowMillis + 1000L * 60 * 60 * 24 * 30; // 30 days
         Date fromNow30Days = new Date(expMillisFor30Days);
 
-        String refreshtoken = Jwts.builder()
+        JWT refreshtoken = new JWT(Jwts.builder()
                 .signWith(getRefreshSignKey())
                 .claims().add("typ", "JWT")
                 .issuedAt(now)
                 .expiration(fromNow30Days)
                 .id(UUID.randomUUID().toString())
                 .subject(id.toString())
-                .and().compact();
+                .and().compact()
+        );
 
         saveRefreshTokenInDB(id, refreshtoken);
 
         return refreshtoken;
     }
 
-    private void saveRefreshTokenInDB(UUID id, String refreshtoken) {
+    private void saveRefreshTokenInDB(UUID id, JWT refreshtoken) {
         Optional<User> user = userRepository.findById(id);
         Optional<Worker> worker = workerRepository.findById(id);
 
         if (user.isPresent()) {
-            user.get().setRefreshToken(refreshtoken);
+            user.get().setRefreshToken(refreshtoken.getToken());
             userRepository.save(user.get());
         } else if (worker.isPresent()) {
-            worker.get().setRefreshToken(refreshtoken);
+            worker.get().setRefreshToken(refreshtoken.getToken());
             workerRepository.save(worker.get());
         }
     }
 
-    private String getRoleById(UUID id) throws UserOrWorkerIDNotFoundException {
-        if (workerRepository.findById(id).isPresent()) return "worker";
-        else if (userRepository.findById(id).isPresent()) return "user";
+    private Roles getRoleById(UUID id) throws UserOrWorkerIDNotFoundException {
+        if (workerRepository.findById(id).isPresent()) return Roles.WORKER;
+        else if (userRepository.findById(id).isPresent()) return Roles.USER;
         throw new UserOrWorkerIDNotFoundException("ID does not belong to either Worker or User");
     }
 
@@ -167,11 +169,11 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public boolean invalidateAccessToken(String token) {
+    public Boolean invalidateAccessToken(JWT token) {
         return Boolean.TRUE.equals(redisTemplate.delete(extractId(token).toString()));
     }
 
-    public void invalidateRefreshToken(String token) throws UserNotFoundException {
+    public void invalidateRefreshToken(JWT token) throws UserNotFoundException {
         Object userOrWorker = getUserOrWorkerFromToken(token);
         if (userOrWorker instanceof User user) {
             user.setRefreshToken("");
@@ -183,7 +185,7 @@ public class JwtService {
     }
 
     // wrapper function to return User or Worker depending on the token
-    public Object getUserOrWorkerFromToken(String token) throws UserNotFoundException {
+    public Object getUserOrWorkerFromToken(JWT token) throws UserNotFoundException {
         UUID id = extractId(token);
         Optional<User> user = userRepository.findById(id);
         Optional<Worker> worker = workerRepository.findById(id);

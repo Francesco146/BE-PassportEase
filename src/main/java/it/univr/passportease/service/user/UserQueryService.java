@@ -8,18 +8,19 @@ import it.univr.passportease.entity.User;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.UserNotFoundException;
+import it.univr.passportease.helper.JWT;
 
 import java.util.List;
 
 public interface UserQueryService {
-    User getUserDetails(String token) throws UserNotFoundException;
+    User getUserDetails(JWT token) throws UserNotFoundException;
 
-    List<Notification> getUserNotifications(String token);
+    List<Notification> getUserNotifications(JWT token);
 
-    List<Availability> getUserReservations(String token);
+    List<Availability> getUserReservations(JWT token);
 
-    ReportDetails getReportDetailsByAvailabilityID(String availabilityId, String token)
+    ReportDetails getReportDetailsByAvailabilityID(String availabilityId, JWT token)
             throws SecurityException, InvalidAvailabilityIDException;
 
-    List<RequestType> getRequestTypesByUser(String token) throws InvalidRequestTypeException;
+    List<RequestType> getRequestTypesByUser(JWT token) throws InvalidRequestTypeException;
 }
