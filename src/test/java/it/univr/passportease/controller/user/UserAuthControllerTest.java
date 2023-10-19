@@ -70,7 +70,9 @@ class UserAuthControllerTest {
         citizen.setName("Zelda");
         citizen.setSurname("NotLink");
         citizen.setCityOfBirth("Palermo");
-        citizen.setDateOfBirth(new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()));
+        citizen.setDateOfBirth(
+                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime())
+        );
         citizen.setHealthCardNumber("1234567890");
 
         citizenRepository.save(citizen);
