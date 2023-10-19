@@ -173,6 +173,36 @@ public enum GraphQLOperations {
                 }
             """;
         }
+    },
+
+    getUserReservations {
+        public String getGraphQl(String... args) {
+            return """
+                    query {
+                        getUserReservations {
+                            id
+                            date
+                            time
+                            status
+                            request {
+                                id
+                                duration
+                                startDate
+                                endDate
+                                requestType {
+                                    id
+                                    name
+                                }
+                            }
+                            office {
+                                id
+                                name
+                                address
+                            }
+                        }
+                    }
+                    """;
+        }
     };
 
     public abstract String getGraphQl(String... args);

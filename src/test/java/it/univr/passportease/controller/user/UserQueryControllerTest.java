@@ -1,13 +1,13 @@
 package it.univr.passportease.controller.user;
 
 import it.univr.passportease.dto.input.NotificationInput;
-import it.univr.passportease.entity.Citizen;
-import it.univr.passportease.entity.Notification;
-import it.univr.passportease.entity.RequestType;
-import it.univr.passportease.entity.User;
+import it.univr.passportease.entity.*;
+import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.graphql.GraphQLOperations;
 import it.univr.passportease.helper.JWT;
+import it.univr.passportease.repository.AvailabilityRepository;
 import it.univr.passportease.repository.CitizenRepository;
+import it.univr.passportease.repository.ReservationRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.user.impl.UserMutationServiceImpl;
@@ -252,6 +252,41 @@ class UserQueryControllerTest {
 
         System.out.println("\u001B[32m");
         System.out.println("[!] getUserDetails successful");
+        System.out.println("\u001B[0m");
+    }
+
+    @Test
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
+    void getUserReservations() {
+
+        UUID availabilityID = userMutationService.createReservation(
+                UUID.fromString("507d06ec-ff38-4afc-aada-7bd1575fc44b"),
+                userRepository.findById(USER_ID).orElseThrow()
+        ).getId();
+
+        JWT token = jwtService.generateAccessToken(USER_ID);
+
+        System.out.println("[!] Generated token: \n" + token + "\n");
+
+        String getUserReservations = GraphQLOperations.getUserReservations.getGraphQl();
+
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getUserReservations, "data.getUserReservations", null, token);
+
+        Assertions.assertNotNull(response);
+
+        Assertions.assertDoesNotThrow(response.errors()::verify);
+
+        List<Availability> availabilities = response
+                .path("data.getUserReservations")
+                .entityList(Availability.class)
+                .get();
+
+        availabilities.forEach(System.out::println);
+
+        userMutationService.deleteReservation(availabilityID);
+
+        System.out.println("\u001B[32m");
+        System.out.println("[!] getUserReservations successful");
         System.out.println("\u001B[0m");
     }
 }
