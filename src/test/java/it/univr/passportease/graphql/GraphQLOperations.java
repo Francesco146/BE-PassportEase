@@ -155,6 +155,24 @@ public enum GraphQLOperations {
                     }
                     """;
         }
+    },
+
+    getUserDetails{
+        public String getGraphQl(String... args) {
+
+            return """
+                query {
+                    getUserDetails {
+                        id
+                        name
+                        surname
+                        cityOfBirth
+                        fiscalCode
+                        dateOfBirth
+                    }
+                }
+            """;
+        }
     };
 
     public abstract String getGraphQl(String... args);

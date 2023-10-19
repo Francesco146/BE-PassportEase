@@ -9,6 +9,5 @@ import lombok.*;
 @ToString
 @Getter
 public class JWT {
-    private static final String JWT_REGEX = "^[\\w-]*\\.[\\w-]*\\.[\\w-]*$";
     private String token;
 }

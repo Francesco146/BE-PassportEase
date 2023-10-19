@@ -66,7 +66,8 @@ class UserQueryControllerTest {
     @BeforeAll
     void createMockUser() {
         // save user if not exists
-        if (citizenRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent() || userRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent()) {
+        if (citizenRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent()
+                || userRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent()) {
             citizenRepository.deleteByFiscalCode("NTLZLD98R52G273R");
             userRepository.deleteByFiscalCode("NTLZLD98R52G273R");
         }
@@ -78,8 +79,7 @@ class UserQueryControllerTest {
         citizen.setSurname("NotLink");
         citizen.setCityOfBirth("Palermo");
         citizen.setDateOfBirth(
-                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime())
-        );
+                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()));
         citizen.setHealthCardNumber("1234567890");
 
         citizenRepository.save(citizen);
@@ -95,14 +95,11 @@ class UserQueryControllerTest {
         user.setCreatedAt(new Date());
         user.setCityOfBirth("Palermo");
         user.setDateOfBirth(
-                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime())
-        );
+                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()));
         user.setHashPassword(passwordEncoder.encode("ciao"));
         user.setRefreshToken(
                 jwtService.generateRefreshToken(
-                        userRepository.save(user).getId()
-                ).getToken()
-        );
+                        userRepository.save(user).getId()).getToken());
 
         userRepository.save(user);
 
@@ -127,7 +124,8 @@ class UserQueryControllerTest {
         System.out.println("\u001B[0m");
     }
 
-    Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass, JWT bearerToken) {
+    Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass,
+            JWT bearerToken) {
         if (bearerToken == null)
             return graphQlTester
                     .mutate()
@@ -139,12 +137,11 @@ class UserQueryControllerTest {
                     .get();
 
         return HttpGraphQlTester.builder(
-                        MockMvcWebTestClient.bindToApplicationContext(context)
-                                .configureClient()
-                                .baseUrl(BASE_URL)
-                                .build()
-                                .mutate()
-                )
+                MockMvcWebTestClient.bindToApplicationContext(context)
+                        .configureClient()
+                        .baseUrl(BASE_URL)
+                        .build()
+                        .mutate())
                 .headers(headers -> headers.setBearerAuth(bearerToken.getToken()))
                 .build()
                 .document(graphQlDocument)
@@ -152,7 +149,7 @@ class UserQueryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"USER", "VALIDATED"})
+    @WithMockUser(authorities = { "USER", "VALIDATED" })
     void getRequestTypesByUser() {
 
         JWT token = jwtService.generateAccessToken(USER_ID);
@@ -161,7 +158,8 @@ class UserQueryControllerTest {
 
         String getRequestTypesByUser = GraphQLOperations.getRequestTypesByUser.getGraphQl();
 
-        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getRequestTypesByUser, "data.getRequestTypesByUser", null, token);
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getRequestTypesByUser,
+                "data.getRequestTypesByUser", null, token);
 
         Assertions.assertNotNull(response);
 
@@ -180,7 +178,7 @@ class UserQueryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"USER", "VALIDATED"})
+    @WithMockUser(authorities = { "USER", "VALIDATED" })
     @SneakyThrows(ParseException.class)
     void getUserNotifications() {
 
@@ -189,10 +187,8 @@ class UserQueryControllerTest {
                         new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2023-08-05").getTime()),
                         new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2023-09-01").getTime()),
                         "Sede di Napoli",
-                        "ritiro passaporti"
-                        ),
-                userRepository.findById(USER_ID).orElseThrow()
-        ).getId();
+                        "ritiro passaporti"),
+                userRepository.findById(USER_ID).orElseThrow()).getId();
 
         JWT token = jwtService.generateAccessToken(USER_ID);
 
@@ -200,7 +196,8 @@ class UserQueryControllerTest {
 
         String getUserNotifications = GraphQLOperations.getUserNotifications.getGraphQl();
 
-        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getUserNotifications, "data.getUserNotifications", null, token);
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getUserNotifications,
+                "data.getUserNotifications", null, token);
 
         Assertions.assertNotNull(response);
 
@@ -217,6 +214,44 @@ class UserQueryControllerTest {
 
         System.out.println("\u001B[32m");
         System.out.println("[!] getUserNotifications successful");
+        System.out.println("\u001B[0m");
+    }
+
+    @Test
+    @WithMockUser(authorities = { "USER", "VALIDATED" })
+    @SneakyThrows(ParseException.class)
+    void getUserDetails() {
+
+        JWT token = jwtService.generateAccessToken(USER_ID);
+
+        System.out.println("[!] Generated token: \n" + token + "\n");
+
+        String getUserDetails = GraphQLOperations.getUserDetails.getGraphQl();
+
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getUserDetails,
+                "data.getUserDetails", null, token);
+
+        Assertions.assertNotNull(response);
+
+        Assertions.assertDoesNotThrow(response.errors()::verify);
+
+        User user = response
+                .path("data.getUserDetails")
+                .entity(User.class)
+                .get();
+
+        Assertions.assertEquals(USER_ID, user.getId());
+        Assertions.assertEquals("Zelda", user.getName());
+        Assertions.assertEquals("NotLink", user.getSurname());
+        Assertions.assertEquals("NTLZLD98R52G273R", user.getFiscalCode());
+        Assertions.assertEquals(new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()),
+                user.getDateOfBirth());
+        Assertions.assertEquals("Palermo", user.getCityOfBirth());
+
+        System.out.println(user);
+
+        System.out.println("\u001B[32m");
+        System.out.println("[!] getUserDetails successful");
         System.out.println("\u001B[0m");
     }
 }
