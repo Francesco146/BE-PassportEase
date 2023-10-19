@@ -1,6 +1,8 @@
 package it.univr.passportease.controller.user;
 
+import it.univr.passportease.dto.input.NotificationInput;
 import it.univr.passportease.entity.Citizen;
+import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.entity.User;
 import it.univr.passportease.graphql.GraphQLOperations;
@@ -8,6 +10,7 @@ import it.univr.passportease.helper.JWT;
 import it.univr.passportease.repository.CitizenRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
+import it.univr.passportease.service.user.impl.UserMutationServiceImpl;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
@@ -56,11 +59,14 @@ class UserQueryControllerTest {
     @Autowired
     private CitizenRepository citizenRepository;
 
+    @Autowired
+    private UserMutationServiceImpl userMutationService;
+
     @SneakyThrows(ParseException.class)
     @BeforeAll
     void createMockUser() {
         // save user if not exists
-        if (citizenRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent()) {
+        if (citizenRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent() || userRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent()) {
             citizenRepository.deleteByFiscalCode("NTLZLD98R52G273R");
             userRepository.deleteByFiscalCode("NTLZLD98R52G273R");
         }
@@ -170,6 +176,47 @@ class UserQueryControllerTest {
 
         System.out.println("\u001B[32m");
         System.out.println("[!] getRequestTypesByUser successful");
+        System.out.println("\u001B[0m");
+    }
+
+    @Test
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
+    @SneakyThrows(ParseException.class)
+    void getUserNotifications() {
+
+        UUID notificationID = userMutationService.createNotification(
+                new NotificationInput(
+                        new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2023-08-05").getTime()),
+                        new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2023-09-01").getTime()),
+                        "Sede di Napoli",
+                        "ritiro passaporti"
+                        ),
+                userRepository.findById(USER_ID).orElseThrow()
+        ).getId();
+
+        JWT token = jwtService.generateAccessToken(USER_ID);
+
+        System.out.println("[!] Generated token: \n" + token + "\n");
+
+        String getUserNotifications = GraphQLOperations.getUserNotifications.getGraphQl();
+
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getUserNotifications, "data.getUserNotifications", null, token);
+
+        Assertions.assertNotNull(response);
+
+        Assertions.assertDoesNotThrow(response.errors()::verify);
+
+        List<Notification> notifications = response
+                .path("data.getUserNotifications")
+                .entityList(Notification.class)
+                .get();
+
+        notifications.forEach(System.out::println);
+
+        userMutationService.deleteNotification(notificationID);
+
+        System.out.println("\u001B[32m");
+        System.out.println("[!] getUserNotifications successful");
         System.out.println("\u001B[0m");
     }
 }

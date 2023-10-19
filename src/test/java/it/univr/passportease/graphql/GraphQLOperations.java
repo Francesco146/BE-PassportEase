@@ -130,6 +130,31 @@ public enum GraphQLOperations {
                     }
                     """;
         }
+    },
+
+    getUserNotifications {
+        public String getGraphQl(String... args) {
+
+            return """
+                    query {
+                        getUserNotifications {
+                            id
+                            isReady
+                            startDate
+                            endDate
+                            office {
+                                id
+                                name
+                                address
+                            }
+                            requestType {
+                                id
+                                name
+                            }
+                        }
+                    }
+                    """;
+        }
     };
 
     public abstract String getGraphQl(String... args);
