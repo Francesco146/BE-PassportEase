@@ -196,6 +196,3 @@ README.html
 /dataSources/
 /dataSources.local.xml
 /.idea/
-/PassportEase.sql
-!/.env
-/.env
