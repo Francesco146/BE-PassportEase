@@ -157,21 +157,21 @@ public enum GraphQLOperations {
         }
     },
 
-    getUserDetails{
+    getUserDetails {
         public String getGraphQl(String... args) {
 
             return """
-                query {
-                    getUserDetails {
-                        id
-                        name
-                        surname
-                        cityOfBirth
-                        fiscalCode
-                        dateOfBirth
-                    }
-                }
-            """;
+                        query {
+                            getUserDetails {
+                                id
+                                name
+                                surname
+                                cityOfBirth
+                                fiscalCode
+                                dateOfBirth
+                            }
+                        }
+                    """;
         }
     },
 
