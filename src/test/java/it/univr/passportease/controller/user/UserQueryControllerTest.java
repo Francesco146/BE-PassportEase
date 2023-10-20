@@ -4,7 +4,10 @@ import it.univr.passportease.dto.output.ReportDetails;
 import it.univr.passportease.entity.*;
 import it.univr.passportease.graphql.GraphQLOperations;
 import it.univr.passportease.helper.JWT;
+import it.univr.passportease.repository.CitizenRepository;
+import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
+import it.univr.passportease.service.user.impl.UserMutationServiceImpl;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
@@ -12,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
@@ -41,12 +46,23 @@ class UserQueryControllerTest {
     @Autowired
     private GraphQlTester graphQlTester;
     @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+    @Autowired
     private JwtService jwtService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CitizenRepository citizenRepository;
 
     @Autowired
+    private UserMutationServiceImpl userMutationService;
+
+
 
     Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass,
-            JWT bearerToken) {
+                              JWT bearerToken) {
         if (bearerToken == null)
             return graphQlTester
                     .mutate()
@@ -58,11 +74,11 @@ class UserQueryControllerTest {
                     .get();
 
         return HttpGraphQlTester.builder(
-                MockMvcWebTestClient.bindToApplicationContext(context)
-                        .configureClient()
-                        .baseUrl(BASE_URL)
-                        .build()
-                        .mutate())
+                        MockMvcWebTestClient.bindToApplicationContext(context)
+                                .configureClient()
+                                .baseUrl(BASE_URL)
+                                .build()
+                                .mutate())
                 .headers(headers -> headers.setBearerAuth(bearerToken.getToken()))
                 .build()
                 .document(graphQlDocument)
@@ -70,7 +86,7 @@ class UserQueryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = { "USER", "VALIDATED" })
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
     void getRequestTypesByUser() {
 
         JWT token = jwtService.generateAccessToken(USER_ID);
@@ -106,8 +122,7 @@ class UserQueryControllerTest {
 
         System.out.println("[!] Generated token: \n" + token + "\n");
 
-        String getReportDetailsByAvailabilityID = GraphQLOperations.getReportDetailsByAvailabilityID
-                .getGraphQl("c3030ccf-67e0-4d58-a7d0-554a16a0fad6");
+        String getReportDetailsByAvailabilityID = GraphQLOperations.getReportDetailsByAvailabilityID.getGraphQl("c3030ccf-67e0-4d58-a7d0-554a16a0fad6");
 
         GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(
                 getReportDetailsByAvailabilityID,
@@ -129,8 +144,9 @@ class UserQueryControllerTest {
         System.out.println("\u001B[0m");
     }
 
+
     @Test
-    @WithMockUser(authorities = { "USER", "VALIDATED" })
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
     void getUserNotifications() {
 
         JWT token = jwtService.generateAccessToken(USER_ID);
@@ -159,7 +175,7 @@ class UserQueryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = { "USER", "VALIDATED" })
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
     @SneakyThrows(ParseException.class)
     void getUserDetails() {
 
@@ -197,7 +213,7 @@ class UserQueryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = { "USER", "VALIDATED" })
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
     void getUserReservations() {
 
         JWT token = jwtService.generateAccessToken(USER_ID);
@@ -206,8 +222,7 @@ class UserQueryControllerTest {
 
         String getUserReservations = GraphQLOperations.getUserReservations.getGraphQl();
 
-        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getUserReservations,
-                "data.getUserReservations", null, token);
+        GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getUserReservations, "data.getUserReservations", null, token);
 
         Assertions.assertNotNull(response);
 
@@ -224,5 +239,4 @@ class UserQueryControllerTest {
         System.out.println("[!] getUserReservations successful");
         System.out.println("\u001B[0m");
     }
-
 }
