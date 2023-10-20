@@ -9,6 +9,10 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The {@code Availability} class is an entity model object. It represents the availability of an {@link Office} for
+ * a specific {@link Request} at a specific {@link Date} and {@link LocalTime}.
+ */
 @Entity
 @Table(name = "availabilities")
 @NoArgsConstructor
@@ -51,6 +55,11 @@ public class Availability {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o The object to compare with this {@link  Availability}.
+     * @return {@code  true} if the given object is an instance of {@link  Availability} and has the same {@code id} as
+     * this {@link Availability}, {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -76,6 +85,9 @@ public class Availability {
         return false;
     }
 
+    /**
+     * @return The hash code of this {@link Availability}.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

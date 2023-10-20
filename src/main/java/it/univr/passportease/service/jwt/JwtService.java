@@ -22,6 +22,9 @@ import javax.crypto.SecretKey;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * This class is used to generate and validate JWT tokens. It manages both access and refresh tokens.
+ */
 @Service
 @AllArgsConstructor
 public class JwtService {
@@ -34,19 +37,37 @@ public class JwtService {
     private final UserRepository userRepository;
     private RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * @param token JWT token
+     * @return the id of the user or worker that owns the token
+     */
     public UUID extractId(JWT token) {
         return UUID.fromString(extractClaim(token, Claims::getSubject));
     }
 
+    /**
+     * @param token JWT token
+     * @return the expiration date of the token
+     */
     public Date extractExpiration(JWT token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    /**
+     * @param token          JWT token
+     * @param claimsResolver function that takes a Claims object and returns a T object
+     * @param <T>            type of the object to return
+     * @return the object of type T extracted from the token
+     */
     public <T> T extractClaim(JWT token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
+    /**
+     * @param token JWT token
+     * @return all the claims of the token
+     */
     private Claims extractAllClaims(JWT token) {
         return Jwts.parser()
                 .verifyWith(getAccessSignKey())
@@ -55,6 +76,19 @@ public class JwtService {
                 .getPayload();
     }
 
+    /**
+     * A token is expired if:
+     * <ul>
+     *     <li>it is expired</li>
+     *     <li>it is not in redis</li>
+     *     <li>the token in redis is not the same as the token in the request</li>
+     *     <li>the token has nbf (not before) field and if it is after the current time</li>
+     *     <li>the token has iat (issued at) field and if it is after the current time</li>
+     * </ul>
+     *
+     * @param token JWT token
+     * @return true if the token is expired, false otherwise.
+     */
     public Boolean isTokenExpired(JWT token) {
         /*
          * Checks for understanding if the token is expired:
@@ -73,7 +107,12 @@ public class JwtService {
                 extractAllClaims(token).get("iat", Date.class).after(new Date());
     }
 
-    public Boolean validateToken(JWT token, UserDetails userDetails) {
+    /**
+     * @param token       JWT token
+     * @param userDetails user details of the user that owns the token
+     * @return true if the token is valid, false otherwise
+     */
+    public Boolean validTokenFromUserDetails(JWT token, UserDetails userDetails) {
         final String id = extractId(token).toString();
 
         JWT tokenInRedis = new JWT(Objects.requireNonNull(redisTemplate.opsForValue().get(id)));
@@ -83,11 +122,22 @@ public class JwtService {
                 (tokenInRedis.equals(token));
     }
 
+    /**
+     * @param id id of the user or worker
+     * @return a new access token, valid for 15 minutes
+     * @throws UserOrWorkerIDNotFoundException if the id does not belong to either a user or a worker
+     */
     public JWT generateAccessToken(UUID id) throws UserOrWorkerIDNotFoundException {
         Map<String, Object> claims = new HashMap<>();
         return createAccessToken(claims, id);
     }
 
+    /**
+     * @param claims claims to add to the token
+     * @param id     id of the user or worker
+     * @return a new access token, valid for 15 minutes
+     * @throws UserOrWorkerIDNotFoundException if the id does not belong to either a user or a worker
+     */
     private JWT createAccessToken(Map<String, Object> claims, UUID id) throws UserOrWorkerIDNotFoundException {
         claims.put("role", getRoleById(id).toString());
         claims.put("typ", "JWT");
@@ -111,14 +161,28 @@ public class JwtService {
         return accessToken;
     }
 
+    /**
+     * Saves the token in redis with the key being the id of the user or worker.
+     *
+     * @param id    id of the user or worker
+     * @param token JWT token
+     */
     private void saveTokenInRedis(UUID id, JWT token) {
         redisTemplate.opsForValue().set(id.toString(), token.getToken());
     }
 
+    /**
+     * @param id id of the user or worker
+     * @return a new refresh token, valid for 30 days
+     */
     public JWT generateRefreshToken(UUID id) {
         return createRefreshToken(id);
     }
 
+    /**
+     * @param id id of the user or worker
+     * @return a new refresh token, valid for 30 days
+     */
     private JWT createRefreshToken(UUID id) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
@@ -140,6 +204,12 @@ public class JwtService {
         return refreshtoken;
     }
 
+    /**
+     * Saves the refresh token in the database.
+     *
+     * @param id           id of the user or worker
+     * @param refreshtoken JWT refresh token
+     */
     private void saveRefreshTokenInDB(UUID id, JWT refreshtoken) {
         Optional<User> user = userRepository.findById(id);
         Optional<Worker> worker = workerRepository.findById(id);
@@ -153,38 +223,70 @@ public class JwtService {
         }
     }
 
+    /**
+     * @param id id of the user or worker
+     * @return an {@link Roles} object representing the role of the user or worker
+     * @throws UserOrWorkerIDNotFoundException if the id does not belong to either a user or a worker
+     */
     private Roles getRoleById(UUID id) throws UserOrWorkerIDNotFoundException {
         if (workerRepository.findById(id).isPresent()) return Roles.WORKER;
         else if (userRepository.findById(id).isPresent()) return Roles.USER;
         throw new UserOrWorkerIDNotFoundException("ID does not belong to either Worker or User");
     }
 
+    /**
+     * @return the {@link SecretKey} used to sign the access token
+     */
     private SecretKey getAccessSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(ACCESS_TOKEN_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /**
+     * @return the {@link SecretKey} used to sign the refresh token
+     */
     private SecretKey getRefreshSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(REFRESH_TOKEN_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /**
+     * @param token JWT Access token
+     * @return true if the access token is deleted from redis, false otherwise
+     */
     public Boolean invalidateAccessToken(JWT token) {
+        // TODO: throw exception if token was not deleted
         return Boolean.TRUE.equals(redisTemplate.delete(extractId(token).toString()));
     }
 
+    /**
+     * Invalidates the refresh token by setting it to an empty string.
+     *
+     * @param token JWT Refresh token
+     * @throws UserNotFoundException if the user or worker is not found
+     */
     public void invalidateRefreshToken(JWT token) throws UserNotFoundException {
         Object userOrWorker = getUserOrWorkerFromToken(token);
+        if (!(userOrWorker instanceof User) && !(userOrWorker instanceof Worker))
+            throw new UserNotFoundException("Invalid User or Worker ID");
+
         if (userOrWorker instanceof User user) {
             user.setRefreshToken("");
             userRepository.save(user);
-        } else if (userOrWorker instanceof Worker worker) {
-            worker.setRefreshToken("");
-            workerRepository.save(worker);
+            return;
         }
+
+        ((Worker) userOrWorker).setRefreshToken("");
+        workerRepository.save((Worker) userOrWorker);
     }
 
-    // wrapper function to return User or Worker depending on the token
+    /**
+     * Wrapper function to return User or Worker depending on the token.
+     *
+     * @param token JWT token
+     * @return the user or worker that owns the token
+     * @throws UserNotFoundException if the user or worker is not found
+     */
     public Object getUserOrWorkerFromToken(JWT token) throws UserNotFoundException {
         UUID id = extractId(token);
         Optional<User> user = userRepository.findById(id);

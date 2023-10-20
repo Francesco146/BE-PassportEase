@@ -7,8 +7,15 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Repository for the {@link RequestType} entity.
+ */
 @Repository
 public interface RequestTypeRepository extends JpaRepository<RequestType, UUID> {
+    /**
+     * @param name the name of the {@link RequestType} to find
+     * @return the {@link RequestType} with the given name, as an {@link Optional}
+     */
     Optional<RequestType> findByName(String name);
 
 }

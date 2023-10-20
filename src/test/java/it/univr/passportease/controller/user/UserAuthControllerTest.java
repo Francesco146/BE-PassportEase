@@ -29,6 +29,22 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Test class for {@link UserAuthController}
+ * <p>
+ * This class tests the following methods:
+ *    <ul>
+ *        <li>{@link UserAuthController#registerUser}</li>
+ *        <li>{@link UserAuthController#loginUser}</li>
+ *        <li>{@link UserAuthController#logout}</li>
+ *        <li>{@link UserAuthController#changePassword}</li>
+ *        <li>{@link UserAuthController#changeEmail}</li>
+ *        <li>{@link UserAuthController#refreshAccessToken}</li>
+ *    </ul>
+ * The first method is tested in {@link UserAuthControllerTest#registerUser()}, to avoid problems with the other tests
+ *
+ * @see UserQueryControllerTest
+ */
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureGraphQlTester
@@ -55,6 +71,18 @@ class UserAuthControllerTest {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * Create a mock user and save it in the database, if not exists
+     * User data:
+     * <ul>
+     *     <li>Fiscal Code: NTLZLD98R52G273R</li>
+     *     <li>Name: Zelda</li>
+     *     <li>Surname: NotLink</li>
+     *     <li>City of Birth: Palermo</li>
+     *     <li>Date of Birth: 1998-10-12</li>
+     *     <li>Health Card Number: 1234567890</li>
+     * </ul>
+     */
     @SneakyThrows(ParseException.class)
     @BeforeAll
     void createMockUser() {
@@ -82,6 +110,9 @@ class UserAuthControllerTest {
         System.out.println("\u001B[0m");
     }
 
+    /**
+     * Delete the mock user and flush the redis cache
+     */
     @AfterAll
     void deleteMockUser() {
         userRepository.deleteByFiscalCode("NTLZLD98R52G273R");
@@ -96,6 +127,10 @@ class UserAuthControllerTest {
         System.out.println("\u001B[0m");
     }
 
+    /**
+     * Register a new user and check if the response is correct
+     * Save the user id and the refresh token for the next tests
+     */
     @Test
     @Order(1)
     void registerUser() {
@@ -132,6 +167,10 @@ class UserAuthControllerTest {
         REFRESH_TOKEN = new JWT(jwtSet.refreshToken());
     }
 
+    /**
+     * Login a user and check if the response is correct
+     * Save the refresh token for the next tests
+     */
     @Test
     void loginUser() {
         if (MOCK_USER_ID == null)
@@ -162,6 +201,13 @@ class UserAuthControllerTest {
         REFRESH_TOKEN = new JWT(jwtSet.refreshToken());
     }
 
+    /**
+     * @param graphQlDocument the graphQl query as string
+     * @param pathResponse    the path of the response
+     * @param objectClass     the class of the response
+     * @param bearerToken     the bearer token (optional)
+     * @return the response of the query, as object of the class passed as parameter if {@code bearerToken} is null, as GraphQlTester.Response otherwise
+     */
     Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass, JWT bearerToken) {
         if (bearerToken == null)
             return graphQlTester
@@ -186,6 +232,10 @@ class UserAuthControllerTest {
                 .execute();
     }
 
+    /**
+     * Logout a user and check if the response is correct
+     * TODO: See if the refresh token is invalidated
+     */
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void logoutUser() {
@@ -210,6 +260,10 @@ class UserAuthControllerTest {
         System.out.println("[!] Logout output: \n" + logoutJson() + "\n");
     }
 
+    /**
+     * Change the password of a user and check if the response is correct
+     * TODO: See if password is changed in the database
+     */
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void changePassword() {
@@ -232,6 +286,10 @@ class UserAuthControllerTest {
         System.out.println("[!] changePassword output: \n" + changePasswordJson() + "\n");
     }
 
+    /**
+     * Change the email of a user and check if the response is correct
+     * TODO: See if email is changed in the database
+     */
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void changeEmail() {
@@ -258,6 +316,10 @@ class UserAuthControllerTest {
         System.out.println("[!] changeEmail output: \n" + changeEmailJson(newEmail) + "\n");
     }
 
+    /**
+     * Refresh the access token of a user and check if the response is correct
+     * TODO: See if the old refresh token is invalidated
+     */
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void refreshAccessToken() {
@@ -290,6 +352,10 @@ class UserAuthControllerTest {
         System.out.println("[!] refreshAccessToken output: \n" + jwtSet.accessToken() + "\n");
     }
 
+    /**
+     * @param loginOutput the login output object
+     * @return the json of the login response
+     */
     private String loginOutputToJson(LoginOutput loginOutput) {
         return """
                 "data": {
@@ -304,6 +370,9 @@ class UserAuthControllerTest {
                 """.formatted(loginOutput.id(), loginOutput.jwtSet().accessToken(), loginOutput.jwtSet().refreshToken());
     }
 
+    /**
+     * @return the json of the logout response
+     */
     private String logoutJson() {
         return """
                 "data": {
@@ -314,6 +383,9 @@ class UserAuthControllerTest {
                 """;
     }
 
+    /**
+     * @return the json of the changePassword response
+     */
     private String changePasswordJson() {
         return """
                 "data": {
@@ -324,6 +396,10 @@ class UserAuthControllerTest {
                 """;
     }
 
+    /**
+     * @param newEmail the new email of the user
+     * @return the json of the changeEmail response
+     */
     private String changeEmailJson(String newEmail) {
         return """
                 "data": {

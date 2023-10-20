@@ -7,6 +7,9 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The {@link Category} entity that represents a category of a {@link Citizen}.
+ */
 @Entity
 @Table(name = "categories")
 @NoArgsConstructor
@@ -31,6 +34,11 @@ public class Category {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o The object to compare with this {@link Category}.
+     * @return {@code true} if the given object is an instance of {@link Category} and has the same {@link UUID} as this
+     * {@link Category}, {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -56,6 +64,9 @@ public class Category {
         return false;
     }
 
+    /**
+     * @return The hash code of this {@link Category}.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

@@ -6,6 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * This class is used to analyze the request and extract the JWT token from the Authorization header.
+ * It also checks if the token is valid and not expired.
+ */
 @Service
 public class RequestAnalyzer {
 
@@ -13,6 +17,10 @@ public class RequestAnalyzer {
     private final HttpServletRequest request;
     private final JwtService jwtService;
 
+    /**
+     * @param jwtService The service used to check if the token is valid and not expired
+     * @param request    The request to analyze
+     */
     @Autowired
     RequestAnalyzer(JwtService jwtService, HttpServletRequest request) {
         this.jwtService = jwtService;
@@ -20,6 +28,10 @@ public class RequestAnalyzer {
     }
 
 
+    /**
+     * @return The JWT token extracted from the Authorization header
+     * @throws AuthenticationCredentialsNotFoundException If the token is not provided, is invalid or expired
+     */
     public JWT getTokenFromRequest() throws AuthenticationCredentialsNotFoundException {
         String authorizationHeader = request.getHeader("Authorization");
 

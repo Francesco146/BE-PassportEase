@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * This class implements the {@link UserMutationService} interface.
+ * It contains all the GraphQL mutation methods that a user can perform.
+ */
 @Service
 @AllArgsConstructor
 public class UserMutationServiceImpl implements UserMutationService {
@@ -28,6 +32,13 @@ public class UserMutationServiceImpl implements UserMutationService {
 
     private final MapNotification mapNotification;
 
+    /**
+     * @param notificationInput contains the notification data
+     * @param user              contains the user data
+     * @return the created notification
+     * @throws OfficeNotFoundException     if the office is not found
+     * @throws InvalidRequestTypeException if the request type is not found
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public Notification createNotification(NotificationInput notificationInput, User user)
@@ -46,6 +57,11 @@ public class UserMutationServiceImpl implements UserMutationService {
         return notification;
     }
 
+    /**
+     * Deletes a notification by id
+     *
+     * @param notificationId contains the notification id
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public void deleteNotification(UUID notificationId) {
@@ -53,6 +69,14 @@ public class UserMutationServiceImpl implements UserMutationService {
         notification.ifPresent(notificationRepository::delete);
     }
 
+    /**
+     * @param notificationInput contains the notification data
+     * @param notificationId    contains the notification id
+     * @return the modified notification
+     * @throws NotificationNotFoundException if the notification is not found
+     * @throws OfficeNotFoundException       if the office is not found
+     * @throws RequestTypeNotFoundException  if the request type is not found
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public Notification modifyNotification(NotificationInput notificationInput, UUID notificationId) throws NotificationNotFoundException, OfficeNotFoundException, RequestTypeNotFoundException {
@@ -80,10 +104,17 @@ public class UserMutationServiceImpl implements UserMutationService {
         return notificationModified;
     }
 
+    /**
+     * @param availabilityId contains the availability id
+     * @param user           contains the user data
+     * @return the created reservation
+     * @throws UserNotFoundException         if the user is not found
+     * @throws AvailabilityNotFoundException if the availability is not found
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public Availability createReservation(UUID availabilityId, User user)
-            throws AvailabilityNotFoundException, UserNotFoundException {
+            throws UserNotFoundException, AvailabilityNotFoundException {
 
         Optional<Availability> availabilityOptional = availabilityRepository.findById(availabilityId);
 
@@ -100,6 +131,13 @@ public class UserMutationServiceImpl implements UserMutationService {
         return availability;
     }
 
+    /**
+     * Deletes a reservation by id, setting the availability status to {@link Status#FREE}
+     * and setting the availability user to {@literal  null}
+     *
+     * @param availabilityId contains the availability id
+     * @throws AvailabilityNotFoundException if the availability is not found
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public void deleteReservation(UUID availabilityId) throws AvailabilityNotFoundException {

@@ -7,6 +7,10 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The {@code RequestOffice} class is an entity that represents the relationship between a {@link Request} and an
+ * {@link Office}.
+ */
 @Entity
 @Table(name = "requests_offices")
 @NoArgsConstructor
@@ -35,6 +39,11 @@ public class RequestOffice {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o The object to compare.
+     * @return {@code true} if the given object is an instance of {@link RequestOffice} and has the same {@code id} as
+     * this one, {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -60,6 +69,9 @@ public class RequestOffice {
         return false;
     }
 
+    /**
+     * @return The hash code of this object.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

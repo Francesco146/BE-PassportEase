@@ -7,6 +7,10 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The {@code Worker} class is an entity that represents a worker. The worker is
+ * the person who is responsible for the management of the offices.
+ */
 @Entity
 @RequiredArgsConstructor
 @Table(name = "workers")
@@ -47,6 +51,10 @@ public class Worker {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o The object to compare.
+     * @return {@code true} if the objects have the same id, {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -72,6 +80,9 @@ public class Worker {
         return false;
     }
 
+    /**
+     * @return The hash code of the id.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

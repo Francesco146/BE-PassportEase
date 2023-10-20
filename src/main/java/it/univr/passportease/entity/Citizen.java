@@ -7,6 +7,10 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The {@link Citizen} class is an entity that represents a citizen. It is
+ * used as a white list for the users that can access the system.
+ */
 @Entity
 @Table(name = "citizens")
 @NoArgsConstructor
@@ -47,6 +51,11 @@ public class Citizen {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o The object to compare with this {@link Citizen}.
+     * @return {@code true} if the given object is an instance of {@link Citizen} and
+     * if it has the same {@link UUID} as this {@link Citizen}.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -72,6 +81,9 @@ public class Citizen {
         return false;
     }
 
+    /**
+     * @return The hash code of this {@link Citizen}.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

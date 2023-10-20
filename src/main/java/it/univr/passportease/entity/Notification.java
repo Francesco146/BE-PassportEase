@@ -7,6 +7,9 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The {@link Notification} entity that represents a notification that can be requested by a {@link User} to a {@link Office}.
+ */
 @Entity
 @Table(name = "notifications")
 @NoArgsConstructor
@@ -54,6 +57,11 @@ public class Notification {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o The object to compare with this {@link Notification}.
+     * @return {@code true} if the given object is a {@link Notification} and has the same {@link UUID} as this {@link Notification}.
+     * {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -79,6 +87,9 @@ public class Notification {
         return false;
     }
 
+    /**
+     * @return The hash code of this {@link Notification}.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

@@ -24,7 +24,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.stream.Stream.iterate;
 
@@ -111,9 +114,7 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         return requestType.get();
     }
 
-    private boolean isWorkersNotEnoughForRequest(RequestInput requestInput, List<Office> offices)
-            throws OfficeOverloadedException {
-
+    private boolean isWorkersNotEnoughForRequest(RequestInput requestInput, List<Office> offices) {
 
         for (Office office : offices) {
             long totalNumberOfWorker = workerRepository.countByOffice(office);
@@ -155,14 +156,18 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         offices.stream()
                 .map(office -> notificationRepository.findAllByOfficeAndIsReadyAndRequestType(
                         office, false, requestType))
-                .forEach(notifications -> notifications.stream()
-                        .filter(notification -> isRequestDateInsideNotificationDate(
-                                startDate, endDate, notification.getStartDate(), notification.getEndDate()) &&
-                                !notification.getIsReady())
-                        .forEach(notification -> {
-                            notification.setIsReady(true);
-                            notificationRepository.save(notification);
-                        }));
+                .forEach(notifications ->
+                        notifications.stream()
+                                .filter(notification ->
+                                        isRequestDateInsideNotificationDate(startDate, endDate, notification.getStartDate(), notification.getEndDate())
+                                                && !notification.getIsReady()
+                                )
+                                .forEach(notification -> {
+                                            notification.setIsReady(true);
+                                            notificationRepository.save(notification);
+                                        }
+                                )
+                );
     }
 
     private void createAvailabilities(Date startDate, Date endDate, List<Office> offices, Request request) {
@@ -170,10 +175,17 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         LocalDate start = startDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
         LocalDate end = endDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 
-        List<OfficeWorkingDay> officeWorkingDays = new ArrayList<>();
-        for (Office office : offices) officeWorkingDays.addAll(officeWorkingDayRepository.findByOffice(office));
+        List<OfficeWorkingDay> officeWorkingDays = offices
+                .stream()
+                .flatMap(
+                        office ->
+                                officeWorkingDayRepository
+                                        .findByOffice(office)
+                                        .stream()
+                )
+                .toList();
 
-        for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
+        iterate(start, date -> date.isBefore(end), date -> date.plusDays(1)).forEach(date -> {
             Day day = Day.valueOf(date.getDayOfWeek().toString());
             processOfficeWorkingDays(
                     day,
@@ -181,11 +193,12 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
                     date,
                     request
             );
-        }
+        });
     }
 
     private void processOfficeWorkingDays(Day day, List<OfficeWorkingDay> officeWorkingDays, LocalDate date, Request request) {
-        officeWorkingDays.stream()
+        officeWorkingDays
+                .stream()
                 .filter(officeWorkingDay ->
                         officeWorkingDay.getDay().equals(day))
                 .forEach(officeWorkingDay ->
@@ -219,7 +232,8 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
 
         iterate(startTime, time -> time.isBefore(endTime), time -> time.plusMinutes(duration))
                 .map(time ->
-                        mapAvailability.mapRequestToAvailability(request, office, date, time))
+                        mapAvailability.mapRequestToAvailability(request, office, date, time)
+                )
                 .forEach(availabilityRepository::save);
     }
 
@@ -245,7 +259,8 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     @Override
-    public Request modifyRequest(JWT token, String requestID, RequestInput requestInput) {
+    public Request modifyRequest(JWT token, String requestID, RequestInput requestInput)
+            throws WorkerNotFoundException, RequestNotFoundException, OfficeOverloadedException {
         // get worker from db
         Worker worker = workerRepository.findById(jwtService.extractId(token)).orElseThrow(() ->
                 new WorkerNotFoundException("Worker not found")
@@ -276,8 +291,8 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
     }
 
     @Override
-    public void deleteRequest(JWT token, String requestID) {
-        // get worker from db
+    public void deleteRequest(JWT token, String requestID)
+            throws WorkerNotFoundException, RequestNotFoundException {
 
         Optional<Worker> worker = workerRepository.findById(jwtService.extractId(token));
         if (worker.isEmpty())

@@ -7,6 +7,9 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The {@code User} class is an entity that represents a user, or costumers, of the application.
+ */
 @Entity
 @RequiredArgsConstructor
 @Table(name = "users")
@@ -59,6 +62,10 @@ public class User {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o the object to compare
+     * @return {@code true} if the object is equals to this, {@code false} otherwise
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -84,6 +91,9 @@ public class User {
         return false;
     }
 
+    /**
+     * @return the hash code of this object
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

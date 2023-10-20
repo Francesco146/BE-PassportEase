@@ -7,6 +7,10 @@ import lombok.ToString;
 
 import java.util.Date;
 
+/**
+ * This class is used to store the data of a register input.
+ * It's from the user input.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

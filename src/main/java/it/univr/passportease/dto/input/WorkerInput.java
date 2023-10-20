@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * WorkerInput is the class that represents the input data from the worker. Used to log in the worker.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * This class is used to store the data of an office input from the user.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

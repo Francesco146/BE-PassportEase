@@ -7,6 +7,10 @@ import lombok.ToString;
 
 import java.util.Date;
 
+/**
+ * Class used to represent the input of the notification service, that is the
+ * input from the user.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

@@ -18,6 +18,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Filter that intercepts every request and checks if the user is authenticated.
+ */
 @Component
 @AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -25,6 +28,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private JwtService jwtService;
     private AppUserDetailsService userDetailsService;
 
+    /**
+     * @param request     The request to be filtered
+     * @param response    The response to be filtered
+     * @param filterChain The chain of filters to be applied
+     * @throws ServletException If the request cannot be handled
+     * @throws IOException      If an input or output error occurs while the filter is handling the request, in the
+     *                          filterChain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
             throws ServletException, IOException {
@@ -39,7 +50,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(id);
-            if (jwtService.validateToken(token, userDetails).equals(true)) {
+            if (jwtService.validTokenFromUserDetails(token, userDetails).equals(true)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

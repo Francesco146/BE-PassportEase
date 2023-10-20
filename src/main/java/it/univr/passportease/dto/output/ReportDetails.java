@@ -8,6 +8,9 @@ import lombok.ToString;
 import java.time.LocalTime;
 import java.util.Date;
 
+/**
+ * This class represents the details of a report. Used to show the details of a report in the report page.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

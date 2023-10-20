@@ -9,6 +9,12 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * This class represents the working days of an office, which are defined by the day of the week, the start time and
+ * the end time. The start time and the end time are defined by two time intervals, which are optional. If the office
+ * is open only in the morning, the second time interval is not defined. If the office is open only in the afternoon,
+ * the first time interval is not defined. If the office is open all day, both time intervals are defined.
+ */
 @Entity
 @Table(name = "office_working_days")
 @NoArgsConstructor
@@ -50,6 +56,11 @@ public class OfficeWorkingDay {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o The object to compare with this object.
+     * @return {@code true} if the given object is an instance of {@link OfficeWorkingDay} and has the same id of this
+     * object, {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -75,6 +86,9 @@ public class OfficeWorkingDay {
         return false;
     }
 
+    /**
+     * @return The hash code of this object.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

@@ -8,8 +8,17 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+/**
+ * Map {@link RequestInput} to {@link Request
+ */
 @Component
 public class MapRequest {
+    /**
+     * @param requestInput {@link RequestInput} to map
+     * @param requestType  {@link RequestType} to map
+     * @param worker       {@link Worker} to map
+     * @return {@link Request} mapped
+     */
     public Request mapRequestInputToRequest(RequestInput requestInput, RequestType requestType, Worker worker) {
         Request request = new Request();
         request.setDuration(requestInput.getDuration());

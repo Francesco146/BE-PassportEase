@@ -11,9 +11,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+/**
+ * Map the {@link RegisterInputDB} to {@link User} and {@link JWT} to {@link LoginOutput}.
+ */
 @AllArgsConstructor
 @Component
 public class MapUser {
+    /**
+     * @param registerInputDB {@link RegisterInputDB} to map.
+     * @return {@link User} mapped.
+     */
     public User mapRegisterInputDBToUser(RegisterInputDB registerInputDB) {
         RegisterInput registerInput = registerInputDB.getRegisterInput();
         User user = new User();
@@ -31,6 +38,11 @@ public class MapUser {
         return user;
     }
 
+    /**
+     * @param user        {@link User} to map.
+     * @param accessToken {@link JWT} to map.
+     * @return {@link LoginOutput} mapped.
+     */
     public LoginOutput mapUserToLoginOutput(User user, JWT accessToken) {
         return new LoginOutput(
                 user.getId(),

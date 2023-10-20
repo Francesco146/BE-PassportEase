@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * This class is used by spring security to authenticate and authorize users
+ */
 @Component
 public class AppUserDetailsService implements UserDetailsService {
 
@@ -26,6 +29,11 @@ public class AppUserDetailsService implements UserDetailsService {
 
     private final RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * @param userRepository   The repository of the users
+     * @param workerRepository The repository of the workers
+     * @param redisTemplate    The redis template used to check if the user is validated
+     */
     @Autowired
     public AppUserDetailsService(UserRepository userRepository, WorkerRepository workerRepository, RedisTemplate<String, String> redisTemplate) {
         this.userRepository = userRepository;
@@ -33,23 +41,40 @@ public class AppUserDetailsService implements UserDetailsService {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * @param id the username identifying the user whose data is required. It is the id of the user
+     * @return the user details of the user identified by the id
+     * @throws UsernameNotFoundException if the user is not found
+     */
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
         Optional<User> optionalUser = userRepository.findById(UUID.fromString(id));
         Optional<Worker> optionalWorker = workerRepository.findById(UUID.fromString(id));
+
+        if (optionalUser.isEmpty() && optionalWorker.isEmpty()) throw new UsernameNotFoundException("User not found");
+
         List<GrantedAuthority> authorities = new ArrayList<>();
+
         if (optionalUser.isPresent()) {
-            authorities.add(new SimpleGrantedAuthority("USER"));
-            if (redisTemplate.opsForValue().get(id) != null) authorities.add(new SimpleGrantedAuthority("VALIDATED"));
-
             User user = optionalUser.get();
-            return new AppUserDetails(user.getId(), user.getHashPassword(), authorities);
-        } else if (optionalWorker.isPresent()) {
-            authorities.add(new SimpleGrantedAuthority("WORKER"));
-            Worker worker = optionalWorker.get();
-            if (redisTemplate.opsForValue().get(id) != null) authorities.add(new SimpleGrantedAuthority("VALIDATED"));
 
-            return new AppUserDetails(worker.getId(), worker.getHashPassword(), authorities);
-        } else throw new UsernameNotFoundException("User not found");
+            addAuthorities(id, authorities, "USER");
+            return new AppUserDetails(user.getId(), user.getHashPassword(), authorities);
+        }
+
+        Worker worker = optionalWorker.get();
+
+        addAuthorities(id, authorities, "WORKER");
+        return new AppUserDetails(worker.getId(), worker.getHashPassword(), authorities);
+    }
+
+    /**
+     * @param id          the id of the user
+     * @param authorities the list of authorities of the user
+     * @param role        the role of the user, it can be "USER" or "WORKER"
+     */
+    private void addAuthorities(String id, List<GrantedAuthority> authorities, String role) {
+        authorities.add(new SimpleGrantedAuthority(role));
+        if (redisTemplate.opsForValue().get(id) != null) authorities.add(new SimpleGrantedAuthority("VALIDATED"));
     }
 }

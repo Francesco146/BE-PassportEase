@@ -7,6 +7,9 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The type Request type entity. Used to store the types of requests that can be made by the workers.
+ */
 @Entity
 @Table(name = "request_types")
 @NoArgsConstructor
@@ -32,6 +35,10 @@ public class RequestType {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * @param o The object to compare
+     * @return True if the objects have the same id, false otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -57,6 +64,9 @@ public class RequestType {
         return false;
     }
 
+    /**
+     * @return The hash code of the id.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

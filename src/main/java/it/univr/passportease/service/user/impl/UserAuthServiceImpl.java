@@ -22,6 +22,9 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Implementation of {@link UserAuthService}, which provides methods for user authentication.
+ */
 @Service
 @AllArgsConstructor
 public class UserAuthServiceImpl implements UserAuthService {
@@ -35,6 +38,13 @@ public class UserAuthServiceImpl implements UserAuthService {
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
 
+    /**
+     * @param fiscalCode user fiscal code
+     * @param password   user password
+     * @return {@link LoginOutput} object containing the access token and the refresh token
+     * @throws UserNotFoundException  if the user is not found
+     * @throws WrongPasswordException if the password is wrong
+     */
     @Override
     public LoginOutput login(String fiscalCode, String password) throws UserNotFoundException, WrongPasswordException {
         // get user
@@ -63,6 +73,12 @@ public class UserAuthServiceImpl implements UserAuthService {
         );
     }
 
+    /**
+     * @param registerInput {@link RegisterInput} object containing the user data
+     * @return {@link LoginOutput} object containing the access token and the refresh token
+     * @throws UserNotFoundException      if the user is not found
+     * @throws UserAlreadyExistsException if the user already exists
+     */
     @Override
     public LoginOutput register(RegisterInput registerInput) throws UserNotFoundException, UserAlreadyExistsException {
         String fiscalCode = registerInput.getFiscalCode();

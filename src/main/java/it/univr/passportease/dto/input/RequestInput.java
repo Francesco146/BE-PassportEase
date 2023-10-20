@@ -9,6 +9,9 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Class that represents the input of a request. From the user.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

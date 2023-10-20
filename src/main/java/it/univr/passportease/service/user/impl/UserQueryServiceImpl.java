@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Implementation of {@link UserQueryService}.
+ * It provides an implementation for the GraphQL queries that can be executed by the user.
+ */
 @Service
 @AllArgsConstructor
 public class UserQueryServiceImpl implements UserQueryService {
@@ -32,6 +36,13 @@ public class UserQueryServiceImpl implements UserQueryService {
     private final RequestTypeRepository requestTypeRepository;
     private final JwtService jwtService;
 
+    /**
+     * Get the user details from the JWT token.
+     *
+     * @param token JWT token
+     * @return User details
+     * @throws UserNotFoundException if the user is not found
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public User getUserDetails(JWT token) throws UserNotFoundException {
@@ -43,6 +54,12 @@ public class UserQueryServiceImpl implements UserQueryService {
         return user.get();
     }
 
+    /**
+     * Get the list of notifications of the user.
+     *
+     * @param token JWT token
+     * @return List of notifications
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public List<Notification> getUserNotifications(JWT token) {
@@ -50,6 +67,12 @@ public class UserQueryServiceImpl implements UserQueryService {
         return notificationRepository.findByUserId(id);
     }
 
+    /**
+     * Get the list of reservations of the user.
+     *
+     * @param token JWT token
+     * @return List of reservations of the user
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public List<Availability> getUserReservations(JWT token) {
@@ -57,6 +80,14 @@ public class UserQueryServiceImpl implements UserQueryService {
         return reservationRepository.findByUserId(id);
     }
 
+    /**
+     * @param availabilityId UUID of the availability
+     * @param token          JWT token
+     * @return Report details of the availability with the given UUID
+     * @throws SecurityException              if the user is not the owner of the availability,
+     *                                        or if the token is from a worker
+     * @throws InvalidAvailabilityIDException if the availability is not found
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public ReportDetails getReportDetailsByAvailabilityID(String availabilityId, JWT token)
@@ -98,6 +129,15 @@ public class UserQueryServiceImpl implements UserQueryService {
         );
     }
 
+    /**
+     * Get the list of request types that the user can make. If the user has already made a request for the
+     * "digitalizzazione passaporto" or "creazione passaporto", then all the other request types are returned. Otherwise, only
+     * "digitalizzazione passaporto" and "creazione passaporto" are returned.
+     *
+     * @param token JWT token
+     * @return List of request types that the user can make
+     * @throws InvalidRequestTypeException if the request type is not found
+     */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public List<RequestType> getRequestTypesByUser(JWT token) throws InvalidRequestTypeException {
@@ -126,6 +166,4 @@ public class UserQueryServiceImpl implements UserQueryService {
                     .toList();
         } else return List.of(digitalizzazionePassaporto, creazionePassaporto);
     }
-
-
 }
