@@ -24,221 +24,248 @@ SET default_table_access_method = heap;
 -- Name: availabilities; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.availabilities (
-    id uuid NOT NULL,
+CREATE TABLE public.availabilities
+(
+    id         uuid NOT NULL,
     created_at timestamp(6) without time zone,
-    date timestamp(6) without time zone,
-    status character varying(255),
-    "time" time(6) without time zone,
+    date       timestamp(6) without time zone,
+    status     character varying(255),
+    "time"     time(6) without time zone,
     updated_at timestamp(6) without time zone,
-    office_id uuid,
+    office_id  uuid,
     request_id uuid,
-    user_id uuid,
-    CONSTRAINT availabilities_status_check CHECK (((status)::text = ANY (ARRAY[('FREE'::character varying)::text, ('TAKEN'::character varying)::text, ('TIMEDOUT'::character varying)::text, ('CANCELLED'::character varying)::text, ('PENDING'::character varying)::text])))
+    user_id    uuid,
+    CONSTRAINT availabilities_status_check CHECK (((status)::text = ANY
+                                                   (ARRAY [('FREE'::character varying)::text, ('TAKEN'::character varying)::text, ('TIMEDOUT'::character varying)::text, ('CANCELLED'::character varying)::text, ('PENDING'::character varying)::text])))
 );
 
 
-ALTER TABLE public.availabilities OWNER TO myuser;
+ALTER TABLE public.availabilities
+    OWNER TO myuser;
 
 --
 -- Name: categories; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.categories (
-    id uuid NOT NULL,
-    created_at timestamp(6) without time zone,
+CREATE TABLE public.categories
+(
+    id          uuid NOT NULL,
+    created_at  timestamp(6) without time zone,
     description character varying(255),
-    name character varying(255),
-    updated_at timestamp(6) without time zone
+    name        character varying(255),
+    updated_at  timestamp(6) without time zone
 );
 
 
-ALTER TABLE public.categories OWNER TO myuser;
+ALTER TABLE public.categories
+    OWNER TO myuser;
 
 --
 -- Name: citizens; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.citizens (
-    id uuid NOT NULL,
-    city_of_birth character varying(255),
-    created_at timestamp(6) without time zone,
-    date_of_birth timestamp(6) without time zone,
-    fiscal_code character varying(255),
+CREATE TABLE public.citizens
+(
+    id                 uuid NOT NULL,
+    city_of_birth      character varying(255),
+    created_at         timestamp(6) without time zone,
+    date_of_birth      timestamp(6) without time zone,
+    fiscal_code        character varying(255),
     health_card_number character varying(255),
-    name character varying(255),
-    surname character varying(255),
-    updated_at timestamp(6) without time zone
+    name               character varying(255),
+    surname            character varying(255),
+    updated_at         timestamp(6) without time zone
 );
 
 
-ALTER TABLE public.citizens OWNER TO myuser;
+ALTER TABLE public.citizens
+    OWNER TO myuser;
 
 --
 -- Name: citizens_categories; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.citizens_categories (
-    id uuid NOT NULL,
-    created_at timestamp(6) without time zone,
-    updated_at timestamp(6) without time zone,
+CREATE TABLE public.citizens_categories
+(
+    id          uuid NOT NULL,
+    created_at  timestamp(6) without time zone,
+    updated_at  timestamp(6) without time zone,
     category_id uuid,
-    citizen_id uuid
+    citizen_id  uuid
 );
 
 
-ALTER TABLE public.citizens_categories OWNER TO myuser;
+ALTER TABLE public.citizens_categories
+    OWNER TO myuser;
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.notifications (
-    id uuid NOT NULL,
-    created_at timestamp(6) without time zone,
-    end_date timestamp(6) without time zone,
-    is_ready boolean,
-    message character varying(255),
-    start_date timestamp(6) without time zone,
-    updated_at timestamp(6) without time zone,
-    office_id uuid,
+CREATE TABLE public.notifications
+(
+    id              uuid NOT NULL,
+    created_at      timestamp(6) without time zone,
+    end_date        timestamp(6) without time zone,
+    is_ready        boolean,
+    message         character varying(255),
+    start_date      timestamp(6) without time zone,
+    updated_at      timestamp(6) without time zone,
+    office_id       uuid,
     request_type_id uuid,
-    user_id uuid
+    user_id         uuid
 );
 
 
-ALTER TABLE public.notifications OWNER TO myuser;
+ALTER TABLE public.notifications
+    OWNER TO myuser;
 
 --
 -- Name: office_working_days; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.office_working_days (
-    id uuid NOT NULL,
-    created_at timestamp(6) without time zone,
-    day character varying(255),
-    end_time1 time(6) without time zone,
-    end_time2 time(6) without time zone,
+CREATE TABLE public.office_working_days
+(
+    id          uuid NOT NULL,
+    created_at  timestamp(6) without time zone,
+    day         character varying(255),
+    end_time1   time(6) without time zone,
+    end_time2   time(6) without time zone,
     start_time1 time(6) without time zone,
     start_time2 time(6) without time zone,
-    updated_at timestamp(6) without time zone,
-    office_id uuid,
-    CONSTRAINT office_working_days_day_check CHECK (((day)::text = ANY (ARRAY[('SUNDAY'::character varying)::text, ('MONDAY'::character varying)::text, ('TUESDAY'::character varying)::text, ('WEDNESDAY'::character varying)::text, ('THURSDAY'::character varying)::text, ('FRIDAY'::character varying)::text, ('SATURDAY'::character varying)::text])))
+    updated_at  timestamp(6) without time zone,
+    office_id   uuid,
+    CONSTRAINT office_working_days_day_check CHECK (((day)::text = ANY
+                                                     (ARRAY [('SUNDAY'::character varying)::text, ('MONDAY'::character varying)::text, ('TUESDAY'::character varying)::text, ('WEDNESDAY'::character varying)::text, ('THURSDAY'::character varying)::text, ('FRIDAY'::character varying)::text, ('SATURDAY'::character varying)::text])))
 );
 
 
-ALTER TABLE public.office_working_days OWNER TO myuser;
+ALTER TABLE public.office_working_days
+    OWNER TO myuser;
 
 --
 -- Name: offices; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.offices (
-    id uuid NOT NULL,
-    address character varying(255),
+CREATE TABLE public.offices
+(
+    id         uuid NOT NULL,
+    address    character varying(255),
     created_at timestamp(6) without time zone,
-    name character varying(255),
+    name       character varying(255),
     updated_at timestamp(6) without time zone
 );
 
 
-ALTER TABLE public.offices OWNER TO myuser;
+ALTER TABLE public.offices
+    OWNER TO myuser;
 
 --
 -- Name: request_types; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.request_types (
-    id uuid NOT NULL,
-    created_at timestamp(6) without time zone,
-    name character varying(255),
-    updated_at timestamp(6) without time zone,
+CREATE TABLE public.request_types
+(
+    id             uuid NOT NULL,
+    created_at     timestamp(6) without time zone,
+    name           character varying(255),
+    updated_at     timestamp(6) without time zone,
     has_dependency boolean
 );
 
 
-ALTER TABLE public.request_types OWNER TO myuser;
+ALTER TABLE public.request_types
+    OWNER TO myuser;
 
 --
 -- Name: requests; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.requests (
-    id uuid NOT NULL,
-    created_at timestamp(6) without time zone,
-    duration bigint NOT NULL,
-    end_date timestamp(6) without time zone,
-    end_time time(6) without time zone,
-    start_date timestamp(6) without time zone,
-    start_time time(6) without time zone,
-    updated_at timestamp(6) without time zone,
+CREATE TABLE public.requests
+(
+    id              uuid   NOT NULL,
+    created_at      timestamp(6) without time zone,
+    duration        bigint NOT NULL,
+    end_date        timestamp(6) without time zone,
+    end_time        time(6) without time zone,
+    start_date      timestamp(6) without time zone,
+    start_time      time(6) without time zone,
+    updated_at      timestamp(6) without time zone,
     request_type_id uuid,
-    worker_id uuid
+    worker_id       uuid
 );
 
 
-ALTER TABLE public.requests OWNER TO myuser;
+ALTER TABLE public.requests
+    OWNER TO myuser;
 
 --
 -- Name: requests_offices; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.requests_offices (
-    id uuid NOT NULL,
+CREATE TABLE public.requests_offices
+(
+    id         uuid NOT NULL,
     created_at timestamp(6) without time zone,
     updated_at timestamp(6) without time zone,
-    office_id uuid,
+    office_id  uuid,
     request_id uuid
 );
 
 
-ALTER TABLE public.requests_offices OWNER TO myuser;
+ALTER TABLE public.requests_offices
+    OWNER TO myuser;
 
 --
 -- Name: users; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.users (
-    id uuid NOT NULL,
-    active boolean,
+CREATE TABLE public.users
+(
+    id            uuid NOT NULL,
+    active        boolean,
     city_of_birth character varying(255),
-    created_at timestamp(6) without time zone,
+    created_at    timestamp(6) without time zone,
     date_of_birth timestamp(6) without time zone,
-    email character varying(255),
-    fiscal_code character varying(255),
+    email         character varying(255),
+    fiscal_code   character varying(255),
     hash_password character varying(255),
-    name character varying(255),
+    name          character varying(255),
     refresh_token character varying(1024),
-    surname character varying(255),
-    updated_at timestamp(6) without time zone
+    surname       character varying(255),
+    updated_at    timestamp(6) without time zone
 );
 
 
-ALTER TABLE public.users OWNER TO myuser;
+ALTER TABLE public.users
+    OWNER TO myuser;
 
 --
 -- Name: workers; Type: TABLE; Schema: public; Owner: myuser
 --
 
-CREATE TABLE public.workers (
-    id uuid NOT NULL,
-    created_at timestamp(6) without time zone,
-    email character varying(255),
+CREATE TABLE public.workers
+(
+    id            uuid NOT NULL,
+    created_at    timestamp(6) without time zone,
+    email         character varying(255),
     hash_password character varying(255),
     refresh_token character varying(255),
-    updated_at timestamp(6) without time zone,
-    username character varying(255),
-    office_id uuid
+    updated_at    timestamp(6) without time zone,
+    username      character varying(255),
+    office_id     uuid
 );
 
 
-ALTER TABLE public.workers OWNER TO myuser;
+ALTER TABLE public.workers
+    OWNER TO myuser;
 
 --
 -- Data for Name: availabilities; Type: TABLE DATA; Schema: public; Owner: myuser
 --
 
-COPY public.availabilities (id, created_at, date, status, "time", updated_at, office_id, request_id, user_id) FROM stdin;
+COPY public.availabilities (id, created_at, date, status, "time", updated_at, office_id, request_id,
+                            user_id) FROM stdin;
 507d06ec-ff38-4afc-aada-7bd1575fc44b	2023-08-29 14:05:57.509	2023-08-28 00:00:00	FREE	08:00:00	2023-08-29 14:05:57.509	2a29e04b-51fc-4710-b8fc-f68c34b89707	768a90ef-2a39-4884-928b-e48f43b1e4b7	\N
 fa1a3e6f-dc17-4f25-9144-f3ba7ef187e7	2023-08-29 14:05:57.516	2023-08-28 00:00:00	FREE	09:00:00	2023-08-29 14:05:57.516	2a29e04b-51fc-4710-b8fc-f68c34b89707	768a90ef-2a39-4884-928b-e48f43b1e4b7	\N
 4a65bd04-6d52-4816-806d-6d13278ff019	2023-08-29 14:05:57.52	2023-08-28 00:00:00	FREE	11:00:00	2023-08-29 14:05:57.52	2a29e04b-51fc-4710-b8fc-f68c34b89707	768a90ef-2a39-4884-928b-e48f43b1e4b7	\N
@@ -286,7 +313,8 @@ COPY public.categories (id, created_at, description, name, updated_at) FROM stdi
 -- Data for Name: citizens; Type: TABLE DATA; Schema: public; Owner: myuser
 --
 
-COPY public.citizens (id, city_of_birth, created_at, date_of_birth, fiscal_code, health_card_number, name, surname, updated_at) FROM stdin;
+COPY public.citizens (id, city_of_birth, created_at, date_of_birth, fiscal_code, health_card_number, name, surname,
+                      updated_at) FROM stdin;
 46ae6b32-2fec-47fd-b6c3-dd2187a88491	Sona	2014-03-15 01:00:00	1996-03-15 01:00:00	GYAMMY96C15I826C	123456789	Gay	Mommy	1996-03-15 01:00:00
 535506d6-62f3-4fc8-9833-28a09cad3527	Legnago	2014-03-15 01:00:00	1996-03-16 01:00:00	FRRFMM96C16E512O	123456789	Furry	Fummi	1996-03-16 01:00:00
 60c6be6d-b916-40c3-b845-b0f0d44d8514	La Spezia	2014-03-15 01:00:00	1996-04-15 01:00:00	BLSCLL96D55E463O	123456789	Balsamo	Capelli	1996-04-15 01:00:00
@@ -305,7 +333,8 @@ COPY public.citizens_categories (id, created_at, updated_at, category_id, citize
 -- Data for Name: notifications; Type: TABLE DATA; Schema: public; Owner: myuser
 --
 
-COPY public.notifications (id, created_at, end_date, is_ready, message, start_date, updated_at, office_id, request_type_id, user_id) FROM stdin;
+COPY public.notifications (id, created_at, end_date, is_ready, message, start_date, updated_at, office_id,
+                           request_type_id, user_id) FROM stdin;
 0ab61ed0-0607-4ca0-a4a3-ebd46dcd7436	2023-10-19 14:29:40.714	2023-09-01 00:00:00	f	\N	2023-08-05 00:00:00	2023-10-19 14:29:40.714	2a29e04b-51fc-4710-b8fc-f68c34b89707	9a7c0343-25a6-4e13-ad18-a46fcba0169a	320eb378-47ed-4316-87ce-1f344993e4dc
 \.
 
@@ -314,7 +343,8 @@ COPY public.notifications (id, created_at, end_date, is_ready, message, start_da
 -- Data for Name: office_working_days; Type: TABLE DATA; Schema: public; Owner: myuser
 --
 
-COPY public.office_working_days (id, created_at, day, end_time1, end_time2, start_time1, start_time2, updated_at, office_id) FROM stdin;
+COPY public.office_working_days (id, created_at, day, end_time1, end_time2, start_time1, start_time2, updated_at,
+                                 office_id) FROM stdin;
 75fae138-ac9d-4cba-bc70-c20cdc9523dd	1996-03-15 01:00:00	MONDAY	12:00:00	18:00:00	08:00:00	14:00:00	2023-03-15 01:00:00	9eaeb288-35f0-445c-bde9-ce65f064c868
 521eea82-52af-4ed3-a923-34c3afcdeb8d	1996-03-15 01:00:00	TUESDAY	12:00:00	18:00:00	08:00:00	14:00:00	2023-03-15 01:00:00	9eaeb288-35f0-445c-bde9-ce65f064c868
 c3952670-7001-43c5-a75f-c6c4c977253d	1996-03-15 01:00:00	WEDNESDAY	12:00:00	18:00:00	08:00:00	14:00:00	2023-03-15 01:00:00	9eaeb288-35f0-445c-bde9-ce65f064c868
@@ -370,7 +400,8 @@ dac90ec6-cca4-4f49-a2be-df0d2d7c482e	2023-08-29 13:58:32.873	Digitalizzazione Pa
 -- Data for Name: requests; Type: TABLE DATA; Schema: public; Owner: myuser
 --
 
-COPY public.requests (id, created_at, duration, end_date, end_time, start_date, start_time, updated_at, request_type_id, worker_id) FROM stdin;
+COPY public.requests (id, created_at, duration, end_date, end_time, start_date, start_time, updated_at, request_type_id,
+                      worker_id) FROM stdin;
 f97ab954-a635-4b39-a557-fc604f7c5b30	2023-08-29 13:58:32.9	60	2024-08-28 00:00:00	18:00:00	2024-08-28 00:00:00	08:00:00	2023-08-29 13:58:32.9	dac90ec6-cca4-4f49-a2be-df0d2d7c482e	eb1bb88e-4e32-4643-a124-b45fb25f0c12
 768a90ef-2a39-4884-928b-e48f43b1e4b7	2023-08-29 14:05:57.491	60	2023-08-29 00:00:00	18:00:00	2023-08-28 00:00:00	08:00:00	2023-08-29 14:05:57.491	dac90ec6-cca4-4f49-a2be-df0d2d7c482e	34a5bc6f-6ccb-4a91-b517-65bf5a53776c
 8c79766d-3b60-490b-a37c-b8e9798e6d4d	2023-08-29 14:09:43.656	60	2023-08-29 00:00:00	18:00:00	2023-08-28 00:00:00	08:00:00	2023-08-29 14:09:43.656	c6f6b7fd-4b0c-4085-ae67-4c46c2049e3e	34a5bc6f-6ccb-4a91-b517-65bf5a53776c
@@ -402,7 +433,8 @@ fdd2656c-7782-4b61-9f4d-6c22a66531d8	2023-08-29 14:20:55.82	2023-08-29 14:20:55.
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: myuser
 --
 
-COPY public.users (id, active, city_of_birth, created_at, date_of_birth, email, fiscal_code, hash_password, name, refresh_token, surname, updated_at) FROM stdin;
+COPY public.users (id, active, city_of_birth, created_at, date_of_birth, email, fiscal_code, hash_password, name,
+                   refresh_token, surname, updated_at) FROM stdin;
 09933d03-d5af-40de-a915-89c24dabe84f	t	la spezia	2023-08-30 07:52:55.89	1996-03-16 00:00:00	balsamo@gmail.com	BLSCLL96D55E463O	$2a$10$WZmTfM2qfQmPz/IDO0q/6.rcKPCVKb9N.mIzH4WnLKAuGyrfeZ48S	balsamo		capelli	2023-08-30 07:52:55.89
 320eb378-47ed-4316-87ce-1f344993e4dc	t	Sona	2023-08-29 13:55:43.562	1996-03-16 00:00:00	gaymommy@gmail.com	GYAMMY96C15I826C	$2a$10$BPlDEl7QjwkO5idQki.uWuxh3GgWpewR2/WZl6eIGOG.0o5Gx0e1m	gay	eyJhbGciOiJIUzM4NCJ9.eyJ0eXAiOiJKV1QiLCJpYXQiOjE2OTc3MjU3NzEsImV4cCI6MTcwMDMxNzc3MSwianRpIjoiYzFkMGNlMzQtZjlhOS00YjM0LWI5MDQtYjI1OGI3YzA1YTAzIiwic3ViIjoiMzIwZWIzNzgtNDdlZC00MzE2LTg3Y2UtMWYzNDQ5OTNlNGRjIn0.vRUZJhIJ5hJLIyThghH_A4qfc0HkYV31eBi0BEI2dZIFaN0n3h70fFeyZGpHgNwm	mommy	2023-08-29 13:55:43.562
 \.
@@ -586,7 +618,7 @@ ALTER TABLE ONLY public.workers
 --
 
 ALTER TABLE ONLY public.citizens_categories
-    ADD CONSTRAINT fk14kq91118bvtyebi2xxmwqfd5 FOREIGN KEY (category_id) REFERENCES public.categories(id);
+    ADD CONSTRAINT fk14kq91118bvtyebi2xxmwqfd5 FOREIGN KEY (category_id) REFERENCES public.categories (id);
 
 
 --
@@ -594,7 +626,7 @@ ALTER TABLE ONLY public.citizens_categories
 --
 
 ALTER TABLE ONLY public.citizens_categories
-    ADD CONSTRAINT fk1f4a2akk5idkk8q6h5jr2j86p FOREIGN KEY (citizen_id) REFERENCES public.citizens(id);
+    ADD CONSTRAINT fk1f4a2akk5idkk8q6h5jr2j86p FOREIGN KEY (citizen_id) REFERENCES public.citizens (id);
 
 
 --
@@ -602,7 +634,7 @@ ALTER TABLE ONLY public.citizens_categories
 --
 
 ALTER TABLE ONLY public.availabilities
-    ADD CONSTRAINT fk6un9rntnvie082aoi6yea0wy1 FOREIGN KEY (office_id) REFERENCES public.offices(id);
+    ADD CONSTRAINT fk6un9rntnvie082aoi6yea0wy1 FOREIGN KEY (office_id) REFERENCES public.offices (id);
 
 
 --
@@ -610,7 +642,7 @@ ALTER TABLE ONLY public.availabilities
 --
 
 ALTER TABLE ONLY public.requests_offices
-    ADD CONSTRAINT fk7jyk5944hhnfe4feu3040r98i FOREIGN KEY (office_id) REFERENCES public.offices(id);
+    ADD CONSTRAINT fk7jyk5944hhnfe4feu3040r98i FOREIGN KEY (office_id) REFERENCES public.offices (id);
 
 
 --
@@ -618,7 +650,7 @@ ALTER TABLE ONLY public.requests_offices
 --
 
 ALTER TABLE ONLY public.notifications
-    ADD CONSTRAINT fk8n5ej1w09r4c0i3up6w0k83kp FOREIGN KEY (request_type_id) REFERENCES public.request_types(id);
+    ADD CONSTRAINT fk8n5ej1w09r4c0i3up6w0k83kp FOREIGN KEY (request_type_id) REFERENCES public.request_types (id);
 
 
 --
@@ -626,7 +658,7 @@ ALTER TABLE ONLY public.notifications
 --
 
 ALTER TABLE ONLY public.requests
-    ADD CONSTRAINT fk8oc543okq82yan71nvqj7hr79 FOREIGN KEY (worker_id) REFERENCES public.workers(id);
+    ADD CONSTRAINT fk8oc543okq82yan71nvqj7hr79 FOREIGN KEY (worker_id) REFERENCES public.workers (id);
 
 
 --
@@ -634,7 +666,7 @@ ALTER TABLE ONLY public.requests
 --
 
 ALTER TABLE ONLY public.workers
-    ADD CONSTRAINT fk9f87yafdk1c48quqxogd8vj74 FOREIGN KEY (office_id) REFERENCES public.offices(id);
+    ADD CONSTRAINT fk9f87yafdk1c48quqxogd8vj74 FOREIGN KEY (office_id) REFERENCES public.offices (id);
 
 
 --
@@ -642,7 +674,7 @@ ALTER TABLE ONLY public.workers
 --
 
 ALTER TABLE ONLY public.notifications
-    ADD CONSTRAINT fk9y21adhxn0ayjhfocscqox7bh FOREIGN KEY (user_id) REFERENCES public.users(id);
+    ADD CONSTRAINT fk9y21adhxn0ayjhfocscqox7bh FOREIGN KEY (user_id) REFERENCES public.users (id);
 
 
 --
@@ -650,7 +682,7 @@ ALTER TABLE ONLY public.notifications
 --
 
 ALTER TABLE ONLY public.availabilities
-    ADD CONSTRAINT fkb471teiejp5x0h6uvnoph1pke FOREIGN KEY (request_id) REFERENCES public.requests(id);
+    ADD CONSTRAINT fkb471teiejp5x0h6uvnoph1pke FOREIGN KEY (request_id) REFERENCES public.requests (id);
 
 
 --
@@ -658,7 +690,7 @@ ALTER TABLE ONLY public.availabilities
 --
 
 ALTER TABLE ONLY public.requests_offices
-    ADD CONSTRAINT fkgq9whtu7nrbrdtklo9j7403x4 FOREIGN KEY (request_id) REFERENCES public.requests(id);
+    ADD CONSTRAINT fkgq9whtu7nrbrdtklo9j7403x4 FOREIGN KEY (request_id) REFERENCES public.requests (id);
 
 
 --
@@ -666,7 +698,7 @@ ALTER TABLE ONLY public.requests_offices
 --
 
 ALTER TABLE ONLY public.office_working_days
-    ADD CONSTRAINT fkhckna8ajomjqxxb78iytxcisc FOREIGN KEY (office_id) REFERENCES public.offices(id);
+    ADD CONSTRAINT fkhckna8ajomjqxxb78iytxcisc FOREIGN KEY (office_id) REFERENCES public.offices (id);
 
 
 --
@@ -674,7 +706,7 @@ ALTER TABLE ONLY public.office_working_days
 --
 
 ALTER TABLE ONLY public.notifications
-    ADD CONSTRAINT fkmb1e0bw1i3nyejmipyjw0numk FOREIGN KEY (office_id) REFERENCES public.offices(id);
+    ADD CONSTRAINT fkmb1e0bw1i3nyejmipyjw0numk FOREIGN KEY (office_id) REFERENCES public.offices (id);
 
 
 --
@@ -682,7 +714,7 @@ ALTER TABLE ONLY public.notifications
 --
 
 ALTER TABLE ONLY public.availabilities
-    ADD CONSTRAINT fkr12nckjwkci4pi0cynhaifbkk FOREIGN KEY (user_id) REFERENCES public.users(id);
+    ADD CONSTRAINT fkr12nckjwkci4pi0cynhaifbkk FOREIGN KEY (user_id) REFERENCES public.users (id);
 
 
 --
@@ -690,7 +722,7 @@ ALTER TABLE ONLY public.availabilities
 --
 
 ALTER TABLE ONLY public.requests
-    ADD CONSTRAINT fksnu8pyufweklimrfnyf6vrdcr FOREIGN KEY (request_type_id) REFERENCES public.request_types(id);
+    ADD CONSTRAINT fksnu8pyufweklimrfnyf6vrdcr FOREIGN KEY (request_type_id) REFERENCES public.request_types (id);
 
 
 --

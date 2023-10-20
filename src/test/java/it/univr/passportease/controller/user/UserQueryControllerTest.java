@@ -125,7 +125,7 @@ class UserQueryControllerTest {
     }
 
     Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass,
-            JWT bearerToken) {
+                              JWT bearerToken) {
         if (bearerToken == null)
             return graphQlTester
                     .mutate()
@@ -137,11 +137,11 @@ class UserQueryControllerTest {
                     .get();
 
         return HttpGraphQlTester.builder(
-                MockMvcWebTestClient.bindToApplicationContext(context)
-                        .configureClient()
-                        .baseUrl(BASE_URL)
-                        .build()
-                        .mutate())
+                        MockMvcWebTestClient.bindToApplicationContext(context)
+                                .configureClient()
+                                .baseUrl(BASE_URL)
+                                .build()
+                                .mutate())
                 .headers(headers -> headers.setBearerAuth(bearerToken.getToken()))
                 .build()
                 .document(graphQlDocument)
@@ -149,7 +149,7 @@ class UserQueryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = { "USER", "VALIDATED" })
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
     void getRequestTypesByUser() {
 
         JWT token = jwtService.generateAccessToken(USER_ID);
@@ -178,7 +178,7 @@ class UserQueryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = { "USER", "VALIDATED" })
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
     @SneakyThrows(ParseException.class)
     void getUserNotifications() {
 
@@ -218,7 +218,7 @@ class UserQueryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = { "USER", "VALIDATED" })
+    @WithMockUser(authorities = {"USER", "VALIDATED"})
     @SneakyThrows(ParseException.class)
     void getUserDetails() {
 
