@@ -34,22 +34,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Test class for {@link UserQueryController}
- * <p>
- * This class tests the following methods:
- * <ul>
- *     <li>{@link UserQueryController#getRequestTypesByUser}</li>
- *     <li>{@link UserQueryController#getUserNotifications}</li>
- *     <li>{@link UserQueryController#getUserDetails}</li>
- * </ul>
- *
- * @see UserAuthControllerTest
- */
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureGraphQlTester
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserQueryControllerTest {
 
@@ -73,30 +62,6 @@ class UserQueryControllerTest {
     @Autowired
     private UserMutationServiceImpl userMutationService;
 
-    /**
-     * Create a mock user to test the queries
-     * The user is created only if it does not exist, otherwise it is deleted and recreated.
-     * The user is created with the following data:
-     * <p>
-     * <ul>
-     *     <li>name: Zelda</li>
-     *     <li>surname: NotLink</li>
-     *     <li>fiscalCode: NTLZLD98R52G273R</li>
-     *     <li>email: zeldanotlink@gmail.com</li>
-     *     <li>password: ciao</li>
-     *     <li>cityOfBirth: Palermo</li>
-     *     <li>dateOfBirth: 1998-10-12</li>
-     *     <li>healthCardNumber: 1234567890</li>
-     *     <li>active: true</li>
-     *     <li>updatedAt: now</li>
-     *     <li>createdAt: now</li>
-     *     <li>refreshToken: generated</li>
-     *     <li>roles: USER, VALIDATED</li>
-     *     <li>authorities: USER, VALIDATED</li>
-     *     <li>notifications: none</li>
-     *     <li>requests: none</li>
-     * </ul>
-     */
     @SneakyThrows(ParseException.class)
     @BeforeAll
     void createMockUser() {
@@ -145,9 +110,6 @@ class UserQueryControllerTest {
         System.out.println("\u001B[0m");
     }
 
-    /**
-     * Delete the mock user from the database, and flush the Redis cache
-     */
     @AfterAll
     void deleteMockUser() {
         userRepository.deleteByFiscalCode("NTLZLD98R52G273R");
@@ -162,14 +124,6 @@ class UserQueryControllerTest {
         System.out.println("\u001B[0m");
     }
 
-    /**
-     * @param graphQlDocument The GraphQL document to execute, as a String (required)
-     * @param pathResponse    The path to the response in the JSON (required)
-     * @param objectClass     The class of the object to return (required)
-     * @param bearerToken     The JWT token to use for the request (optional)
-     * @return The response of the GraphQL request, as an Object. If the bearerToken is not null, the response is a
-     * GraphQlTester.Response, otherwise it is an Object, and it must be casted to the correct type
-     */
     Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass,
                               JWT bearerToken) {
         if (bearerToken == null)
@@ -194,10 +148,6 @@ class UserQueryControllerTest {
                 .execute();
     }
 
-    /**
-     * Test the getRequestTypes query
-     * TODO: check if the request types are correct for the user
-     */
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void getRequestTypesByUser() {
@@ -227,9 +177,6 @@ class UserQueryControllerTest {
         System.out.println("\u001B[0m");
     }
 
-    /**
-     * Test the getUserNotifications query
-     */
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     @SneakyThrows(ParseException.class)
@@ -270,10 +217,6 @@ class UserQueryControllerTest {
         System.out.println("\u001B[0m");
     }
 
-    /**
-     * Test the getUserDetails query
-     * Check if the user details are correct
-     */
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     @SneakyThrows(ParseException.class)
