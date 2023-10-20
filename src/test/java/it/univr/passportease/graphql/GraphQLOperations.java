@@ -132,6 +132,30 @@ public enum GraphQLOperations {
         }
     },
 
+    getReportDetailsByAvailabilityID {
+        public String getGraphQl(String... args) {
+            String availabilityID = args[0];
+
+            String getReportDetailsByAvailabilityID = """
+                    query {
+                        getReportDetailsByAvailabilityID(availabilityID: "%s") {
+                            fiscalCode
+                            address
+                            cityOfBirth
+                            dateOfAvailability
+                            dateOfBirth
+                            name
+                            nameRequestType
+                            officeName
+                            startTime
+                            surname
+                        }
+                    }
+                    """;
+            return String.format(getReportDetailsByAvailabilityID, availabilityID);
+        }
+    },
+
     getUserNotifications {
         public String getGraphQl(String... args) {
 
@@ -207,4 +231,3 @@ public enum GraphQLOperations {
 
     public abstract String getGraphQl(String... args);
 }
-
