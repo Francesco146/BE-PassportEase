@@ -1,13 +1,9 @@
 package it.univr.passportease.controller.user;
 
-import it.univr.passportease.dto.input.NotificationInput;
 import it.univr.passportease.entity.*;
-import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.graphql.GraphQLOperations;
 import it.univr.passportease.helper.JWT;
-import it.univr.passportease.repository.AvailabilityRepository;
 import it.univr.passportease.repository.CitizenRepository;
-import it.univr.passportease.repository.ReservationRepository;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.user.impl.UserMutationServiceImpl;
@@ -31,7 +27,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @ActiveProfiles("test")
@@ -43,7 +38,8 @@ import java.util.UUID;
 class UserQueryControllerTest {
 
     private static final String BASE_URL = "http://localhost:8080/graphql";
-    private static UUID USER_ID;
+    private static final UUID USER_ID = UUID.fromString("b2e26425-59cb-4d39-9835-4218002a0c73");
+
     @Autowired
     WebApplicationContext context;
     @Autowired
@@ -62,67 +58,7 @@ class UserQueryControllerTest {
     @Autowired
     private UserMutationServiceImpl userMutationService;
 
-    @SneakyThrows(ParseException.class)
-    @BeforeAll
-    void createMockUser() {
-        // save user if not exists
-        if (citizenRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent()
-                || userRepository.findByFiscalCode("NTLZLD98R52G273R").isPresent()) {
-            citizenRepository.deleteByFiscalCode("NTLZLD98R52G273R");
-            userRepository.deleteByFiscalCode("NTLZLD98R52G273R");
-        }
 
-        Citizen citizen = new Citizen();
-
-        citizen.setFiscalCode("NTLZLD98R52G273R");
-        citizen.setName("Zelda");
-        citizen.setSurname("NotLink");
-        citizen.setCityOfBirth("Palermo");
-        citizen.setDateOfBirth(
-                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()));
-        citizen.setHealthCardNumber("1234567890");
-
-        citizenRepository.save(citizen);
-
-        User user = new User();
-
-        user.setName("Zelda");
-        user.setSurname("NotLink");
-        user.setFiscalCode("NTLZLD98R52G273R");
-        user.setEmail("zeldanotlink@gmail.com");
-        user.setActive(true);
-        user.setUpdatedAt(new Date());
-        user.setCreatedAt(new Date());
-        user.setCityOfBirth("Palermo");
-        user.setDateOfBirth(
-                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()));
-        user.setHashPassword(passwordEncoder.encode("ciao"));
-        user.setRefreshToken(
-                jwtService.generateRefreshToken(
-                        userRepository.save(user).getId()).getToken());
-
-        userRepository.save(user);
-
-        USER_ID = user.getId();
-
-        System.out.println("\u001B[33m");
-        System.out.println("[!] Mock User Created");
-        System.out.println("\u001B[0m");
-    }
-
-    @AfterAll
-    void deleteMockUser() {
-        userRepository.deleteByFiscalCode("NTLZLD98R52G273R");
-        citizenRepository.deleteByFiscalCode("NTLZLD98R52G273R");
-        Objects.requireNonNull(redisTemplate.getConnectionFactory())
-                .getConnection()
-                .serverCommands()
-                .flushAll();
-
-        System.out.println("\u001B[33m");
-        System.out.println("[!] Mock User Deleted");
-        System.out.println("\u001B[0m");
-    }
 
     Object makeGraphQLRequest(@NonNull String graphQlDocument, String pathResponse, Class<?> objectClass,
                               JWT bearerToken) {
@@ -177,18 +113,11 @@ class UserQueryControllerTest {
         System.out.println("\u001B[0m");
     }
 
+
     @Test
     @WithMockUser(authorities = {"USER", "VALIDATED"})
-    @SneakyThrows(ParseException.class)
+    //@SneakyThrows(ParseException.class)
     void getUserNotifications() {
-
-        UUID notificationID = userMutationService.createNotification(
-                new NotificationInput(
-                        new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2023-08-05").getTime()),
-                        new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2023-09-01").getTime()),
-                        "Sede di Napoli",
-                        "ritiro passaporti"),
-                userRepository.findById(USER_ID).orElseThrow()).getId();
 
         JWT token = jwtService.generateAccessToken(USER_ID);
 
@@ -209,8 +138,6 @@ class UserQueryControllerTest {
                 .get();
 
         notifications.forEach(System.out::println);
-
-        userMutationService.deleteNotification(notificationID);
 
         System.out.println("\u001B[32m");
         System.out.println("[!] getUserNotifications successful");
@@ -259,11 +186,6 @@ class UserQueryControllerTest {
     @WithMockUser(authorities = {"USER", "VALIDATED"})
     void getUserReservations() {
 
-        UUID availabilityID = userMutationService.createReservation(
-                UUID.fromString("507d06ec-ff38-4afc-aada-7bd1575fc44b"),
-                userRepository.findById(USER_ID).orElseThrow()
-        ).getId();
-
         JWT token = jwtService.generateAccessToken(USER_ID);
 
         System.out.println("[!] Generated token: \n" + token + "\n");
@@ -282,8 +204,6 @@ class UserQueryControllerTest {
                 .get();
 
         availabilities.forEach(System.out::println);
-
-        userMutationService.deleteReservation(availabilityID);
 
         System.out.println("\u001B[32m");
         System.out.println("[!] getUserReservations successful");
