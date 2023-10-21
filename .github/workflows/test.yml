@@ -47,7 +47,7 @@ jobs:
                 run: mvn -B -DskipTests -Pnative package --file pom.xml
 
             -   name: Update dependency graph
-                uses: advanced-security/maven-dependency-submission-action@v3.0.2
+                uses: advanced-security/maven-dependency-submission-action@v3.0.3
     unit-tests:
         needs: build
         permissions: write-all
