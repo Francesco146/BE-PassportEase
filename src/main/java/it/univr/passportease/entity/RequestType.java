@@ -7,6 +7,9 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The type Request type entity. Used to store the types of requests that can be made by the workers.
+ */
 @Entity
 @Table(name = "request_types")
 @NoArgsConstructor
@@ -15,23 +18,45 @@ import java.util.UUID;
 @ToString
 public class RequestType {
 
+    /**
+     * Unique identifier of the {@link RequestType}
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The name of the {@link RequestType}
+     */
     @NonNull
     @Column(unique = true)
     private String name;
 
+    /**
+     * A boolean value that indicates if the {@link RequestType} has a dependency. If true, the {@link RequestType} can
+     * be executed only if the {@link RequestType} on which it depends has been executed by the {@link User}
+     */
     @Column(name = "has_dependency")
     private boolean hasDependency;
 
+    /**
+     * The {@link Date} of creation of the {@link RequestType}
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The {@link Date} of the last update of the {@link RequestType}
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * Two {@link RequestType} are equals if they have the same id.
+     *
+     * @param o The object to compare
+     * @return True if the objects have the same id, false otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -57,6 +82,11 @@ public class RequestType {
         return false;
     }
 
+    /**
+     * The hash code of a {@link RequestType} is calculated using the id.
+     *
+     * @return The hash code of the id.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

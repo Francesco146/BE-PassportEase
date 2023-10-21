@@ -36,7 +36,7 @@ CREATE TABLE public.availabilities
     request_id uuid,
     user_id    uuid,
     CONSTRAINT availabilities_status_check CHECK (((status)::text = ANY
-                                                   ((ARRAY ['FREE'::character varying, 'TAKEN'::character varying, 'TIMEDOUT'::character varying, 'CANCELLED'::character varying, 'PENDING'::character varying])::text[])))
+                                                   (ARRAY [('FREE'::character varying)::text, ('TAKEN'::character varying)::text, ('TIMEDOUT'::character varying)::text, ('CANCELLED'::character varying)::text, ('PENDING'::character varying)::text])))
 );
 
 
@@ -136,7 +136,7 @@ CREATE TABLE public.office_working_days
     updated_at  timestamp(6) without time zone,
     office_id   uuid,
     CONSTRAINT office_working_days_day_check CHECK (((day)::text = ANY
-                                                     ((ARRAY ['SUNDAY'::character varying, 'MONDAY'::character varying, 'TUESDAY'::character varying, 'WEDNESDAY'::character varying, 'THURSDAY'::character varying, 'FRIDAY'::character varying, 'SATURDAY'::character varying])::text[])))
+                                                     (ARRAY [('SUNDAY'::character varying)::text, ('MONDAY'::character varying)::text, ('TUESDAY'::character varying)::text, ('WEDNESDAY'::character varying)::text, ('THURSDAY'::character varying)::text, ('FRIDAY'::character varying)::text, ('SATURDAY'::character varying)::text])))
 );
 
 
@@ -335,6 +335,7 @@ COPY public.citizens_categories (id, created_at, updated_at, category_id, citize
 
 COPY public.notifications (id, created_at, end_date, is_ready, message, start_date, updated_at, office_id,
                            request_type_id, user_id) FROM stdin;
+0ab61ed0-0607-4ca0-a4a3-ebd46dcd7436	2023-10-19 14:29:40.714	2023-09-01 00:00:00	f	\N	2023-08-05 00:00:00	2023-10-19 14:29:40.714	2a29e04b-51fc-4710-b8fc-f68c34b89707	9a7c0343-25a6-4e13-ad18-a46fcba0169a	320eb378-47ed-4316-87ce-1f344993e4dc
 \.
 
 
@@ -435,7 +436,7 @@ fdd2656c-7782-4b61-9f4d-6c22a66531d8	2023-08-29 14:20:55.82	2023-08-29 14:20:55.
 COPY public.users (id, active, city_of_birth, created_at, date_of_birth, email, fiscal_code, hash_password, name,
                    refresh_token, surname, updated_at) FROM stdin;
 09933d03-d5af-40de-a915-89c24dabe84f	t	la spezia	2023-08-30 07:52:55.89	1996-03-16 00:00:00	balsamo@gmail.com	BLSCLL96D55E463O	$2a$10$WZmTfM2qfQmPz/IDO0q/6.rcKPCVKb9N.mIzH4WnLKAuGyrfeZ48S	balsamo		capelli	2023-08-30 07:52:55.89
-320eb378-47ed-4316-87ce-1f344993e4dc	t	Sona	2023-08-29 13:55:43.562	1996-03-16 00:00:00	gaymommy@gmail.com	GYAMMY96C15I826C	$2a$10$BPlDEl7QjwkO5idQki.uWuxh3GgWpewR2/WZl6eIGOG.0o5Gx0e1m	gay	eyJhbGciOiJIUzM4NCJ9.eyJ0eXAiOiJKV1QiLCJpYXQiOjE2OTY3NzU5NDYsImV4cCI6MTY5OTM2Nzk0NiwianRpIjoiOGRlMDUwMTctZjczNS00YzU1LWEyZTgtMTQ1ZTkyOTZmNWQ5Iiwic3ViIjoiMzIwZWIzNzgtNDdlZC00MzE2LTg3Y2UtMWYzNDQ5OTNlNGRjIn0.yYaAp1bzj8H1_8gMJwEcldrCCYRg8yWcdkA-Zf9--_LIKJ_PQJk5uE3V4vCgb91Q	mommy	2023-08-29 13:55:43.562
+320eb378-47ed-4316-87ce-1f344993e4dc	t	Sona	2023-08-29 13:55:43.562	1996-03-16 00:00:00	gaymommy@gmail.com	GYAMMY96C15I826C	$2a$10$BPlDEl7QjwkO5idQki.uWuxh3GgWpewR2/WZl6eIGOG.0o5Gx0e1m	gay	eyJhbGciOiJIUzM4NCJ9.eyJ0eXAiOiJKV1QiLCJpYXQiOjE2OTc3MjU3NzEsImV4cCI6MTcwMDMxNzc3MSwianRpIjoiYzFkMGNlMzQtZjlhOS00YjM0LWI5MDQtYjI1OGI3YzA1YTAzIiwic3ViIjoiMzIwZWIzNzgtNDdlZC00MzE2LTg3Y2UtMWYzNDQ5OTNlNGRjIn0.vRUZJhIJ5hJLIyThghH_A4qfc0HkYV31eBi0BEI2dZIFaN0n3h70fFeyZGpHgNwm	mommy	2023-08-29 13:55:43.562
 \.
 
 

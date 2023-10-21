@@ -21,20 +21,47 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Security configuration class.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @AllArgsConstructor
 public class SecurityConfig {
+    /**
+     * User repository.
+     */
     private UserRepository userRepository;
+    /**
+     * Worker repository.
+     */
     private WorkerRepository workerRepository;
+    /**
+     * Redis template.
+     */
     private RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * Creates a UserDetailsService bean, used to retrieve user details from the database or from the Redis cache.
+     *
+     * @return UserDetailsService, used to retrieve user details from the database or from the Redis cache
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return new AppUserDetailsService(userRepository, workerRepository, redisTemplate);
     }
 
+    /**
+     * Creates a SecurityFilterChain bean, used to configure the security filter chain. It is used to configure the
+     * authentication method, the authorization method and the session management.
+     *
+     * @param http       HttpSecurity object
+     * @param authFilter JwtAuthFilter object
+     * @return SecurityFilterChain, used to configure the security filter chain. It is used to configure the
+     * authentication method, the authorization method and the session management.
+     * @throws Exception if an error occurs in the csrf configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter authFilter) throws Exception {
         return http
@@ -58,11 +85,21 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Creates a PasswordEncoder bean, used to encode the password.
+     *
+     * @return PasswordEncoder, used to encode the password
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Creates an AuthenticationProvider bean, used to authenticate the user.
+     *
+     * @return AuthenticationProvider, used to authenticate the user
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
@@ -71,6 +108,13 @@ public class SecurityConfig {
         return authenticationProvider;
     }
 
+    /**
+     * Creates an AuthenticationManager bean, used to authenticate the user.
+     *
+     * @param config AuthenticationConfiguration object, used to configure the authentication manager
+     * @return AuthenticationManager, used to authenticate the user
+     * @throws Exception if an error occurs in the authentication manager configuration
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

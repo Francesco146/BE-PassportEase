@@ -25,20 +25,50 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Implementation of {@link WorkerAuthService}, provides methods for authentication of {@link Worker}
+ */
 @Service
 @AllArgsConstructor
 public class WorkerAuthServiceImpl implements WorkerAuthService {
 
+    /**
+     * Repository for {@link Worker} entity
+     */
     private final WorkerRepository workerRepository;
+    /**
+     * Repository for {@link Office} entity
+     */
     private final OfficeRepository officeRepository;
 
+    /**
+     * Service for mapping {@link Worker} to {@link LoginOutput}
+     */
     private final MapWorker mapWorker;
 
+    /**
+     * Service for generating {@link JWT}
+     */
     private final JwtService jwtService;
 
+    /**
+     * Service for authenticating {@link Worker}
+     */
     private AuthenticationManager authenticationManager;
+    /**
+     * Service for encoding password
+     */
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Login a {@link Worker}
+     *
+     * @param username username of {@link Worker}
+     * @param password password of {@link Worker}
+     * @return {@link LoginOutput} with {@link JWTSet} of {@link Worker}
+     * @throws WrongPasswordException  if password is wrong
+     * @throws WorkerNotFoundException if {@link Worker} is not found
+     */
     @Override
     public LoginOutput login(String username, String password) throws WrongPasswordException, WorkerNotFoundException {
         Optional<Worker> optionalWorker = workerRepository.findByUsername(username);
@@ -62,8 +92,17 @@ public class WorkerAuthServiceImpl implements WorkerAuthService {
         );
     }
 
+    /**
+     * Register a {@link Worker}
+     *
+     * @param workerInput {@link WorkerInput} with data of {@link Worker}
+     * @return {@link LoginOutput} with {@link JWTSet} of {@link Worker}
+     * @throws OfficeNotFoundException if {@link Office} is not found
+     * @deprecated Refreshes {@link JWT} of {@link Worker}, it's deprecated because the {@link Worker} is inserted in the database
+     * manually by the administrator
+     */
     @Override
-    @Deprecated
+    @Deprecated(since = "0.0.1")
     public LoginOutput register(WorkerInput workerInput) throws OfficeNotFoundException {
 
         Optional<Office> office = officeRepository.findByName(workerInput.getOfficeName());

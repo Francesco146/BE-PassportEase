@@ -10,8 +10,20 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 
+/**
+ * Map a {@link Request} to an {@link Availability} object.
+ */
 @Component
 public class MapAvailability {
+    /**
+     * Map a {@link Request} to an {@link Availability} object.
+     *
+     * @param request   The request to map.
+     * @param office    The office to map.
+     * @param localDate The date to map.
+     * @param time      The time to map.
+     * @return The mapped {@link Availability} object.
+     */
     public Availability mapRequestToAvailability(Request request, Office office, LocalDate localDate, LocalTime time) {
         Date date = java.sql.Date.valueOf(localDate);
         Availability availability = new Availability();

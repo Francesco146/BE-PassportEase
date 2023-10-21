@@ -10,8 +10,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository for the {@link Request} entity.
+ */
 @Repository
 public interface RequestRepository extends JpaRepository<Request, UUID> {
+    /**
+     * Finds all the {@link Request} associated to the given worker id.
+     *
+     * @param officeId  office id to search for
+     * @param startDate start date to search for
+     * @param endDate   end date to search for
+     * @return a list of {@link Request} objects.
+     */
     @Query(value = "SELECT r.id, r.duration, r.start_date, r.end_date, r.start_time, r.end_time, r.worker_id, r.request_type_id, r.created_at, r.updated_at " +
             "FROM requests r, requests_offices ro, offices o " +
             "WHERE r.id = ro.request_id " +

@@ -1,7 +1,7 @@
 type Availability {
     id: ID!
-    date: String!
-    time: String!
+    date: Date!
+    time: LocalTime!
     status: AvailabilityStatus!
     request: Request!
     office: Office!

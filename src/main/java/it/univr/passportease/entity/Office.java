@@ -7,6 +7,10 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * The {@link  Office} class is an entity that represents an office, which is a place where
+ * {@link Worker workers} can manages {@link Request} requests.
+ */
 @Entity
 @Table(name = "offices")
 @NoArgsConstructor
@@ -15,23 +19,45 @@ import java.util.UUID;
 @ToString
 public class Office {
 
+    /**
+     * The unique identifier of this {@link Office}.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The name of this {@link Office}.
+     */
     @NonNull
     @Column(unique = true)
     private String name;
 
+    /**
+     * The address of this {@link Office}.
+     */
     @NonNull
     private String address;
 
+    /**
+     * The {@link Date} when this {@link Office} was created.
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The {@link Date} when this {@link Office} was last updated.
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    /**
+     * Equals method for {@link Office} class.
+     *
+     * @param o The object to compare with this {@link Office}.
+     * @return {@code true} if the given object is an instance of {@link Office} and has the same
+     * {@link UUID} as this {@link Office}, {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -57,6 +83,11 @@ public class Office {
         return false;
     }
 
+    /**
+     * Hash code method for {@link Office} class.
+     *
+     * @return The hash code of this {@link Office}.
+     */
     @Override
     public final int hashCode() {
         if (this instanceof HibernateProxy hibernateProxy)

@@ -7,6 +7,22 @@ on:
         branches: [ "master" ]
 
 jobs:
+    build-doc:
+        permissions: write-all
+        runs-on: self-hosted
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Set up GraalVM 21 JDK
+                uses: graalvm/setup-graalvm@v1
+                with:
+                    java-version: '21'
+                    distribution: 'graalvm'
+                    cache: 'maven'
+                    check-for-updates: true
+
+            -   name: Build Javadoc
+                run: mvn -B javadoc:javadoc --file pom.xml
     build:
         permissions: write-all
         runs-on: self-hosted

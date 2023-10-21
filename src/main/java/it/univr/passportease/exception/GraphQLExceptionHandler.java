@@ -8,13 +8,31 @@ import it.univr.passportease.exception.illegalstate.UserAlreadyExistsException;
 import it.univr.passportease.exception.invalid.*;
 import it.univr.passportease.exception.notfound.*;
 import it.univr.passportease.exception.security.RateLimitException;
+import it.univr.passportease.exception.security.WrongPasswordException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class handles the exceptions thrown by the GraphQL queries and mutations.
+ * It handles the following exceptions classes:
+ * <ul>
+ *     <li>Forbidden Exceptions</li>
+ *     <li>Bad Request Exceptions</li>
+ *     <li>Not Found Exceptions</li>
+ *     <li>Unauthorized Exceptions</li>
+ * </ul>
+ */
 @Component
 public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter {
+    /**
+     * Handles the exceptions thrown by the GraphQL queries and mutations of type {@code Forbidden}.
+     *
+     * @param exception   The exception thrown by the query or mutation.
+     * @param environment The environment of the query or mutation.
+     * @return a {@link GraphQLError} object containing the error type of {@code Not Found}, the message, the path and the location of the error.
+     */
     private static GraphQLError notFoundError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
         return GraphqlErrorBuilder.newError()
                 .errorType(ErrorType.NOT_FOUND)
@@ -24,6 +42,14 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                 .build();
     }
 
+    /**
+     * Handles the exceptions thrown by the GraphQL queries and mutations of type {@code Unauthorized}.
+     *
+     * @param exception   The exception thrown by the query or mutation.
+     * @param environment The environment of the query or mutation.
+     * @return a {@link GraphQLError} object containing the error type of {@code Unauthorized},
+     * the message, the path and the location of the error.
+     */
     private static GraphQLError unauthorizedError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
         return GraphqlErrorBuilder.newError()
                 .errorType(ErrorType.UNAUTHORIZED)
@@ -33,6 +59,13 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                 .build();
     }
 
+    /**
+     * Handles the exceptions thrown by the GraphQL queries and mutations of type {@code Bad Request}.
+     *
+     * @param exception   The exception thrown by the query or mutation.
+     * @param environment The environment of the query or mutation.
+     * @return a {@link GraphQLError} object containing the error type of {@code Bad Request},
+     */
     private static GraphQLError badRequestError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
         return GraphqlErrorBuilder.newError()
                 .errorType(ErrorType.BAD_REQUEST)
@@ -42,6 +75,13 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                 .build();
     }
 
+    /**
+     * Handles the exceptions thrown by the GraphQL queries and mutations of type {@code Forbidden}.
+     *
+     * @param exception   The exception thrown by the query or mutation.
+     * @param environment The environment of the query or mutation.
+     * @return a {@link GraphQLError} object containing the error type of {@code Forbidden},
+     */
     private static GraphQLError forbiddenError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
         return GraphqlErrorBuilder.newError()
                 .errorType(ErrorType.FORBIDDEN)
@@ -51,6 +91,12 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                 .build();
     }
 
+    /**
+     * Checks if the exception is part of the {@code Forbidden} exceptions.
+     *
+     * @param exception The exception thrown by the query or mutation.
+     * @return {@code true} if the exception is part of the {@code Forbidden} exceptions, {@code false} otherwise.
+     */
     private boolean isNotFound(@NotNull Throwable exception) {
         return exception instanceof OfficeNotFoundException ||
                 exception instanceof UserNotFoundException ||
@@ -62,6 +108,12 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                 exception instanceof RequestNotFoundException;
     }
 
+    /**
+     * Checks if the exception is part of the {@code Bad Request} exceptions.
+     *
+     * @param exception The exception thrown by the query or mutation.
+     * @return {@code true} if the exception is part of the {@code Unauthorized} exceptions, {@code false} otherwise.
+     */
     private boolean isBadRequest(@NotNull Throwable exception) {
         return exception instanceof InvalidAvailabilityIDException ||
                 exception instanceof InvalidEmailException ||
@@ -72,15 +124,37 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
                 exception instanceof InvalidDataFromRequestException;
     }
 
+    /**
+     * Checks if the exception is part of the {@code Unauthorized} exceptions.
+     *
+     * @param exception The exception thrown by the query or mutation.
+     * @return {@code true} if the exception is part of the {@code Unauthorized} exceptions, {@code false} otherwise.
+     */
     private boolean isUnauthorized(@NotNull Throwable exception) {
         return exception instanceof InvalidRefreshTokenException ||
-                exception instanceof SecurityException;
+                exception instanceof SecurityException ||
+                exception instanceof WrongPasswordException;
     }
 
+    /**
+     * Checks if the exception is part of the {@code Forbidden} exceptions.
+     *
+     * @param exception The exception thrown by the query or mutation.
+     * @return {@code true} if the exception is part of the {@code Forbidden} exceptions, {@code false} otherwise.
+     */
     private boolean isForbidden(@NotNull Throwable exception) {
         return exception instanceof RateLimitException;
     }
 
+    /**
+     * Resolves the exception to a single {@link GraphQLError} object containing the right error type, the message,
+     * the path and the location of the error.
+     *
+     * @param exception   the exception to resolve to a single {@link GraphQLError}
+     * @param environment the environment for the invoked {@code DataFetcher}
+     * @return a {@link GraphQLError} object containing the right error type, the message, the path and the location of the error.
+     * If the exception is not part of the handled exceptions, it returns the default error. (Internal Server Error)
+     */
     @Override
     protected GraphQLError resolveToSingleError(@NotNull Throwable exception, @NotNull DataFetchingEnvironment environment) {
         if (isForbidden(exception))

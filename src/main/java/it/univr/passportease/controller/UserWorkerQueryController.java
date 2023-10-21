@@ -15,14 +15,39 @@ import org.springframework.stereotype.Controller;
 
 import java.util.List;
 
+/**
+ * Controller for user and worker queries. It handles the following GraphQL queries:
+ * <ul>
+ *     <li>{@link UserWorkerQueryController#getAvailabilities(AvailabilityFilters, Integer, Integer)}</li>
+ *     <li>{@link UserWorkerQueryController#getOffices()}</li>
+ * </ul>
+ *
+ * @see UserWorkerQueryService
+ */
 @Controller
 @AllArgsConstructor
 public class UserWorkerQueryController {
 
+    /**
+     * Service for user and worker queries.
+     */
     private final UserWorkerQueryService userWorkerQueryService;
 
+    /**
+     * Bucket limiter for rate limiting.
+     */
     private BucketLimiter bucketLimiter;
 
+    /**
+     * This query returns the availabilities matching the given filters. It returns a paginated list of availabilities if
+     * the page and size arguments are provided.
+     *
+     * @param availabilityFilters filters to apply to the query, if any
+     * @param size                number of results to return per page, optional
+     * @param page                page number starting from 0, optional
+     * @return list of {@link Availability} matching the filters, paginated if requested
+     * @throws RateLimitException if the user or worker has exceeded the rate limit
+     */
     @QueryMapping
     public List<Availability> getAvailabilities(@Argument("availabilityFilters") AvailabilityFilters availabilityFilters, @Argument("size") Integer size, @Argument("page") Integer page) throws RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.GET_AVAILABILITIES);
@@ -31,6 +56,12 @@ public class UserWorkerQueryController {
         return userWorkerQueryService.getAvailabilities(availabilityFilters, page, size);
     }
 
+    /**
+     * This query returns all the offices in the database.
+     *
+     * @return list of {@link Office}
+     * @throws RateLimitException if the user or worker has exceeded the rate limit
+     */
     @QueryMapping
     public List<Office> getOffices() throws RateLimitException {
         Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.GET_OFFICES);

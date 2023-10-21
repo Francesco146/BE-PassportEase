@@ -15,19 +15,40 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Implementation of {@link WorkerQueryService}.
+ */
 @Service
 @AllArgsConstructor
 public class WorkerQueryServiceImpl implements WorkerQueryService {
 
+    /**
+     * Repository of {@link RequestType} entities.
+     */
     private final RequestTypeRepository requestTypeRepository;
+    /**
+     * Repository of {@link Availability} entities.
+     */
     private final ReservationRepository reservationRepository;
 
+    /**
+     * Get all the {@link RequestType}.
+     *
+     * @return a list of all the {@link RequestType}.
+     */
     @Override
     @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
     public List<RequestType> getAllRequestTypes() {
         return requestTypeRepository.findAll();
     }
 
+    /**
+     * Get the {@link Request} associated to the {@link Availability} with the given id.
+     *
+     * @param id the {@link Availability} id.
+     * @return the {@link Request} associated to the {@link Availability} with the given id.
+     * @throws InvalidAvailabilityIDException if the given id is not valid.
+     */
     @Override
     @PreAuthorize("hasAuthority('WORKER') && hasAuthority('VALIDATED')")
     public Request getRequestByAvailabilityID(String id) throws InvalidAvailabilityIDException {
