@@ -12,5 +12,8 @@ import lombok.*;
 @ToString
 @Getter
 public class JWT {
+    /**
+     * The JWT token as a string.
+     */
     private String token;
 }

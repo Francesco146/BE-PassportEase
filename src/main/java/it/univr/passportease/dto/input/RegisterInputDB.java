@@ -15,8 +15,20 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class RegisterInputDB {
+    /**
+     * The register input.
+     */
     private RegisterInput registerInput;
+    /**
+     * The hash of the password.
+     */
     private String hashPassword;
+    /**
+     * The active status.
+     */
     private Boolean active;
+    /**
+     * The refresh token.
+     */
     private String refreshToken;
 }

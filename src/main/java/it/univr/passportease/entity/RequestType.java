@@ -18,24 +18,42 @@ import java.util.UUID;
 @ToString
 public class RequestType {
 
+    /**
+     * Unique identifier of the {@link RequestType}
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The name of the {@link RequestType}
+     */
     @NonNull
     @Column(unique = true)
     private String name;
 
+    /**
+     * A boolean value that indicates if the {@link RequestType} has a dependency. If true, the {@link RequestType} can
+     * be executed only if the {@link RequestType} on which it depends has been executed by the {@link User}
+     */
     @Column(name = "has_dependency")
     private boolean hasDependency;
 
+    /**
+     * The {@link Date} of creation of the {@link RequestType}
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The {@link Date} of the last update of the {@link RequestType}
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
     /**
+     * Two {@link RequestType} are equals if they have the same id.
+     *
      * @param o The object to compare
      * @return True if the objects have the same id, false otherwise.
      */
@@ -65,6 +83,8 @@ public class RequestType {
     }
 
     /**
+     * The hash code of a {@link RequestType} is calculated using the id.
+     *
      * @return The hash code of the id.
      */
     @Override

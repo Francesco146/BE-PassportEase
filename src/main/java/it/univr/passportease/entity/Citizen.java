@@ -19,39 +19,68 @@ import java.util.UUID;
 @ToString
 public class Citizen {
 
+    /**
+     * The unique identifier of this {@link Citizen}.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The fiscal code of this {@link Citizen}.
+     */
     @NonNull
     @Column(name = "fiscal_code", unique = true)
     private String fiscalCode;
 
+    /**
+     * The name of this {@link Citizen}.
+     */
     @NonNull
     private String name;
 
+    /**
+     * The surname of this {@link Citizen}.
+     */
     @NonNull
     private String surname;
 
+    /**
+     * The city of birth of this {@link Citizen}.
+     */
     @NonNull
     @Column(name = "city_of_birth")
     private String cityOfBirth;
 
+    /**
+     * The date of birth of this {@link Citizen}.
+     */
     @NonNull
     @Column(name = "date_of_birth")
     private Date dateOfBirth;
 
+    /**
+     * The health card number of this {@link Citizen}.
+     */
     @NonNull
     @Column(name = "health_card_number")
     private String healthCardNumber;
 
+    /**
+     * The {@link Date} of creation of this {@link Citizen}.
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The {@link Date} of last update of this {@link Citizen}.
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
     /**
+     * Equals method for this {@link Citizen}.
+     *
      * @param o The object to compare with this {@link Citizen}.
      * @return {@code true} if the given object is an instance of {@link Citizen} and
      * if it has the same {@link UUID} as this {@link Citizen}.
@@ -82,6 +111,8 @@ public class Citizen {
     }
 
     /**
+     * Hash code method for this {@link Citizen}.
+     *
      * @return The hash code of this {@link Citizen}.
      */
     @Override

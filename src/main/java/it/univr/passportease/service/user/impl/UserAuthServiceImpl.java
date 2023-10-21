@@ -28,17 +28,37 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class UserAuthServiceImpl implements UserAuthService {
+    /**
+     * The repository for {@link User} entity.
+     */
     private final UserRepository userRepository;
+    /**
+     * The repository for {@link it.univr.passportease.entity.Citizen} entity.
+     */
     private final CitizenRepository citizenRepository;
 
+    /**
+     * The service that maps the {@link User} entity to the {@link LoginOutput} DTO.
+     */
     private final MapUser mapUser;
 
+    /**
+     * The service that handles the JWT.
+     */
     private final JwtService jwtService;
 
+    /**
+     * The service that encodes the password.
+     */
     private PasswordEncoder passwordEncoder;
+    /**
+     * The service that handles the authentication.
+     */
     private AuthenticationManager authenticationManager;
 
     /**
+     * Logs in the user.
+     *
      * @param fiscalCode user fiscal code
      * @param password   user password
      * @return {@link LoginOutput} object containing the access token and the refresh token
@@ -74,6 +94,8 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     /**
+     * Registers the user.
+     *
      * @param registerInput {@link RegisterInput} object containing the user data
      * @return {@link LoginOutput} object containing the access token and the refresh token
      * @throws UserNotFoundException      if the user is not found

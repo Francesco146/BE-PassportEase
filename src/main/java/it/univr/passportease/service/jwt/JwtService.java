@@ -28,16 +28,33 @@ import java.util.function.Function;
 @Service
 @AllArgsConstructor
 public class JwtService {
+    /**
+     * The access token key used to sign the access token.
+     */
     @NonNull
     private static final String ACCESS_TOKEN_KEY = System.getenv("ACCESS_KEY");
+    /**
+     * The refresh token key used to sign the refresh token.
+     */
     @NonNull
     private static final String REFRESH_TOKEN_KEY = System.getenv("REFRESH_KEY");
 
+    /**
+     * The repository for the {@link Worker} entity.
+     */
     private final WorkerRepository workerRepository;
+    /**
+     * The repository for the {@link User} entity.
+     */
     private final UserRepository userRepository;
+    /**
+     * The redis template used to store the access tokens.
+     */
     private RedisTemplate<String, String> redisTemplate;
 
     /**
+     * Extracts the id of the user or worker from the token.
+     *
      * @param token JWT token
      * @return the id of the user or worker that owns the token
      */
@@ -46,6 +63,8 @@ public class JwtService {
     }
 
     /**
+     * Extracts the expiration date of the token.
+     *
      * @param token JWT token
      * @return the expiration date of the token
      */
@@ -54,6 +73,8 @@ public class JwtService {
     }
 
     /**
+     * Extracts the claims of the token.
+     *
      * @param token          JWT token
      * @param claimsResolver function that takes a Claims object and returns a T object
      * @param <T>            type of the object to return
@@ -65,6 +86,8 @@ public class JwtService {
     }
 
     /**
+     * Extracts all the claims of the token.
+     *
      * @param token JWT token
      * @return all the claims of the token
      */
@@ -108,6 +131,8 @@ public class JwtService {
     }
 
     /**
+     * Checks if the token is valid.
+     *
      * @param token       JWT token
      * @param userDetails user details of the user that owns the token
      * @return true if the token is valid, false otherwise
@@ -123,6 +148,8 @@ public class JwtService {
     }
 
     /**
+     * Generates a new access token.
+     *
      * @param id id of the user or worker
      * @return a new access token, valid for 15 minutes
      * @throws UserOrWorkerIDNotFoundException if the id does not belong to either a user or a worker
@@ -133,6 +160,8 @@ public class JwtService {
     }
 
     /**
+     * Generates a new access token.
+     *
      * @param claims claims to add to the token
      * @param id     id of the user or worker
      * @return a new access token, valid for 15 minutes
@@ -172,6 +201,8 @@ public class JwtService {
     }
 
     /**
+     * Generates a new refresh token.
+     *
      * @param id id of the user or worker
      * @return a new refresh token, valid for 30 days
      */
@@ -180,6 +211,8 @@ public class JwtService {
     }
 
     /**
+     * Generates a new refresh token.
+     *
      * @param id id of the user or worker
      * @return a new refresh token, valid for 30 days
      */
@@ -224,6 +257,8 @@ public class JwtService {
     }
 
     /**
+     * Gets the role of the user or worker.
+     *
      * @param id id of the user or worker
      * @return an {@link Roles} object representing the role of the user or worker
      * @throws UserOrWorkerIDNotFoundException if the id does not belong to either a user or a worker
@@ -235,6 +270,8 @@ public class JwtService {
     }
 
     /**
+     * Gets the {@link SecretKey} used to sign the access token.
+     *
      * @return the {@link SecretKey} used to sign the access token
      */
     private SecretKey getAccessSignKey() {
@@ -243,6 +280,8 @@ public class JwtService {
     }
 
     /**
+     * Gets the {@link SecretKey} used to sign the refresh token.
+     *
      * @return the {@link SecretKey} used to sign the refresh token
      */
     private SecretKey getRefreshSignKey() {
@@ -251,6 +290,8 @@ public class JwtService {
     }
 
     /**
+     * Invalidates the access token by deleting it from redis.
+     *
      * @param token JWT Access token
      * @return true if the access token is deleted from redis, false otherwise
      */

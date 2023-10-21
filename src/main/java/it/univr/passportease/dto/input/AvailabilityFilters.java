@@ -27,11 +27,29 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class AvailabilityFilters implements Specification<Availability> {
+    /**
+     * The offices name to filter the query by.
+     */
     private List<String> officesName;
+    /**
+     * The request types to filter the query by.
+     */
     private List<String> requestTypes;
+    /**
+     * The start date to filter the query by.
+     */
     private Date startDate;
+    /**
+     * The end date to filter the query by.
+     */
     private Date endDate;
+    /**
+     * The start time to filter the query by.
+     */
     private LocalTime startTime;
+    /**
+     * The end time to filter the query by.
+     */
     private LocalTime endTime;
 
 
@@ -66,6 +84,8 @@ public class AvailabilityFilters implements Specification<Availability> {
     }
 
     /**
+     * Checks if the start date, end date, start time and end time are valid.
+     *
      * @return True if the end time is valid, that is if the start time is before the end time or the end time is null.
      */
     private boolean isEndTimeValid() {
@@ -73,6 +93,8 @@ public class AvailabilityFilters implements Specification<Availability> {
     }
 
     /**
+     * Checks if the start date, end date, start time and end time are valid.
+     *
      * @return True if the start time is valid, that is if the end time is after the start time or the start time is null.
      */
     private boolean isStartTimeValid() {
@@ -80,6 +102,8 @@ public class AvailabilityFilters implements Specification<Availability> {
     }
 
     /**
+     * Checks if the start date and end date are valid.
+     *
      * @return True if the end date is valid, that is if the start date is before the end date or the end date is null.
      */
     private boolean isEndDateValid() {
@@ -87,6 +111,8 @@ public class AvailabilityFilters implements Specification<Availability> {
     }
 
     /**
+     * Checks if the start date and end date are valid.
+     *
      * @return True if the start date is valid, that is if the end date is after the start date or the start date is null.
      */
     private boolean isStartDateValid() {

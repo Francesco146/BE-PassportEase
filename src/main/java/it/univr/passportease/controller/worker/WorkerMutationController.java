@@ -32,12 +32,23 @@ import org.springframework.stereotype.Controller;
 @AllArgsConstructor
 public class WorkerMutationController {
 
+    /**
+     * Worker mutation service.
+     */
     private final WorkerMutationService workerMutationService;
 
+    /**
+     * Bucket limiter.
+     */
     private BucketLimiter bucketLimiter;
+    /**
+     * Request analyzer.
+     */
     private RequestAnalyzer requestAnalyzer;
 
     /**
+     * This mutation creates a request. It returns the created request.
+     *
      * @param requestInput {@link RequestInput} containing the request's data
      * @return the created {@link Request}
      * @throws AuthenticationCredentialsNotFoundException if the worker has not inserted the token in the request
@@ -57,6 +68,8 @@ public class WorkerMutationController {
     }
 
     /**
+     * This mutation modifies a request. It returns the modified request.
+     *
      * @param requestID    the request's ID
      * @param requestInput {@link RequestInput} containing the request's data
      * @return the modified {@link Request}
@@ -77,6 +90,8 @@ public class WorkerMutationController {
     }
 
     /**
+     * This mutation deletes a request. It returns nothing.
+     *
      * @param requestID the request's ID
      * @throws WorkerNotFoundException                    if the worker is not found
      * @throws RequestNotFoundException                   if the request is not found

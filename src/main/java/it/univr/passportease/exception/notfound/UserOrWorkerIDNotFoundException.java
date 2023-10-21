@@ -5,6 +5,8 @@ package it.univr.passportease.exception.notfound;
  */
 public class UserOrWorkerIDNotFoundException extends IllegalArgumentException {
     /**
+     * Constructor for the {@link UserOrWorkerIDNotFoundException}
+     *
      * @param message The message of the exception.
      */
     public UserOrWorkerIDNotFoundException(String message) {

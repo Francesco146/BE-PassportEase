@@ -17,6 +17,8 @@ import java.util.UUID;
 @Repository
 public interface AvailabilityRepository extends JpaRepository<Availability, UUID>, JpaSpecificationExecutor<Availability> {
     /**
+     * Find the {@link Availability} entities that satisfy the given {@link Specification}.
+     *
      * @param specification must not be {@literal null}. It is used to filter the results of the query.
      * @return a list of {@link Availability} entities that satisfy the given {@link Specification}.
      */
@@ -24,6 +26,9 @@ public interface AvailabilityRepository extends JpaRepository<Availability, UUID
     List<Availability> findAll(@NotNull Specification<Availability> specification);
 
     /**
+     * Find the {@link Availability} entities that satisfy the given {@link Specification} and have the given
+     * {@link Request} id.
+     *
      * @param requestId the id of the {@link Request} entity.
      * @return a list of {@link Availability} entities that satisfy the given {@link Specification}.
      */

@@ -18,23 +18,40 @@ import java.util.UUID;
 @ToString
 public class Category {
 
+    /**
+     * The unique identifier of this {@link Category}.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The name of this {@link Category}.
+     */
     @NonNull
     @Column(unique = true)
     private String name;
 
+    /**
+     * The description of this {@link Category}.
+     */
     private String description;
 
+    /**
+     * The {@link Date} of creation of this {@link Category}.
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The {@link Date} of last update of this {@link Category}.
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
     /**
+     * Equals method for this {@link Category}.
+     *
      * @param o The object to compare with this {@link Category}.
      * @return {@code true} if the given object is an instance of {@link Category} and has the same {@link UUID} as this
      * {@link Category}, {@code false} otherwise.
@@ -65,6 +82,8 @@ public class Category {
     }
 
     /**
+     * Hash code method for this {@link Category}.
+     *
      * @return The hash code of this {@link Category}.
      */
     @Override

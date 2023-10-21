@@ -8,12 +8,14 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
- * Map {@link NotificationInputDB} to {@link Notification
+ * Map {@link NotificationInputDB} to {@link Notification}
  */
 @AllArgsConstructor
 @Component
 public class MapNotification {
     /**
+     * Map {@link NotificationInputDB} to {@link Notification}
+     *
      * @param notificationInputDB {@link NotificationInputDB} to map
      * @return {@link Notification} mapped
      */

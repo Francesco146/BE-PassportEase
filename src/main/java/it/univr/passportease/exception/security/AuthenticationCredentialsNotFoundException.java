@@ -5,6 +5,8 @@ package it.univr.passportease.exception.security;
  */
 public class AuthenticationCredentialsNotFoundException extends SecurityException {
     /**
+     * Constructor of {@link AuthenticationCredentialsNotFoundException}.
+     *
      * @param message The message of the exception.
      */
     public AuthenticationCredentialsNotFoundException(String message) {

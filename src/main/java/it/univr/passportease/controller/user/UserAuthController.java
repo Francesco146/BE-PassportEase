@@ -44,10 +44,22 @@ import org.springframework.stereotype.Controller;
 @Log4j2
 public class UserAuthController {
 
+    /**
+     * User authentication service.
+     */
     private final UserAuthService userAuthService;
+    /**
+     * User worker mutation service.
+     */
     private final UserWorkerMutationService userWorkerMutationService;
 
+    /**
+     * Bucket limiter.
+     */
     private final BucketLimiter bucketLimiter;
+    /**
+     * Request analyzer.
+     */
     private RequestAnalyzer requestAnalyzer;
 
 
@@ -131,6 +143,8 @@ public class UserAuthController {
     }
 
     /**
+     * This mutation changes the password of the user.
+     *
      * @param oldPassword the old password
      * @param newPassword the new password
      * @throws UserNotFoundException                      if the user is not found
@@ -149,6 +163,8 @@ public class UserAuthController {
     }
 
     /**
+     * This mutation changes the email of the user.
+     *
      * @param newEmail the new email
      * @param oldEmail the old email
      * @return the new email

@@ -38,12 +38,23 @@ import java.util.List;
 @AllArgsConstructor
 public class UserQueryController {
 
+    /**
+     * User query service.
+     */
     private final UserQueryService userQueryService;
 
-    BucketLimiter bucketLimiter;
+    /**
+     * Bucket limiter.
+     */
+    private BucketLimiter bucketLimiter;
+    /**
+     * Request analyzer.
+     */
     private RequestAnalyzer requestAnalyzer;
 
     /**
+     * This query returns the request types associated to the user.
+     *
      * @return the list of request types associated to the user
      * @throws RateLimitException                         if the user has exceeded the rate limit
      * @throws RequestTypeNotFoundException               if the user has no request types associated
@@ -58,6 +69,8 @@ public class UserQueryController {
     }
 
     /**
+     * This query returns the report details for the given availability id.
+     *
      * @param availabilityId the availability id for which the report details are requested
      * @return see {@link ReportDetails}, containing all the information to generate the report for the given availability
      * @throws SecurityException              if the user is not authorized to access the report details requested,
@@ -74,6 +87,8 @@ public class UserQueryController {
     }
 
     /**
+     * This query returns the notifications associated to the user.
+     *
      * @return the list of notifications associated to the user
      * @throws AuthenticationCredentialsNotFoundException if the user has not included the token in the request
      * @throws RateLimitException                         if the user has exceeded the rate limit
@@ -87,6 +102,8 @@ public class UserQueryController {
     }
 
     /**
+     * This query returns the user details associated to the user.
+     *
      * @return the user details associated to the user, for generating the profile page
      * @throws AuthenticationCredentialsNotFoundException if the user has not included the token in the request
      * @throws RateLimitException                         if the user has exceeded the rate limit
@@ -101,6 +118,8 @@ public class UserQueryController {
     }
 
     /**
+     * This query returns the reservations associated to the user.
+     *
      * @return the list of reservations associated to the user
      * @throws AuthenticationCredentialsNotFoundException if the user has not included the token in the request
      * @throws RateLimitException                         if the user has exceeded the rate limit

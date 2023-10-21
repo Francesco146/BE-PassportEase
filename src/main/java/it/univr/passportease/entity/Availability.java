@@ -21,41 +21,70 @@ import java.util.UUID;
 @ToString
 public class Availability {
 
+    /**
+     * The id of the {@link Availability}.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The status of the {@link Availability}.
+     */
     @NonNull
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    /**
+     * The date of the {@link Availability}.
+     */
     @NonNull
     private Date date;
 
+    /**
+     * The time of the {@link Availability}.
+     */
     @NonNull
     private LocalTime time;
 
+    /**
+     * The {@link Request} of the {@link Availability}.
+     */
     @NonNull
     @ManyToOne
     @JoinColumn(name = "request_id")
     private Request request;
 
+    /**
+     * The {@link Office} of the {@link Availability}.
+     */
     @NonNull
     @ManyToOne
     @JoinColumn(name = "office_id")
     private Office office;
 
+    /**
+     * The {@link User} of the {@link Availability}.
+     */
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    /**
+     * The creation {@link Date} of the {@link Availability}.
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The update {@link Date} of the {@link Availability}.
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
     /**
+     * Equals method for {@link Availability}.
+     *
      * @param o The object to compare with this {@link  Availability}.
      * @return {@code  true} if the given object is an instance of {@link  Availability} and has the same {@code id} as
      * this {@link Availability}, {@code false} otherwise.
@@ -86,6 +115,8 @@ public class Availability {
     }
 
     /**
+     * Hash code method for {@link Availability}.
+     *
      * @return The hash code of this {@link Availability}.
      */
     @Override

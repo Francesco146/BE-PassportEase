@@ -5,6 +5,8 @@ package it.univr.passportease.exception.invalid;
  */
 public class InvalidDataFromRequestException extends IllegalArgumentException {
     /**
+     * Constructor of {@link InvalidDataFromRequestException}.
+     *
      * @param message the detail message.
      */
     public InvalidDataFromRequestException(String message) {

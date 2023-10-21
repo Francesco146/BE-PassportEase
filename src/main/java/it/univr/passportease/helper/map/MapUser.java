@@ -18,6 +18,8 @@ import java.util.Date;
 @Component
 public class MapUser {
     /**
+     * Map {@link RegisterInputDB} to {@link User}.
+     *
      * @param registerInputDB {@link RegisterInputDB} to map.
      * @return {@link User} mapped.
      */
@@ -39,6 +41,8 @@ public class MapUser {
     }
 
     /**
+     * Map {@link User} to {@link LoginOutput}.
+     *
      * @param user        {@link User} to map.
      * @param accessToken {@link JWT} to map.
      * @return {@link LoginOutput} mapped.

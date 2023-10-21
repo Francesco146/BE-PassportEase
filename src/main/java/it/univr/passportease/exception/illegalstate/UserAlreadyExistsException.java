@@ -5,6 +5,8 @@ package it.univr.passportease.exception.illegalstate;
  */
 public class UserAlreadyExistsException extends IllegalStateException {
     /**
+     * Constructs a {@code UserAlreadyExistsException} with the specified detail message.
+     *
      * @param msg the detail message.
      */
     public UserAlreadyExistsException(String msg) {

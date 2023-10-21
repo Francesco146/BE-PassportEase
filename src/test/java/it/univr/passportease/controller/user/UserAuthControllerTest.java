@@ -73,7 +73,7 @@ class UserAuthControllerTest {
 
     /**
      * Create a mock user and save it in the database, if not exists
-     * User data:
+     * Citizen data:
      * <ul>
      *     <li>Fiscal Code: NTLZLD98R52G273R</li>
      *     <li>Name: Zelda</li>

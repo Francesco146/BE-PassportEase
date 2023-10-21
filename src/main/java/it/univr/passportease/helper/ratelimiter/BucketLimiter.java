@@ -20,9 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 public class BucketLimiter {
+    /**
+     * The cache of the buckets.
+     */
     private final Map<String, Bucket> bucketCache = new ConcurrentHashMap<>();
 
     /**
+     * This method is used to resolve the bucket for each method. It uses a ConcurrentHashMap to store the buckets.
+     *
      * @param methodName The name of the method to resolve the bucket for.
      * @return The bucket for the given method.
      */

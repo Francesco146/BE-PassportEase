@@ -5,6 +5,8 @@ package it.univr.passportease.exception.illegalstate;
  */
 public class OfficeOverloadedException extends RuntimeException {
     /**
+     * Constructs a {@link OfficeOverloadedException} with no detail message.
+     *
      * @param message the detail message.
      */
     public OfficeOverloadedException(String message) {

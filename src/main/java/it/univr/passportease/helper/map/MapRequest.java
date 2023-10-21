@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
- * Map {@link RequestInput} to {@link Request
+ * Map {@link RequestInput} to {@link Request}
  */
 @Component
 public class MapRequest {
     /**
+     * Map {@link RequestInput} to {@link Request}
+     *
      * @param requestInput {@link RequestInput} to map
      * @param requestType  {@link RequestType} to map
      * @param worker       {@link Worker} to map

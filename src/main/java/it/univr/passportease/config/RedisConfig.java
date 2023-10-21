@@ -18,10 +18,15 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Configuration
 @Log4j2
 public class RedisConfig {
+    /**
+     * Redis host.
+     */
     @Value("${spring.data.redis.host}")
     private String redisHost;
 
     /**
+     * Creates a connection to the Redis server.
+     *
      * @return JedisConnectionFactory, used to create a connection to the Redis server
      */
     @Bean
@@ -39,6 +44,8 @@ public class RedisConfig {
     }
 
     /**
+     * Creates a RedisTemplate bean, used to interact with the Redis server.
+     *
      * @param <T> Type of the RedisTemplate
      * @return RedisTemplate, used to interact with the Redis server
      */

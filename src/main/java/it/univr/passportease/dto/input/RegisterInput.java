@@ -16,11 +16,32 @@ import java.util.Date;
 @AllArgsConstructor
 @ToString
 public class RegisterInput {
+    /**
+     * The fiscal code of the user.
+     */
     private String fiscalCode;
+    /**
+     * The email of the user.
+     */
     private String email;
+    /**
+     * The name of the user.
+     */
     private String name;
+    /**
+     * The surname of the user.
+     */
     private String surname;
+    /**
+     * The city of birth of the user.
+     */
     private String cityOfBirth;
+    /**
+     * The date of birth of the user.
+     */
     private Date dateOfBirth;
+    /**
+     * The password of the user.
+     */
     private String password;
 }

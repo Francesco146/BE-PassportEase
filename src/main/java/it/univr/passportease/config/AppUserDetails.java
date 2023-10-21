@@ -11,13 +11,25 @@ import java.util.UUID;
  */
 public class AppUserDetails implements UserDetails {
 
+    /**
+     * The user id
+     */
     private final String name;
+    /**
+     * The user password
+     */
     @lombok.Getter
     private final String password;
+    /**
+     * The authorities of the user
+     */
     @lombok.Getter
     private final List<GrantedAuthority> authorities;
 
     /**
+     * Constructor of {@link AppUserDetails}. It takes the user id, the user password and the user authorities
+     * and creates a {@link UserDetails} object.
+     *
      * @param id           user id
      * @param hashPassword user password
      * @param authorities  user authorities

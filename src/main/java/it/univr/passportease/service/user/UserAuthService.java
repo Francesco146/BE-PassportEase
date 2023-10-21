@@ -11,6 +11,8 @@ import it.univr.passportease.exception.security.WrongPasswordException;
  */
 public interface UserAuthService {
     /**
+     * Logs in the user with the given fiscal code and password.
+     *
      * @param fiscalCode The fiscal code of the user
      * @param password   The password of the user
      * @return The JWTs of the user
@@ -20,6 +22,8 @@ public interface UserAuthService {
     LoginOutput login(String fiscalCode, String password) throws UserNotFoundException, WrongPasswordException;
 
     /**
+     * Registers the user with the given input.
+     *
      * @param registerInput The input of the register mutation
      * @return The JWTs of the user
      * @throws UserNotFoundException      if the user is not found

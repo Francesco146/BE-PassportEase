@@ -5,6 +5,8 @@ package it.univr.passportease.exception.invalid;
  */
 public class InvalidEmailException extends IllegalArgumentException {
     /**
+     * Constructor of {@link InvalidEmailException}.
+     *
      * @param message The message of the exception.
      */
     public InvalidEmailException(String message) {

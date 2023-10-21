@@ -24,15 +24,35 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserMutationServiceImpl implements UserMutationService {
 
+    /**
+     * The repository for {@link Notification} entity.
+     */
     private final NotificationRepository notificationRepository;
+    /**
+     * The repository for {@link Office} entity.
+     */
     private final OfficeRepository officeRepository;
+    /**
+     * The repository for {@link RequestType} entity.
+     */
     private final RequestTypeRepository requestTypeRepository;
+    /**
+     * The repository for {@link Availability} entity.
+     */
     private final AvailabilityRepository availabilityRepository;
+    /**
+     * The repository for {@link User} entity.
+     */
     private final UserRepository userRepository;
 
+    /**
+     * The service that maps the {@link NotificationInputDB} DTO to the {@link Notification} entity.
+     */
     private final MapNotification mapNotification;
 
     /**
+     * Creates a notification.
+     *
      * @param notificationInput contains the notification data
      * @param user              contains the user data
      * @return the created notification
@@ -70,6 +90,8 @@ public class UserMutationServiceImpl implements UserMutationService {
     }
 
     /**
+     * Modifies a notification by id
+     *
      * @param notificationInput contains the notification data
      * @param notificationId    contains the notification id
      * @return the modified notification
@@ -105,6 +127,8 @@ public class UserMutationServiceImpl implements UserMutationService {
     }
 
     /**
+     * Creates a reservation by id, setting the availability status to {@link Status#TAKEN}
+     *
      * @param availabilityId contains the availability id
      * @param user           contains the user data
      * @return the created reservation

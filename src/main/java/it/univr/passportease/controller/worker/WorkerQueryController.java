@@ -28,11 +28,19 @@ import java.util.List;
 @AllArgsConstructor
 public class WorkerQueryController {
 
+    /**
+     * Worker query service.
+     */
     private final WorkerQueryService workerQueryService;
 
+    /**
+     * Bucket limiter.
+     */
     private BucketLimiter bucketLimiter;
 
     /**
+     * This query returns the request with the given availability id.
+     *
      * @param id availability id
      * @return {@link Request} with the given availability id
      * @throws InvalidAvailabilityIDException if the given availability id is invalid
@@ -47,6 +55,8 @@ public class WorkerQueryController {
     }
 
     /**
+     * This query returns all the request types in the database.
+     *
      * @return all the request types in the database
      * @throws RateLimitException if the rate limit is exceeded
      */

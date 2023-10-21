@@ -13,8 +13,20 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class WorkerInput {
+    /**
+     * The username of the worker.
+     */
     private String username;
+    /**
+     * The email of the worker.
+     */
     private String email;
+    /**
+     * The password of the worker.
+     */
     private String password;
+    /**
+     * The name of the worker.
+     */
     private String officeName;
 }

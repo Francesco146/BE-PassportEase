@@ -24,12 +24,16 @@ public interface WorkerRepository extends JpaRepository<Worker, UUID> {
     Optional<Worker> findById(@NotNull UUID id);
 
     /**
+     * Counts the number of workers of the given {@link Office}.
+     *
      * @param office the {@link Office} to count the workers of.
      * @return the number of workers of the given {@link Office}.
      */
     long countByOffice(Office office);
 
     /**
+     * Finds a {@link Worker} by its username.
+     *
      * @param username the username of the {@link Worker} to find.
      * @return an {@link Optional} containing the {@link Worker} if found, an empty {@link Optional} otherwise.
      */

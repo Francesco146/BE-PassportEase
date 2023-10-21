@@ -5,6 +5,8 @@ package it.univr.passportease.exception.notfound;
  */
 public class NotificationNotFoundException extends IllegalArgumentException {
     /**
+     * Constructs a {@code NotificationNotFoundException} with no detail message.
+     *
      * @param message The message of the exception.
      */
     public NotificationNotFoundException(String message) {

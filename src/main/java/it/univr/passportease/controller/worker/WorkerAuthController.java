@@ -32,11 +32,19 @@ import org.springframework.stereotype.Controller;
 @AllArgsConstructor
 public class WorkerAuthController {
 
+    /**
+     * Worker authentication service.
+     */
     private final WorkerAuthService workerAuthService;
 
+    /**
+     * Bucket limiter.
+     */
     private BucketLimiter bucketLimiter;
 
     /**
+     * Logs in the worker with the given username and password.
+     *
      * @param username worker's username
      * @param password worker's password
      * @return {@link LoginOutput} containing the access token and the refresh token
@@ -61,7 +69,7 @@ public class WorkerAuthController {
      * @return {@link LoginOutput} containing the access token and the refresh token
      * @throws RateLimitException      if the rate limit is exceeded
      * @throws OfficeNotFoundException if the office is not found
-     * @deprecated . Use {@link WorkerAuthController#loginWorker(String, String)} instead.
+     * @deprecated Use {@link WorkerAuthController#loginWorker(String, String)} instead.
      */
     @MutationMapping
     @Deprecated(since = "0.0.1")

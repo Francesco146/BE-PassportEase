@@ -29,11 +29,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 @AllArgsConstructor
 public class SecurityConfig {
+    /**
+     * User repository.
+     */
     private UserRepository userRepository;
+    /**
+     * Worker repository.
+     */
     private WorkerRepository workerRepository;
+    /**
+     * Redis template.
+     */
     private RedisTemplate<String, String> redisTemplate;
 
     /**
+     * Creates a UserDetailsService bean, used to retrieve user details from the database or from the Redis cache.
+     *
      * @return UserDetailsService, used to retrieve user details from the database or from the Redis cache
      */
     @Bean
@@ -42,6 +53,9 @@ public class SecurityConfig {
     }
 
     /**
+     * Creates a SecurityFilterChain bean, used to configure the security filter chain. It is used to configure the
+     * authentication method, the authorization method and the session management.
+     *
      * @param http       HttpSecurity object
      * @param authFilter JwtAuthFilter object
      * @return SecurityFilterChain, used to configure the security filter chain. It is used to configure the
@@ -72,6 +86,8 @@ public class SecurityConfig {
     }
 
     /**
+     * Creates a PasswordEncoder bean, used to encode the password.
+     *
      * @return PasswordEncoder, used to encode the password
      */
     @Bean
@@ -80,6 +96,8 @@ public class SecurityConfig {
     }
 
     /**
+     * Creates an AuthenticationProvider bean, used to authenticate the user.
+     *
      * @return AuthenticationProvider, used to authenticate the user
      */
     @Bean
@@ -91,6 +109,8 @@ public class SecurityConfig {
     }
 
     /**
+     * Creates an AuthenticationManager bean, used to authenticate the user.
+     *
      * @param config AuthenticationConfiguration object, used to configure the authentication manager
      * @return AuthenticationManager, used to authenticate the user
      * @throws Exception if an error occurs in the authentication manager configuration

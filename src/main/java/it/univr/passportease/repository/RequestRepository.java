@@ -16,6 +16,8 @@ import java.util.UUID;
 @Repository
 public interface RequestRepository extends JpaRepository<Request, UUID> {
     /**
+     * Finds all the {@link Request} associated to the given worker id.
+     *
      * @param officeId  office id to search for
      * @param startDate start date to search for
      * @param endDate   end date to search for

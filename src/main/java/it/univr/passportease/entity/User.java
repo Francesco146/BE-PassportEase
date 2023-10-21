@@ -19,50 +19,91 @@ import java.util.UUID;
 @ToString
 public class User {
 
+    /**
+     * The unique identifier of the {@link User}
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The unique fiscal code of the {@link User}
+     */
     @NonNull
     @Column(name = "fiscal_code", unique = true)
     private String fiscalCode;
 
+    /**
+     * The unique email of the {@link User}
+     */
     @NonNull
     @Column(unique = true)
     private String email;
 
+    /**
+     * The name of the {@link User}
+     */
     @NonNull
     private String name;
 
+    /**
+     * The surname of the {@link User}
+     */
     @NonNull
     private String surname;
 
+    /**
+     * The city of birth of the {@link User}
+     */
     @NonNull
     @Column(name = "city_of_birth")
     private String cityOfBirth;
 
+    /**
+     * The date of birth of the {@link User}
+     */
     @NonNull
     @Column(name = "date_of_birth")
     private Date dateOfBirth;
 
+    /**
+     * The hash password of the {@link User}.
+     * Known issue: The password is not salted or peppered.
+     */
     @NonNull
     @Column(name = "hash_password")
     private String hashPassword;
 
+    /**
+     * A boolean that indicates if the {@link User} is active or not
+     */
     @NonNull
     private Boolean active;
 
+    /**
+     * The refresh token of the {@link User}.
+     * Known issue: The refresh token is stored in plain text, and if the database is compromised, the attacker can
+     * impersonate the user.
+     */
     @NonNull
     @Column(name = "refresh_token", length = 1024)
     private String refreshToken;
 
+    /**
+     * The creation date of the {@link User}
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The last update date of the {@link User}
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
     /**
+     * Equals method for the {@link User} class
+     *
      * @param o the object to compare
      * @return {@code true} if the object is equals to this, {@code false} otherwise
      */
@@ -92,6 +133,8 @@ public class User {
     }
 
     /**
+     * Hash code method for the {@link User} class
+     *
      * @return the hash code of this object
      */
     @Override

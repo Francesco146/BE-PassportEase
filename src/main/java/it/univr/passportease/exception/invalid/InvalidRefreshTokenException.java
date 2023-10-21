@@ -5,6 +5,8 @@ package it.univr.passportease.exception.invalid;
  */
 public class InvalidRefreshTokenException extends IllegalArgumentException {
     /**
+     * Constructor of {@link InvalidRefreshTokenException}.
+     *
      * @param message The message of the exception.
      */
     public InvalidRefreshTokenException(String message) {

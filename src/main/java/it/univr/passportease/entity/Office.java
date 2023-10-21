@@ -19,24 +19,41 @@ import java.util.UUID;
 @ToString
 public class Office {
 
+    /**
+     * The unique identifier of this {@link Office}.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The name of this {@link Office}.
+     */
     @NonNull
     @Column(unique = true)
     private String name;
 
+    /**
+     * The address of this {@link Office}.
+     */
     @NonNull
     private String address;
 
+    /**
+     * The {@link Date} when this {@link Office} was created.
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The {@link Date} when this {@link Office} was last updated.
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
     /**
+     * Equals method for {@link Office} class.
+     *
      * @param o The object to compare with this {@link Office}.
      * @return {@code true} if the given object is an instance of {@link Office} and has the same
      * {@link UUID} as this {@link Office}, {@code false} otherwise.
@@ -67,6 +84,8 @@ public class Office {
     }
 
     /**
+     * Hash code method for {@link Office} class.
+     *
      * @return The hash code of this {@link Office}.
      */
     @Override

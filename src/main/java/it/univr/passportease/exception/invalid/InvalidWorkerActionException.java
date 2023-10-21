@@ -5,6 +5,8 @@ package it.univr.passportease.exception.invalid;
  */
 public class InvalidWorkerActionException extends IllegalArgumentException {
     /**
+     * Constructor of {@link InvalidWorkerActionException}.
+     *
      * @param message The message of the exception.
      */
     public InvalidWorkerActionException(String message) {

@@ -5,6 +5,8 @@ package it.univr.passportease.exception.notfound;
  */
 public class RequestNotFoundException extends IllegalArgumentException {
     /**
+     * Constructor for the {@link RequestNotFoundException}
+     *
      * @param message The message of the exception.
      */
     public RequestNotFoundException(String message) {

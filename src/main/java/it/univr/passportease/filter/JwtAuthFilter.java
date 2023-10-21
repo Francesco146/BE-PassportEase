@@ -25,10 +25,18 @@ import java.io.IOException;
 @AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+    /**
+     * The service that handles the JWT.
+     */
     private JwtService jwtService;
+    /**
+     * The service that handles the user details of the application. Used to manage the sessions.
+     */
     private AppUserDetailsService userDetailsService;
 
     /**
+     * Checks if the user is authenticated.
+     *
      * @param request     The request to be filtered
      * @param response    The response to be filtered
      * @param filterChain The chain of filters to be applied

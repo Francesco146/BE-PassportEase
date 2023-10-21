@@ -16,12 +16,16 @@ import java.util.UUID;
 @Transactional
 public interface UserRepository extends JpaRepository<User, UUID> {
     /**
+     * Finds a user by its fiscal code.
+     *
      * @param fiscalCode the fiscal code of the user
      * @return the user with the given fiscal code, as an {@link Optional}
      */
     Optional<User> findByFiscalCode(String fiscalCode);
 
     /**
+     * Finds a user by its id.
+     *
      * @param id the id of the user
      * @return the user with the given id, as an {@link Optional}
      */
@@ -29,11 +33,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findById(@NotNull UUID id);
 
     /**
+     * Deletes a user by its id.
+     *
      * @param fiscalCode the fiscal code of the user
      */
     void deleteByFiscalCode(String fiscalCode);
 
     /**
+     * Checks if a user with the given fiscal code exists.
+     *
      * @param id must not be {@literal null}.  The id of the user
      * @return {@literal true} if the user with the given id exists, {@literal false} otherwise
      */

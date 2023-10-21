@@ -15,11 +15,15 @@ import java.util.UUID;
 @Transactional
 public interface CitizenRepository extends JpaRepository<Citizen, UUID> {
     /**
+     * Delete the citizen with the given fiscal code.
+     *
      * @param fiscalCode the fiscal code of the citizen to delete
      */
     void deleteByFiscalCode(String fiscalCode);
 
     /**
+     * Find the citizen with the given fiscal code.
+     *
      * @param fiscalCode the fiscal code of the citizen to find
      * @return an {@link Optional} containing the citizen with the given fiscal code
      */

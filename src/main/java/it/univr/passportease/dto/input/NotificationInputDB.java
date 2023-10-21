@@ -17,8 +17,20 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class NotificationInputDB {
+    /**
+     * The notification input.
+     */
     private NotificationInput notificationInput;
+    /**
+     * The user.
+     */
     private User user;
+    /**
+     * The office.
+     */
     private Office office;
+    /**
+     * The request type.
+     */
     private RequestType requestType;
 }

@@ -92,6 +92,8 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
     }
 
     /**
+     * Checks if the exception is part of the {@code Forbidden} exceptions.
+     *
      * @param exception The exception thrown by the query or mutation.
      * @return {@code true} if the exception is part of the {@code Forbidden} exceptions, {@code false} otherwise.
      */
@@ -107,6 +109,8 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
     }
 
     /**
+     * Checks if the exception is part of the {@code Bad Request} exceptions.
+     *
      * @param exception The exception thrown by the query or mutation.
      * @return {@code true} if the exception is part of the {@code Unauthorized} exceptions, {@code false} otherwise.
      */
@@ -121,6 +125,8 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
     }
 
     /**
+     * Checks if the exception is part of the {@code Unauthorized} exceptions.
+     *
      * @param exception The exception thrown by the query or mutation.
      * @return {@code true} if the exception is part of the {@code Unauthorized} exceptions, {@code false} otherwise.
      */
@@ -131,6 +137,8 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
     }
 
     /**
+     * Checks if the exception is part of the {@code Forbidden} exceptions.
+     *
      * @param exception The exception thrown by the query or mutation.
      * @return {@code true} if the exception is part of the {@code Forbidden} exceptions, {@code false} otherwise.
      */
@@ -139,6 +147,9 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
     }
 
     /**
+     * Resolves the exception to a single {@link GraphQLError} object containing the right error type, the message,
+     * the path and the location of the error.
+     *
      * @param exception   the exception to resolve to a single {@link GraphQLError}
      * @param environment the environment for the invoked {@code DataFetcher}
      * @return a {@link GraphQLError} object containing the right error type, the message, the path and the location of the error.

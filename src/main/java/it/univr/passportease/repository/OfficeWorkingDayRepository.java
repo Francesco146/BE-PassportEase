@@ -15,6 +15,8 @@ import java.util.UUID;
 public interface OfficeWorkingDayRepository extends JpaRepository<OfficeWorkingDay, UUID> {
 
     /**
+     * Find all the {@link OfficeWorkingDay} entities for the given {@link Office} entity.
+     *
      * @param office {@link Office} entity
      * @return {@link List} of {@link OfficeWorkingDay} entities
      */

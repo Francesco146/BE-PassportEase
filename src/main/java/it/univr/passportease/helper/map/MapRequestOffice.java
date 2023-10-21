@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
- * Map {@link Request} and {@link Office} to {@link RequestOffice
+ * Map {@link Request} and {@link Office} to {@link RequestOffice}
  */
 @Component
 public class MapRequestOffice {
     /**
+     * Map {@link Request} and {@link Office} to {@link RequestOffice}
+     *
      * @param request {@link Request} to map
      * @param office  {@link Office} to map
      * @return {@link RequestOffice} mapped

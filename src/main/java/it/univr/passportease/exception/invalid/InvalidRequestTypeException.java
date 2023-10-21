@@ -5,6 +5,8 @@ package it.univr.passportease.exception.invalid;
  */
 public class InvalidRequestTypeException extends IllegalArgumentException {
     /**
+     * Constructor of {@link InvalidRequestTypeException}.
+     *
      * @param message The message of the exception.
      */
     public InvalidRequestTypeException(String message) {

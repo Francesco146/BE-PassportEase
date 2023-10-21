@@ -17,11 +17,32 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class RequestInput {
+    /**
+     * The duration of the request in minutes.
+     */
     private long duration;
+    /**
+     * The start date of the request.
+     */
     private Date startDate;
+    /**
+     * The end date of the request.
+     */
     private Date endDate;
+    /**
+     * The start time of the request.
+     */
     private LocalTime startTime;
+    /**
+     * The end time of the request.
+     */
     private LocalTime endTime;
+    /**
+     * The type of the request.
+     */
     private String requestType;
+    /**
+     * The offices of the request.
+     */
     private List<String> offices;
 }

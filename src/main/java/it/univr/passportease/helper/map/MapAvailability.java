@@ -16,6 +16,8 @@ import java.util.Date;
 @Component
 public class MapAvailability {
     /**
+     * Map a {@link Request} to an {@link Availability} object.
+     *
      * @param request   The request to map.
      * @param office    The office to map.
      * @param localDate The date to map.

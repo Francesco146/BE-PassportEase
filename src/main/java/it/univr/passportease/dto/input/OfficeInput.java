@@ -13,6 +13,12 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class OfficeInput {
+    /**
+     * The name of the office.
+     */
     private String name;
+    /**
+     * The address of the office.
+     */
     private String address;
 }

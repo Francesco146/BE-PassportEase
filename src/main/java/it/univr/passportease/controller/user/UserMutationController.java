@@ -37,11 +37,22 @@ import java.util.UUID;
 @Controller
 @AllArgsConstructor
 public class UserMutationController {
-
+    /**
+     * User mutation service.
+     */
     private final UserMutationService userMutationService;
+    /**
+     * Request analyzer.
+     */
     private final JwtService jwtService;
 
+    /**
+     * Bucket limiter.
+     */
     private BucketLimiter bucketLimiter;
+    /**
+     * Request analyzer.
+     */
     private RequestAnalyzer requestAnalyzer;
 
     /**
@@ -84,6 +95,8 @@ public class UserMutationController {
     }
 
     /**
+     * This mutation creates a notification. It returns the created notification.
+     *
      * @param notificationInput see {@link NotificationInput}, the notification to create
      * @return the created notification
      * @throws UserNotFoundException                      if the user is not found
@@ -106,6 +119,8 @@ public class UserMutationController {
     }
 
     /**
+     * This mutation modifies a notification. It returns the modified notification.
+     *
      * @param notificationInput see {@link NotificationInput}, the notification to modify
      * @param notificationId    the notification ID to modify
      * @return the modified notification
@@ -124,6 +139,8 @@ public class UserMutationController {
     }
 
     /**
+     * This mutation deletes a notification. It returns nothing.
+     *
      * @param notificationId the notification ID to delete
      * @throws RateLimitException if the user has exceeded the rate limit
      */

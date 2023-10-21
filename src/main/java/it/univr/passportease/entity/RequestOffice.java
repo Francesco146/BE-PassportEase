@@ -19,27 +19,44 @@ import java.util.UUID;
 @ToString
 public class RequestOffice {
 
+    /**
+     * The unique identifier of this {@link RequestOffice}.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The {@link Office} that is related to this {@link RequestOffice}.
+     */
     @NonNull
     @ManyToOne
     @JoinColumn(name = "office_id")
     private Office office;
 
+    /**
+     * The {@link Request} that is related to this {@link RequestOffice}.
+     */
     @NonNull
     @ManyToOne
     @JoinColumn(name = "request_id")
     private Request request;
 
+    /**
+     * The date and time when this {@link RequestOffice} was created.
+     */
     @Column(name = "created_at")
     private Date createdAt;
 
+    /**
+     * The date and time when this {@link RequestOffice} was last updated.
+     */
     @Column(name = "updated_at")
     private Date updatedAt;
 
     /**
+     * Equals method for this {@link RequestOffice}.
+     *
      * @param o The object to compare.
      * @return {@code true} if the given object is an instance of {@link RequestOffice} and has the same {@code id} as
      * this one, {@code false} otherwise.
@@ -70,6 +87,8 @@ public class RequestOffice {
     }
 
     /**
+     * Hash code method for this {@link RequestOffice}.
+     *
      * @return The hash code of this object.
      */
     @Override

@@ -28,11 +28,20 @@ import java.util.List;
 @AllArgsConstructor
 public class UserWorkerQueryController {
 
+    /**
+     * Service for user and worker queries.
+     */
     private final UserWorkerQueryService userWorkerQueryService;
 
+    /**
+     * Bucket limiter for rate limiting.
+     */
     private BucketLimiter bucketLimiter;
 
     /**
+     * This query returns the availabilities matching the given filters. It returns a paginated list of availabilities if
+     * the page and size arguments are provided.
+     *
      * @param availabilityFilters filters to apply to the query, if any
      * @param size                number of results to return per page, optional
      * @param page                page number starting from 0, optional
@@ -48,6 +57,8 @@ public class UserWorkerQueryController {
     }
 
     /**
+     * This query returns all the offices in the database.
+     *
      * @return list of {@link Office}
      * @throws RateLimitException if the user or worker has exceeded the rate limit
      */

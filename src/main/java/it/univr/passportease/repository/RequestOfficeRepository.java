@@ -13,6 +13,8 @@ import java.util.UUID;
 @Repository
 public interface RequestOfficeRepository extends JpaRepository<RequestOffice, UUID> {
     /**
+     * Finds all the {@link RequestOffice} associated to the given request id.
+     *
      * @param requestId The id of the request
      * @return The list of {@link RequestOffice} associated to the request
      */

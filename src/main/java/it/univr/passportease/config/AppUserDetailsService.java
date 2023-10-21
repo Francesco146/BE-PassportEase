@@ -24,12 +24,24 @@ import java.util.UUID;
 @Component
 public class AppUserDetailsService implements UserDetailsService {
 
+    /**
+     * The repository of the users
+     */
     private final UserRepository userRepository;
+    /**
+     * The repository of the workers
+     */
     private final WorkerRepository workerRepository;
-
+    /**
+     * The redis template used to check if the user is validated
+     */
     private final RedisTemplate<String, String> redisTemplate;
 
     /**
+     * Constructor of {@link AppUserDetailsService}. It takes the repository of the users, the repository of the workers
+     * and the redis template used to check if the user is validated.
+     * It creates a {@link UserDetailsService} object.
+     *
      * @param userRepository   The repository of the users
      * @param workerRepository The repository of the workers
      * @param redisTemplate    The redis template used to check if the user is validated
@@ -42,6 +54,8 @@ public class AppUserDetailsService implements UserDetailsService {
     }
 
     /**
+     * Load the user details of the user identified by the id
+     *
      * @param id the username identifying the user whose data is required. It is the id of the user
      * @return the user details of the user identified by the id
      * @throws UsernameNotFoundException if the user is not found
@@ -69,6 +83,8 @@ public class AppUserDetailsService implements UserDetailsService {
     }
 
     /**
+     * Add the authorities to the list of authorities of the user
+     *
      * @param id          the id of the user
      * @param authorities the list of authorities of the user
      * @param role        the role of the user, it can be "USER" or "WORKER"

@@ -30,10 +30,25 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserQueryServiceImpl implements UserQueryService {
 
+    /**
+     * The repository for {@link User} entity.
+     */
     private final UserRepository userRepository;
+    /**
+     * The repository for {@link Notification} entity.
+     */
     private final NotificationRepository notificationRepository;
+    /**
+     * The repository for {@link Availability} entity.
+     */
     private final ReservationRepository reservationRepository;
+    /**
+     * The repository for {@link RequestType} entity.
+     */
     private final RequestTypeRepository requestTypeRepository;
+    /**
+     * The service that handles the JWT.
+     */
     private final JwtService jwtService;
 
     /**
@@ -81,6 +96,8 @@ public class UserQueryServiceImpl implements UserQueryService {
     }
 
     /**
+     * Get the report details of the availability with the given UUID.
+     *
      * @param availabilityId UUID of the availability
      * @param token          JWT token
      * @return Report details of the availability with the given UUID
