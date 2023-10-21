@@ -1,5 +1,6 @@
 package it.univr.passportease.entity;
 
+import it.univr.passportease.helper.UserType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-public class Worker {
+public class Worker implements UserType {
 
     /**
      * The id of the {@link Worker}.

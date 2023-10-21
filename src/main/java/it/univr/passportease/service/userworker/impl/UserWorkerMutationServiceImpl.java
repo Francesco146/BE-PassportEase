@@ -12,6 +12,7 @@ import it.univr.passportease.exception.security.TokenNotInRedisException;
 import it.univr.passportease.exception.security.WrongPasswordException;
 import it.univr.passportease.helper.JWT;
 import it.univr.passportease.helper.RequestAnalyzer;
+import it.univr.passportease.helper.UserType;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import it.univr.passportease.service.jwt.JwtService;
@@ -90,33 +91,25 @@ public class UserWorkerMutationServiceImpl implements UserWorkerMutationService 
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
     public JWTSet refreshAccessToken(JWT token, JWT refreshToken) throws UserNotFoundException, InvalidRefreshTokenException, UserOrWorkerIDNotFoundException {
-        Object userOrWorker = jwtService.getUserOrWorkerFromToken(token);
 
         UUID id = jwtService.extractId(token);
         if (id == null)
             throw new UserOrWorkerIDNotFoundException("Token has been corrupted token.id is null");
 
+        UserType userOrWorker = jwtService.getUserOrWorkerFromToken(token);
+
+        if (!userOrWorker.getRefreshToken().equals(refreshToken))
+            throw new InvalidRefreshTokenException("Invalid refresh token");
+
         JWT newRefreshToken = jwtService.generateRefreshToken(id);
 
-        if (!(userOrWorker instanceof User) && !(userOrWorker instanceof Worker))
-            throw new UserNotFoundException("User or worker not found");
+        userOrWorker.setRefreshToken(newRefreshToken);
 
-        if (userOrWorker instanceof User user) {
-            if (!user.getRefreshToken().equals(refreshToken.getToken()))
-                throw new InvalidRefreshTokenException("Invalid user refresh token");
-            user.setRefreshToken(newRefreshToken.getToken());
-            userRepository.save(user);
-            return new JWTSet(jwtService.generateAccessToken(id).getToken(), newRefreshToken.getToken());
+        switch (userOrWorker) {
+            case User user -> userRepository.save(user);
+            case Worker worker -> workerRepository.save(worker);
+            default -> throw new UserNotFoundException("User or worker not found");
         }
-
-        Worker worker = (Worker) userOrWorker;
-
-        if (!worker.getRefreshToken().equals(refreshToken.getToken()))
-            throw new InvalidRefreshTokenException("Invalid worker refresh token");
-
-        worker.setRefreshToken(newRefreshToken.getToken());
-        workerRepository.save(worker);
-
 
         return new JWTSet(jwtService.generateAccessToken(id).getToken(), newRefreshToken.getToken());
     }
@@ -136,27 +129,18 @@ public class UserWorkerMutationServiceImpl implements UserWorkerMutationService 
             throws UserNotFoundException, WrongPasswordException, AuthenticationCredentialsNotFoundException {
 
         JWT accessToken = requestAnalyzer.getTokenFromRequest();
-        Object userOrWorker = jwtService.getUserOrWorkerFromToken(accessToken);
+        UserType userOrWorker = jwtService.getUserOrWorkerFromToken(accessToken);
 
-        if (!(userOrWorker instanceof User) && !(userOrWorker instanceof Worker))
-            throw new AuthenticationCredentialsNotFoundException("User or worker not found");
+        if (!passwordEncoder.matches(oldPassword, userOrWorker.getHashPassword()))
+            throw new WrongPasswordException("Wrong old password");
 
-        if (userOrWorker instanceof User user) {
-            if (!passwordEncoder.matches(oldPassword, user.getHashPassword()))
-                throw new WrongPasswordException("Invalid old password");
-            user.setHashPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
-            return;
+        userOrWorker.setHashPassword(passwordEncoder.encode(newPassword));
+
+        switch (userOrWorker) {
+            case User user -> userRepository.save(user);
+            case Worker worker -> workerRepository.save(worker);
+            default -> throw new UserNotFoundException("User or worker not found");
         }
-
-        Worker worker = (Worker) userOrWorker;
-
-        if (!passwordEncoder.matches(oldPassword, worker.getHashPassword()))
-            throw new WrongPasswordException("Invalid old password");
-
-        worker.setHashPassword(passwordEncoder.encode(newPassword));
-        workerRepository.save(worker);
-
     }
 
     /**
@@ -178,19 +162,19 @@ public class UserWorkerMutationServiceImpl implements UserWorkerMutationService 
         if (!emailValid(newEmail))
             throw new InvalidEmailException("Invalid email");
 
-        Object userOrWorker = jwtService.getUserOrWorkerFromToken(accessToken);
+        UserType userOrWorker = jwtService.getUserOrWorkerFromToken(accessToken);
 
-        if (userOrWorker instanceof User user) {
-            if (!user.getEmail().equals(oldEmail))
-                throw new InvalidEmailException("Invalid old email");
-            user.setEmail(newEmail);
-            userRepository.save(user);
-        } else if (userOrWorker instanceof Worker worker) {
-            if (!worker.getEmail().equals(oldEmail))
-                throw new InvalidEmailException("Invalid old email");
-            worker.setEmail(newEmail);
-            workerRepository.save(worker);
+        if (!userOrWorker.getEmail().equals(oldEmail))
+            throw new InvalidEmailException("Invalid old email");
+
+        userOrWorker.setEmail(newEmail);
+
+        switch (userOrWorker) {
+            case User user -> userRepository.save(user);
+            case Worker worker -> workerRepository.save(worker);
+            default -> throw new UserNotFoundException("User or worker not found");
         }
+
         return newEmail;
     }
 

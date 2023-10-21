@@ -10,6 +10,7 @@ import it.univr.passportease.exception.notfound.UserNotFoundException;
 import it.univr.passportease.exception.notfound.UserOrWorkerIDNotFoundException;
 import it.univr.passportease.helper.JWT;
 import it.univr.passportease.helper.Roles;
+import it.univr.passportease.helper.UserType;
 import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.repository.WorkerRepository;
 import lombok.AllArgsConstructor;
@@ -325,10 +326,10 @@ public class JwtService {
      * Wrapper function to return User or Worker depending on the token.
      *
      * @param token JWT token
-     * @return the user or worker that owns the token
+     * @return the user or worker that owns the token, as a {@link UserType} object
      * @throws UserNotFoundException if the user or worker is not found
      */
-    public Object getUserOrWorkerFromToken(JWT token) throws UserNotFoundException {
+    public UserType getUserOrWorkerFromToken(JWT token) throws UserNotFoundException {
         UUID id = extractId(token);
         Optional<User> user = userRepository.findById(id);
         Optional<Worker> worker = workerRepository.findById(id);

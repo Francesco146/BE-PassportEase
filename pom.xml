@@ -17,7 +17,7 @@
     </description>
 
     <properties>
-        <java.version>20</java.version>
+        <java.version>21</java.version>
         <antrl4.version>4.13.1</antrl4.version>
         <jjwt.version>0.12.3</jjwt.version>
     </properties>
@@ -249,6 +249,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>
