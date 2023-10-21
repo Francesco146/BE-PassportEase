@@ -98,12 +98,12 @@ public class UserWorkerMutationServiceImpl implements UserWorkerMutationService 
 
         UserType userOrWorker = jwtService.getUserOrWorkerFromToken(token);
 
-        if (!userOrWorker.getRefreshToken().equals(refreshToken))
+        if (!userOrWorker.getRefreshToken().equals(refreshToken.getToken()))
             throw new InvalidRefreshTokenException("Invalid refresh token");
 
         JWT newRefreshToken = jwtService.generateRefreshToken(id);
 
-        userOrWorker.setRefreshToken(newRefreshToken);
+        userOrWorker.setRefreshToken(newRefreshToken.getToken());
 
         switch (userOrWorker) {
             case User user -> userRepository.save(user);

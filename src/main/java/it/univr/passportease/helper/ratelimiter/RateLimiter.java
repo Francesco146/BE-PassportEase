@@ -332,6 +332,7 @@ public enum RateLimiter {
     /**
      * @deprecated Rate limiter for {@link WorkerAuthController#registerWorker(WorkerInput)}
      */
+    @Deprecated
     REGISTER_WORKER {
         /**
          * Get the rate limiter for {@link WorkerAuthController#registerWorker(WorkerInput)}

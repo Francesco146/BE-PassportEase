@@ -37,12 +37,12 @@ public interface UserType {
      *
      * @return the refresh token of the user or worker.
      */
-    JWT getRefreshToken();
+    String getRefreshToken();
 
     /**
      * Changes the refresh token of the user or worker.
      *
      * @param refreshToken new refresh token
      */
-    void setRefreshToken(JWT refreshToken);
+    void setRefreshToken(String refreshToken);
 }
