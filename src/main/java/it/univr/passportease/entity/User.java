@@ -1,5 +1,6 @@
 package it.univr.passportease.entity;
 
+import it.univr.passportease.helper.UserType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-public class User {
+public class User implements UserType {
 
     /**
      * The unique identifier of the {@link User}
