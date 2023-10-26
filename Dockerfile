@@ -1,4 +1,4 @@
-FROM vegardit/graalvm-maven:21.0.0 AS builder
+FROM vegardit/graalvm-maven:21.0.1 AS builder
 WORKDIR /build/
 
 # Download dependencies first - Docker Layer Caching
