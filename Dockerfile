@@ -1,4 +1,4 @@
-FROM vegardit/graalvm-maven:21.0.0 AS builder
+FROM vegardit/graalvm-maven:21.0.1 AS builder
 WORKDIR /build/
 
 # Download dependencies first - Docker Layer Caching
@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.m2/repository  \
     mvn clean package -Pnative -DskipTests
 
 # Run the JAR file stage
-FROM ghcr.io/graalvm/native-image-community:21.0.0 AS production
+FROM ghcr.io/graalvm/native-image-community:21.0.1 AS production
 
 # Add a spring user to run our application so that it doesn't need to run as root
 RUN groupadd spring && adduser -g spring spring
