@@ -5,6 +5,7 @@ import it.univr.passportease.dto.input.NotificationInput;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.User;
+import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.invalid.InvalidWorkerActionException;
 import it.univr.passportease.exception.notfound.*;
@@ -60,13 +61,16 @@ public class UserMutationController {
      *
      * @param availabilityID the availability ID to create the reservation from.
      * @return the created reservation
-     * @throws RateLimitException            if the user has exceeded the rate limit
-     * @throws AvailabilityNotFoundException if the availability is not found
-     * @throws UserNotFoundException         if the user is not found
+     * @throws RateLimitException             if the user has exceeded the rate limit
+     * @throws AvailabilityNotFoundException  if the availability is not found
+     * @throws UserNotFoundException          if the user is not found
+     * @throws InvalidAvailabilityIDException if the availability 'ritiro passaporto' date is not valid, or if the
+     *                                        availability is already taken.
+     *                                        It must be at least one month after the last rilascio passaporto
      */
     @MutationMapping
     public Availability createReservation(@Argument("availabilityID") String availabilityID)
-            throws RateLimitException, AvailabilityNotFoundException, UserNotFoundException {
+            throws RateLimitException, AvailabilityNotFoundException, UserNotFoundException, InvalidAvailabilityIDException {
 
         Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.CREATE_RESERVATION);
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many createReservation attempts");

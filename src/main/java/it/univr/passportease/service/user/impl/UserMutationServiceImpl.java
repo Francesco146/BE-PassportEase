@@ -4,17 +4,22 @@ import it.univr.passportease.dto.input.NotificationInput;
 import it.univr.passportease.dto.input.NotificationInputDB;
 import it.univr.passportease.entity.*;
 import it.univr.passportease.entity.enums.Status;
+import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.*;
 import it.univr.passportease.helper.map.MapNotification;
 import it.univr.passportease.repository.*;
 import it.univr.passportease.service.user.UserMutationService;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * This class implements the {@link UserMutationService} interface.
@@ -132,27 +137,69 @@ public class UserMutationServiceImpl implements UserMutationService {
      * @param availabilityId contains the availability id
      * @param user           contains the user data
      * @return the created reservation
-     * @throws UserNotFoundException         if the user is not found
-     * @throws AvailabilityNotFoundException if the availability is not found
+     * @throws UserNotFoundException          if the user is not found
+     * @throws AvailabilityNotFoundException  if the availability is not found
+     * @throws InvalidAvailabilityIDException if the availability 'ritiro passaporto' date is not valid, or if the
+     *                                        availability is already taken.
+     *                                        It must be at least one month after the last rilascio passaporto
      */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
     public Availability createReservation(UUID availabilityId, User user)
-            throws UserNotFoundException, AvailabilityNotFoundException {
+            throws UserNotFoundException, AvailabilityNotFoundException, InvalidAvailabilityIDException {
 
         Optional<Availability> availabilityOptional = availabilityRepository.findById(availabilityId);
 
         if (!userRepository.existsById(user.getId())) throw new UserNotFoundException("User not found");
         if (availabilityOptional.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
 
-        Availability availability = availabilityOptional.get();
+        Availability availabilityRequested = availabilityOptional.get();
 
-        availability.setStatus(Status.TAKEN);
-        availability.setUser(user);
+        if (availabilityRequested.getStatus() == Status.TAKEN)
+            throw new InvalidAvailabilityIDException("Availability already taken");
 
-        availabilityRepository.save(availability);
+        boolean isRitiroPassaporto = availabilityRequested
+                .getRequest()
+                .getRequestType()
+                .getName()
+                .equals("ritiro passaporto");
 
-        return availability;
+        ArrayList<Availability> rilascioPassaportiOfUser = availabilityRepository
+                .findByUser(user)
+                .stream()
+                .filter(availability -> availability.getStatus() == Status.TAKEN)
+                .filter(availability -> availability.getRequest()
+                        .getRequestType()
+                        .getName()
+                        .equals("rilascio passaporto"))
+                .sorted((availability1, availability2) ->
+                        availability2.getDate().compareTo(availability1.getDate()))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        Date rilascioDatePlusOneMonth = DateUtils
+                .addMonths(
+                        rilascioPassaportiOfUser
+                                .getLast()
+                                .getDate(),
+                        1
+                );
+
+        boolean isDateValid = !rilascioPassaportiOfUser.isEmpty() &&
+                availabilityRequested
+                        .getDate()
+                        .after(rilascioDatePlusOneMonth);
+
+
+        if (isRitiroPassaporto && !isDateValid)
+            throw new InvalidAvailabilityIDException("Availability not valid for the request");
+
+
+        availabilityRequested.setStatus(Status.TAKEN);
+        availabilityRequested.setUser(user);
+
+        availabilityRepository.save(availabilityRequested);
+
+        return availabilityRequested;
     }
 
     /**

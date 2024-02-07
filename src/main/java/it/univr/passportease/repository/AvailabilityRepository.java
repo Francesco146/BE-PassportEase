@@ -2,6 +2,7 @@ package it.univr.passportease.repository;
 
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Request;
+import it.univr.passportease.entity.User;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,4 +34,12 @@ public interface AvailabilityRepository extends JpaRepository<Availability, UUID
      * @return a list of {@link Availability} entities that satisfy the given {@link Specification}.
      */
     List<Availability> findByRequestId(UUID requestId);
+
+    /**
+     * Find the list of {@link Availability} entities that have the given {@link User} id.
+     *
+     * @param user the {@link User} entity.
+     * @return a list of {@link Availability} entities of the given {@link User}.
+     */
+    List<Availability> findByUser(User user);
 }

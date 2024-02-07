@@ -4,6 +4,7 @@ import it.univr.passportease.dto.input.NotificationInput;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Notification;
 import it.univr.passportease.entity.User;
+import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.*;
 
@@ -49,10 +50,13 @@ public interface UserMutationService {
      * @param availabilityId the id of the availability to be created
      * @param user           the user that creates the availability
      * @return the created availability
-     * @throws AvailabilityNotFoundException if the availability to be created does not exist
-     * @throws UserNotFoundException         if the user that creates the availability does not exist
+     * @throws AvailabilityNotFoundException  if the availability to be created does not exist
+     * @throws UserNotFoundException          if the user that creates the availability does not exist
+     * @throws InvalidAvailabilityIDException if the availability 'ritiro passaporto' date is not valid, or if the
+     *                                        availability is already taken.
+     *                                        It must be at least one month after the last rilascio passaporto
      */
-    Availability createReservation(UUID availabilityId, User user) throws AvailabilityNotFoundException, UserNotFoundException;
+    Availability createReservation(UUID availabilityId, User user) throws AvailabilityNotFoundException, UserNotFoundException, InvalidAvailabilityIDException;
 
     /**
      * Deletes an availability.
