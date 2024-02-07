@@ -19,7 +19,7 @@
     <properties>
         <java.version>21</java.version>
         <antrl4.version>4.13.1</antrl4.version>
-        <jjwt.version>0.12.4</jjwt.version>
+        <jjwt.version>0.12.5</jjwt.version>
     </properties>
     <dependencies>
         <dependency>
