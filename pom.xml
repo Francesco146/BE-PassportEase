@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0-RC2</version>
+        <version>3.3.0-M1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>it.univr</groupId>
@@ -19,7 +19,7 @@
     <properties>
         <java.version>21</java.version>
         <antrl4.version>4.13.1</antrl4.version>
-        <jjwt.version>0.12.3</jjwt.version>
+        <jjwt.version>0.12.4</jjwt.version>
     </properties>
     <dependencies>
         <dependency>
@@ -66,7 +66,7 @@
         <dependency>
             <groupId>com.graphql-java-kickstart</groupId>
             <artifactId>graphql-java-tools</artifactId>
-            <version>13.1.0</version>
+            <version>13.1.1</version>
             <exclusions>
                 <exclusion>
                     <artifactId>antlr4-runtime</artifactId>
@@ -204,7 +204,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.2</version>
+                <version>3.6.3</version>
                 <configuration>
                     <reportOutputDirectory>./docs</reportOutputDirectory>
                     <show>private</show>
@@ -215,7 +215,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.2.5</version>
                 <configuration>
                     <systemPropertyVariables>
                     </systemPropertyVariables>
