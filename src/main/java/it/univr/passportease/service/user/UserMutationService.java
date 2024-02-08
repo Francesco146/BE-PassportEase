@@ -65,4 +65,12 @@ public interface UserMutationService {
      * @throws AvailabilityNotFoundException if the availability to be deleted does not exist
      */
     void deleteReservation(UUID availabilityId) throws AvailabilityNotFoundException;
+
+    /**
+     * Preserves the availability.
+     *
+     * @param availabilityId the id of the availability to be preserved
+     * @throws AvailabilityNotFoundException if the availability to be deleted does not exist
+     */
+    void preserveAvailability(UUID availabilityId) throws AvailabilityNotFoundException;
 }

@@ -3,6 +3,7 @@ package it.univr.passportease.repository;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Request;
 import it.univr.passportease.entity.User;
+import it.univr.passportease.entity.enums.Status;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,4 +43,13 @@ public interface AvailabilityRepository extends JpaRepository<Availability, UUID
      * @return a list of {@link Availability} entities of the given {@link User}.
      */
     List<Availability> findByUser(User user);
+
+
+    /**
+     * Find the list of {@link Availability} entities that have the given status.
+     *
+     * @param status the status of the {@link Availability} entity.
+     * @return a list of {@link Availability} entities of the given status.
+     */
+    List<Availability> findByStatus(Status status);
 }
