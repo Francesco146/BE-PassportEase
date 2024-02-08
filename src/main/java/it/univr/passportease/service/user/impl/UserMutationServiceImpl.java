@@ -12,6 +12,7 @@ import it.univr.passportease.repository.*;
 import it.univr.passportease.service.user.UserMutationService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -221,5 +222,38 @@ public class UserMutationServiceImpl implements UserMutationService {
         availability.setStatus(Status.FREE);
         availability.setUser(null);
         availabilityRepository.save(availability);
+    }
+
+    /**
+     * Preserves the availability by id, setting the availability status to {@link Status#PENDING}
+     *
+     * @param availabilityId contains the availability id
+     * @throws AvailabilityNotFoundException if the availability is not found
+     */
+    @Override
+    @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
+    public void preserveAvailability(UUID availabilityId) throws AvailabilityNotFoundException {
+        Optional<Availability> availabilityOptional = availabilityRepository.findById(availabilityId);
+        if (availabilityOptional.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
+        Availability availability = availabilityOptional.get();
+        availability.setStatus(Status.PENDING);
+        availabilityRepository.save(availability);
+    }
+
+    /**
+     * This method is scheduled to run every 10 minutes.
+     * It restores the availability status to {@link Status#FREE} and sets the availability user to {@literal null}
+     * for all the availabilities with status {@link Status#PENDING}
+     */
+    @Scheduled(cron = "0 */20 * * * *") // every 20 minutes
+    public void restoreAvailability() {
+        availabilityRepository
+                .findByStatus(Status.PENDING)
+                .forEach(availability -> {
+                            availability.setStatus(Status.FREE);
+                            availability.setUser(null);
+                            availabilityRepository.save(availability);
+                        }
+                );
     }
 }

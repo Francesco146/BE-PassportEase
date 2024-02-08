@@ -329,6 +329,20 @@ public enum RateLimiter {
             return getBandwidth(1);
         }
     },
+
+    /**
+     * Rate limiter for {@link UserMutationController#preserveAvailability(String)}}
+     */
+    PRESERVE_AVAILABILITY {
+        /**
+         * Get the rate limiter for {@link UserMutationController#preserveAvailability(String)}
+         *
+         * @return the rate limiter for {@link UserMutationController#preserveAvailability(String)} with a capacity of 1 request
+         */
+        public Bandwidth getLimit() {
+            return getBandwidth(1);
+        }
+    },
     /**
      * @deprecated Rate limiter for {@link WorkerAuthController#registerWorker(WorkerInput)}
      */

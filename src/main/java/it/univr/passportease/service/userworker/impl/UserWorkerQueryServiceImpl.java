@@ -66,13 +66,21 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
         boolean wantFiltered = availabilityFilters != null;
         boolean wantPaged = size != null && page != null;
 
-        if (!wantFiltered)
+        if (!wantFiltered) {
+            AvailabilityFilters defaultFilters = new AvailabilityFilters(null, null, null, null, null, null);
             return wantPaged ?
-                    availabilityRepository.findAll(PageRequest.of(page, size)).getContent() : availabilityRepository.findAll();
+                    availabilityRepository
+                            .findAll(Specification.where(defaultFilters), PageRequest.of(page, size))
+                            .getContent()
+                    :
+                    availabilityRepository
+                            .findAll(Specification.where(defaultFilters));
+        }
 
         filtersValidation(availabilityFilters);
         return wantPaged ?
-                availabilityRepository.findAll(Specification.where(availabilityFilters), PageRequest.of(page, size)).getContent() : availabilityRepository.findAll(Specification.where(availabilityFilters));
+                availabilityRepository.findAll(Specification.where(availabilityFilters), PageRequest.of(page, size)).getContent() :
+                availabilityRepository.findAll(Specification.where(availabilityFilters));
     }
 
     /**
