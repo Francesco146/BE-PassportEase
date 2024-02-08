@@ -10,4 +10,5 @@ type Mutation {
     modifyNotification(notification: NotificationInput!, notificationID: ID!): Notification!
     deleteNotification(notificationID: ID!): Boolean
     changeEmail(newEmail: String!, oldEmail: String!): String!
+    preserveAvailability(availabilityID: ID!): Boolean
 }

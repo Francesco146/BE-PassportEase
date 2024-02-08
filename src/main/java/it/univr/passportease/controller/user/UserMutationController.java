@@ -155,4 +155,12 @@ public class UserMutationController {
 
         userMutationService.deleteNotification(notificationId);
     }
+
+    @MutationMapping
+    public void preserveAvailability(@Argument("availabilityID") String availabilityID) throws RateLimitException, AvailabilityNotFoundException {
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.PRESERVE_AVAILABILITY);
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many preserveAvailability attempts");
+
+        userMutationService.preserveAvailability(UUID.fromString(availabilityID));
+    }
 }
