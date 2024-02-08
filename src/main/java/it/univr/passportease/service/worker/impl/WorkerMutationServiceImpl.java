@@ -283,15 +283,16 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
                 )
                 .toList();
 
-        iterate(start, date -> date.isBefore(end), date -> date.plusDays(1)).forEach(date -> {
-            Day day = Day.valueOf(date.getDayOfWeek().toString());
-            processOfficeWorkingDays(
-                    day,
-                    officeWorkingDays,
-                    date,
-                    request
-            );
-        });
+        iterate(start, date -> date.isBefore(end), date -> date.plusDays(1))
+                .forEach(date -> {
+                    Day day = Day.valueOf(date.getDayOfWeek().toString());
+                    processOfficeWorkingDays(
+                            day,
+                            officeWorkingDays,
+                            date,
+                            request
+                    );
+                });
     }
 
     /**
@@ -309,24 +310,8 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
                 .filter(officeWorkingDay ->
                         officeWorkingDay.getDay().equals(day))
                 .forEach(officeWorkingDay ->
-                        processOfficeWorkingDay(officeWorkingDay, date, request)
+                        processOfficeWorkingDayTimeSlot(officeWorkingDay, date, request)
                 );
-    }
-
-    /**
-     * Process office working day. By processing it means to create availabilities for each office working day between
-     * start and end time.
-     *
-     * @param officeWorkingDay office working day
-     * @param date             date
-     * @param request          request
-     */
-    private void processOfficeWorkingDay(OfficeWorkingDay officeWorkingDay, LocalDate date, Request request) {
-
-        processOfficeWorkingDayTimeSlot(officeWorkingDay, date, request);
-
-        if (officeWorkingDay.getStartTime2() != null && officeWorkingDay.getEndTime2() != null)
-            processOfficeWorkingDayTimeSlot(officeWorkingDay, date, request);
     }
 
     /**

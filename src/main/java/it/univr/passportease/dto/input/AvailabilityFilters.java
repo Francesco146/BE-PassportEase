@@ -107,7 +107,7 @@ public class AvailabilityFilters implements Specification<Availability> {
      * @return True if the end date is valid, that is if the start date is before the end date or the end date is null.
      */
     private boolean isEndDateValid() {
-        return endDate != null && (startDate == null || endDate.after(startDate));
+        return endDate != null && (startDate == null || endDate.after(startDate) || endDate.equals(startDate));
     }
 
     /**
@@ -116,7 +116,7 @@ public class AvailabilityFilters implements Specification<Availability> {
      * @return True if the start date is valid, that is if the end date is after the start date or the start date is null.
      */
     private boolean isStartDateValid() {
-        return startDate != null && (endDate == null || startDate.before(endDate));
+        return startDate != null && (endDate == null || startDate.before(endDate) || startDate.equals(endDate));
     }
 
 }
