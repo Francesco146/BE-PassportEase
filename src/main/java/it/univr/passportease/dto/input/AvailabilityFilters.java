@@ -1,6 +1,7 @@
 package it.univr.passportease.dto.input;
 
 import it.univr.passportease.entity.Availability;
+import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.service.userworker.UserWorkerQueryService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -79,6 +80,8 @@ public class AvailabilityFilters implements Specification<Availability> {
             predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), startTime));
         if (isEndTimeValid())
             predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("endTime"), endTime));
+
+        predicates.add(criteriaBuilder.equal(root.get("status"), Status.FREE));
 
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
