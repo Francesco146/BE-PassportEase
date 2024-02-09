@@ -1,5 +1,6 @@
 package it.univr.passportease.service.worker;
 
+import it.univr.passportease.dto.input.RequestFilters;
 import it.univr.passportease.entity.Request;
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
@@ -26,5 +27,7 @@ public interface WorkerQueryService {
      * @throws InvalidAvailabilityIDException if the given id is not a valid availability id
      */
     Request getRequestByAvailabilityID(String id) throws InvalidAvailabilityIDException;
+
+    List<Request> getRequests(RequestFilters filters, Integer page, Integer size);
 
 }

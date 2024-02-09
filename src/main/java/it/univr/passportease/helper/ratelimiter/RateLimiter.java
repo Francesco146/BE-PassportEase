@@ -28,7 +28,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserQueryController#getRequestTypesByUser()} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -40,7 +40,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserQueryController#getReportDetailsByAvailabilityID(String)} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -53,7 +53,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserQueryController#getUserNotifications()} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -66,7 +66,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserQueryController#getUserDetails()} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -79,7 +79,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserQueryController#getUserReservations()} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -92,7 +92,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserAuthController#loginUser(String, String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -105,7 +105,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserAuthController#logout()} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(1000);
         }
     },
     /**
@@ -118,7 +118,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserAuthController#registerUser(RegisterInput)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(1000);
         }
     },
     /**
@@ -131,7 +131,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserAuthController#refreshAccessToken(String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -144,7 +144,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserAuthController#changePassword(String, String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(1000);
         }
     },
     /**
@@ -157,7 +157,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserMutationController#createReservation(String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -170,7 +170,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserMutationController#deleteReservation(String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -183,7 +183,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserMutationController#createNotification(NotificationInput)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -196,7 +196,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserMutationController#modifyNotification(NotificationInput, UUID)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -209,7 +209,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserMutationController#deleteNotification(UUID)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -222,7 +222,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserAuthController#changeEmail(String, String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(1000);
         }
     },
     /**
@@ -235,7 +235,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link WorkerQueryController#getRequestByAvailabilityID(String)} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -248,7 +248,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link WorkerQueryController#getAllRequestTypes()} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -261,7 +261,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserWorkerQueryController#getAvailabilities(AvailabilityFilters, Integer, Integer)} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -274,7 +274,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserWorkerQueryController#getOffices()} with a capacity of 5 requests
          */
         public Bandwidth getLimit() {
-            return getBandwidth(5);
+            return getBandwidth(200);
         }
     },
     /**
@@ -287,7 +287,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link WorkerAuthController#loginWorker(String, String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -300,7 +300,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link WorkerMutationController#createRequest(RequestInput)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(1000);
         }
     },
     /**
@@ -313,7 +313,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link WorkerMutationController#modifyRequest(String, RequestInput)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -326,7 +326,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link WorkerMutationController#deleteRequest(String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
 
@@ -340,7 +340,7 @@ public enum RateLimiter {
          * @return the rate limiter for {@link UserMutationController#preserveAvailability(String)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(200);
         }
     },
     /**
@@ -354,7 +354,13 @@ public enum RateLimiter {
          * @return the rate limiter for {@link WorkerAuthController#registerWorker(WorkerInput)} with a capacity of 1 request
          */
         public Bandwidth getLimit() {
-            return getBandwidth(1);
+            return getBandwidth(1000);
+        }
+    },
+
+    GET_REQUESTS {
+        public Bandwidth getLimit() {
+            return getBandwidth(200);
         }
     };
 
@@ -372,7 +378,7 @@ public enum RateLimiter {
      */
     Bandwidth getBandwidth() {
         // Default value
-        return getBandwidth(1);
+        return getBandwidth(200);
     }
 
     /**
@@ -381,10 +387,10 @@ public enum RateLimiter {
      * @param seconds the number of seconds to wait before refilling the bucket by 1 token
      * @return the {@link Bandwidth} object for the enum value
      */
-    Bandwidth getBandwidth(int seconds) {
+    Bandwidth getBandwidth(int milliseconds) {
         return Bandwidth.builder()
                 .capacity(1)
-                .refillGreedy(1, java.time.Duration.ofSeconds(seconds))
+                .refillGreedy(1, java.time.Duration.ofMillis(milliseconds))
                 .build();
     }
 }

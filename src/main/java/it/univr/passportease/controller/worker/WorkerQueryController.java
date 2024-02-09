@@ -1,6 +1,7 @@
 package it.univr.passportease.controller.worker;
 
 import io.github.bucket4j.Bucket;
+import it.univr.passportease.dto.input.RequestFilters;
 import it.univr.passportease.entity.Request;
 import it.univr.passportease.entity.RequestType;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
@@ -66,5 +67,13 @@ public class WorkerQueryController {
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many getAllRequestTypes attempts");
 
         return workerQueryService.getAllRequestTypes();
+    }
+
+    @QueryMapping
+    public List<Request> getRequests(@Argument("requestFilters") RequestFilters requestFilters, @Argument("size") Integer size, @Argument("page") Integer page) throws RateLimitException {
+        Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.GET_REQUESTS);
+        if (!bucket.tryConsume(1)) throw new RateLimitException("Too many getRequests attempts");
+
+        return workerQueryService.getRequests(requestFilters, size, page);
     }
 }

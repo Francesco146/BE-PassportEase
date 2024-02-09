@@ -1,0 +1,8 @@
+input RequestFilters {
+    officesName: [String!]
+    requestTypes: [String!]
+    startDate: Date
+    endDate: Date
+    startTime: LocalTime
+    endTime: LocalTime
+}

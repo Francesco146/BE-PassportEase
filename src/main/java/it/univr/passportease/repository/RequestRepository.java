@@ -1,7 +1,10 @@
 package it.univr.passportease.repository;
 
 import it.univr.passportease.entity.Request;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,7 +17,7 @@ import java.util.UUID;
  * Repository for the {@link Request} entity.
  */
 @Repository
-public interface RequestRepository extends JpaRepository<Request, UUID> {
+public interface RequestRepository extends JpaRepository<Request, UUID>, JpaSpecificationExecutor<Request> {
     /**
      * Finds all the {@link Request} associated to the given worker id.
      *
@@ -32,4 +35,7 @@ public interface RequestRepository extends JpaRepository<Request, UUID> {
             "AND r.start_date <= :endDate", nativeQuery = true)
     List<Request> getOfficeRequests(@Param("officeId") UUID officeId, @Param("startDate") Date startDate,
                                     @Param("endDate") Date endDate);
+
+    @NotNull
+    List<Request> findAll(@NotNull Specification<Request> specification);
 }
