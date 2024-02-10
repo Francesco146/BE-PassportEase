@@ -1,5 +1,5 @@
 extend type Query {
     getRequestByAvailabilityID(availabilityID: ID!): Request
-    getRequests(requestFilters: RequestFilters, page: Int, size: Int): [Request]
+    getRequests(requestFilters: RequestFilters, page: Int, size: Int): [RequestAndOffices]
     getAllRequestTypes: [RequestType]
 }

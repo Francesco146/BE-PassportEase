@@ -1,0 +1,4 @@
+type RequestAndOffices {
+    request: Request
+    offices: [Office]
+}

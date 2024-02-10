@@ -56,7 +56,7 @@ public class Worker implements UserType {
      * impersonate the worker.
      */
     @NonNull
-    @Column(name = "refresh_token")
+    @Column(name = "refresh_token", length = 1024)
     private String refreshToken;
 
     /**

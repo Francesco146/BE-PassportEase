@@ -432,8 +432,35 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         // update request
         String requestTypeName = requestInput.getRequestType();
         RequestType requestType = getOrCreateRequestType(requestTypeName);
+
+        // delete request
+        requestRepository.delete(request);
+
         request = mapRequest.mapRequestInputToRequest(requestInput, requestType, worker);
         request = requestRepository.save(request);
+
+        // create new requestOffice
+        for (Office office : offices) {
+            RequestOffice requestOffice = mapRequestOffice.mapRequestAndOfficeToRequestOffice(request, office);
+            requestOfficeRepository.save(requestOffice);
+        }
+
+
+        // delete notifications between start and end date to avoid duplicates
+        Request finalRequest = request;
+        notificationRepository
+                .findAllByRequestType(
+                        request.getRequestType()
+                )
+                .forEach(notification -> {
+                            if ((notification.getStartDate().after(finalRequest.getStartDate()) || notification.getStartDate().equals(finalRequest.getStartDate())) &&
+                                    (notification.getEndDate().before(finalRequest.getEndDate()) || notification.getEndDate().equals(finalRequest.getEndDate())))
+                                notificationRepository.delete(notification);
+                        }
+                );
+
+        // set notifications
+        setNotifications(requestInput.getStartDate(), requestInput.getEndDate(), offices, requestType);
 
         // create new availabilities
         createAvailabilities(requestInput.getStartDate(), requestInput.getEndDate(), offices, request);
@@ -460,6 +487,18 @@ public class WorkerMutationServiceImpl implements WorkerMutationService {
         Request request = requestRepository.findById(UUID.fromString(requestID)).orElseThrow(() ->
                 new RequestNotFoundException("Request not found")
         );
+
+
+        notificationRepository
+                .findAllByRequestType(
+                        request.getRequestType()
+                )
+                .forEach(notification -> {
+                            if ((notification.getStartDate().after(request.getStartDate()) || notification.getStartDate().equals(request.getStartDate())) &&
+                                    (notification.getEndDate().before(request.getEndDate()) || notification.getEndDate().equals(request.getEndDate())))
+                                notificationRepository.delete(notification);
+                        }
+                );
 
 
         deleteAvailabilities(request);

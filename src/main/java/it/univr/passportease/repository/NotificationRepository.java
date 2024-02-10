@@ -31,4 +31,6 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
      * @return the list of notifications for the given office, ready status and request type
      */
     List<Notification> findAllByOfficeAndIsReadyAndRequestType(Office office, boolean isReady, RequestType requestType);
+
+    List<Notification> findAllByRequestType(RequestType requestType);
 }

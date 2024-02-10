@@ -250,7 +250,7 @@ CREATE TABLE public.workers
     created_at    timestamp(6) without time zone,
     email         character varying(255),
     hash_password character varying(255),
-    refresh_token character varying(255),
+    refresh_token character varying(1024),
     updated_at    timestamp(6) without time zone,
     username      character varying(255),
     office_id     uuid

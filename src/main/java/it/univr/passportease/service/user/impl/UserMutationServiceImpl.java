@@ -177,19 +177,21 @@ public class UserMutationServiceImpl implements UserMutationService {
                         availability2.getDate().compareTo(availability1.getDate()))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        Date rilascioDatePlusOneMonth = DateUtils
-                .addMonths(
-                        rilascioPassaportiOfUser
-                                .getLast()
-                                .getDate(),
-                        1
-                );
-
-        boolean isDateValid = !rilascioPassaportiOfUser.isEmpty() &&
-                availabilityRequested
-                        .getDate()
-                        .after(rilascioDatePlusOneMonth);
-
+        Date rilascioDatePlusOneMonth;
+        boolean isDateValid = false;
+        if (!rilascioPassaportiOfUser.isEmpty()) {
+            rilascioDatePlusOneMonth = DateUtils
+                    .addMonths(
+                            rilascioPassaportiOfUser
+                                    .getLast()
+                                    .getDate(),
+                            1
+                    );
+            isDateValid = !rilascioPassaportiOfUser.isEmpty() &&
+                    availabilityRequested
+                            .getDate()
+                            .after(rilascioDatePlusOneMonth);
+        }
 
         if (isRitiroPassaporto && !isDateValid)
             throw new InvalidAvailabilityIDException("Availability not valid for the request");
