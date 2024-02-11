@@ -3,4 +3,5 @@ enum AvailabilityStatus{
     TAKEN
     TIMEDOUT
     CANCELLED
+    PENDING
 }

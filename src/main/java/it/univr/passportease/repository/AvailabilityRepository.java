@@ -54,4 +54,8 @@ public interface AvailabilityRepository extends JpaRepository<Availability, UUID
     List<Availability> findByStatus(Status status);
 
     List<Availability> findAllByUserAndStatus(User user, Status status);
+
+    List<Availability> findAllByStatusOrUserAndStatus(Status status, User userType, Status status1);
+
+    List<Availability> findAllByStatusAndUser(Status status, User userType);
 }

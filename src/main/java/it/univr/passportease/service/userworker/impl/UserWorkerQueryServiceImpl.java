@@ -8,7 +8,6 @@ import it.univr.passportease.entity.User;
 import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.exception.invalid.InvalidDataFromRequestException;
 import it.univr.passportease.helper.JWT;
-import it.univr.passportease.helper.UserType;
 import it.univr.passportease.repository.AvailabilityRepository;
 import it.univr.passportease.repository.OfficeRepository;
 import it.univr.passportease.repository.RequestTypeRepository;
@@ -16,21 +15,21 @@ import it.univr.passportease.repository.UserRepository;
 import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.userworker.UserWorkerQueryService;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Implementation of {@link UserWorkerQueryService}
  */
 @Service
 @AllArgsConstructor
+@Log4j2
 public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
 
     /**
@@ -74,34 +73,41 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
     public List<Availability> getAvailabilities(JWT jwt, AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException {
 
         boolean wantFiltered = availabilityFilters != null;
-        AvailabilityFilters defaultFilters = new AvailabilityFilters(null, null, null, null, null, null);
-
-        UserType userType = jwtService.getUserOrWorkerFromToken(jwt);
-
-        boolean isUser = userType instanceof User;
         if (wantFiltered)
             filtersValidation(availabilityFilters);
 
+        AvailabilityFilters defaultFilters = new AvailabilityFilters(null, null, null, null, null, null);
 
-        List<Availability> allAvailabilities = availabilityRepository
-                .findAll(Specification.where(defaultFilters));
-        List<Availability> userPendingAvailabilities = new ArrayList<>();
+        Object userType = jwtService.getUserOrWorkerFromToken(jwt);
+        boolean isUser = userType instanceof User;
 
-        if (isUser)
-            userPendingAvailabilities = availabilityRepository.findAllByUserAndStatus((User) userType, Status.PENDING);
+        System.out.println("User type: " + userType);
 
+        List<Availability> allAvailabilities;
+        if (isUser) {
+            allAvailabilities = availabilityRepository.findAllByStatusOrUserAndStatus(Status.FREE, (User) userType, Status.PENDING);
+        } else {
+            allAvailabilities = availabilityRepository.findAll();
+        }
 
-        if (!wantFiltered)
-            return Stream.concat(
-                    allAvailabilities.stream(),
-                    userPendingAvailabilities.stream()
-            ).toList();
+        System.out.println("All availabilities size: " + allAvailabilities.size());
 
+        if (!wantFiltered) {
+            System.out.println("Returning all availabilities size: " + allAvailabilities.size());
+            return allAvailabilities;
+        }
 
-        return Stream.concat(
-                availabilityRepository.findAll(Specification.where(availabilityFilters)).stream(),
-                userPendingAvailabilities.stream()
-        ).toList();
+        // if the filters are not null, apply them
+        List<Availability> filteredAvailabilities = availabilityRepository
+                .findAll(Specification.where(availabilityFilters));
+        System.out.println("Filtered availabilities size: " + filteredAvailabilities.size());
+        // add the pending availabilities to the filtered ones
+        if (isUser) {
+            List<Availability> pendingAvailabilities = availabilityRepository.findAllByStatusAndUser(Status.PENDING, (User) userType);
+            System.out.println("Pending availabilities size: " + pendingAvailabilities.size());
+            filteredAvailabilities.addAll(pendingAvailabilities);
+        }
+        return filteredAvailabilities;
     }
 
     /**
