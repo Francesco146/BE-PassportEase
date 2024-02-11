@@ -52,4 +52,6 @@ public interface AvailabilityRepository extends JpaRepository<Availability, UUID
      * @return a list of {@link Availability} entities of the given status.
      */
     List<Availability> findByStatus(Status status);
+
+    List<Availability> findAllByUserAndStatus(User user, Status status);
 }

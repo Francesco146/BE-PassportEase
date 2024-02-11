@@ -7,8 +7,11 @@ import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.*;
+import it.univr.passportease.helper.JWT;
+import it.univr.passportease.helper.UserType;
 import it.univr.passportease.helper.map.MapNotification;
 import it.univr.passportease.repository.*;
+import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.user.UserMutationService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.time.DateUtils;
@@ -55,6 +58,8 @@ public class UserMutationServiceImpl implements UserMutationService {
      * The service that maps the {@link NotificationInputDB} DTO to the {@link Notification} entity.
      */
     private final MapNotification mapNotification;
+
+    private final JwtService jwtService;
 
     /**
      * Creates a notification.
@@ -234,11 +239,17 @@ public class UserMutationServiceImpl implements UserMutationService {
      */
     @Override
     @PreAuthorize("hasAuthority('USER') && hasAuthority('VALIDATED')")
-    public void preserveAvailability(UUID availabilityId) throws AvailabilityNotFoundException {
+    public void preserveAvailability(JWT jwt, UUID availabilityId) throws AvailabilityNotFoundException {
         Optional<Availability> availabilityOptional = availabilityRepository.findById(availabilityId);
         if (availabilityOptional.isEmpty()) throw new AvailabilityNotFoundException("Availability not found");
         Availability availability = availabilityOptional.get();
         availability.setStatus(Status.PENDING);
+        UserType userType = jwtService.getUserOrWorkerFromToken(jwt);
+        if (userType instanceof Worker)
+            throw new AvailabilityNotFoundException("Worker cannot preserve availability");
+        User user = (User) userType;
+        availability.setUser(user);
+
         availabilityRepository.save(availability);
     }
 

@@ -25,5 +25,4 @@ class UserRepositoryTest {
         Assertions.assertNotNull(userRepository.findByFiscalCode("BLSCLL96D55E463O").orElse(null));
         System.out.println("[!] User found: " + userRepository.findByFiscalCode("BLSCLL96D55E463O") + "\n");
     }
-
 }

@@ -11,6 +11,7 @@ import it.univr.passportease.exception.invalid.InvalidWorkerActionException;
 import it.univr.passportease.exception.notfound.*;
 import it.univr.passportease.exception.security.AuthenticationCredentialsNotFoundException;
 import it.univr.passportease.exception.security.RateLimitException;
+import it.univr.passportease.helper.JWT;
 import it.univr.passportease.helper.RequestAnalyzer;
 import it.univr.passportease.helper.ratelimiter.BucketLimiter;
 import it.univr.passportease.helper.ratelimiter.RateLimiter;
@@ -161,6 +162,7 @@ public class UserMutationController {
         Bucket bucket = bucketLimiter.resolveBucket(RateLimiter.PRESERVE_AVAILABILITY);
         if (!bucket.tryConsume(1)) throw new RateLimitException("Too many preserveAvailability attempts");
 
-        userMutationService.preserveAvailability(UUID.fromString(availabilityID));
+        JWT jwt = requestAnalyzer.getTokenFromRequest();
+        userMutationService.preserveAvailability(jwt, UUID.fromString(availabilityID));
     }
 }

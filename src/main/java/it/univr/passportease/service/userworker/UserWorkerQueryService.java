@@ -4,6 +4,7 @@ import it.univr.passportease.dto.input.AvailabilityFilters;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Office;
 import it.univr.passportease.exception.invalid.InvalidDataFromRequestException;
+import it.univr.passportease.helper.JWT;
 
 import java.util.List;
 
@@ -28,5 +29,5 @@ public interface UserWorkerQueryService {
      * @return the list of availabilities.
      * @throws InvalidDataFromRequestException if the data from the request are invalid.
      */
-    List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException;
+    List<Availability> getAvailabilities(JWT jwt, AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException;
 }

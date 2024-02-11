@@ -135,7 +135,8 @@ class UserQueryControllerTest {
         user.setCreatedAt(new Date());
         user.setCityOfBirth("Palermo");
         user.setDateOfBirth(
-                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()));
+                new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime())
+        );
         user.setHashPassword(passwordEncoder.encode("ciao"));
         user.setRefreshToken(
                 jwtService.generateRefreshToken(
@@ -255,18 +256,14 @@ class UserQueryControllerTest {
         JWT token = jwtService.generateAccessToken(USER_ID);
 
         System.out.println("[!] Generated token: \n" + token + "\n");
-
         String getUserNotifications = GraphQLOperations.getUserNotifications.getGraphQl();
 
         GraphQlTester.Response response = (GraphQlTester.Response) makeGraphQLRequest(getUserNotifications,
                 "data.getUserNotifications", null, token);
 
         Assertions.assertNotNull(response);
-
         Assertions.assertDoesNotThrow(response.errors()::verify);
-
-        List<Notification> notifications = response
-                .path("data.getUserNotifications")
+        List<Notification> notifications = response.path("data.getUserNotifications")
                 .entityList(Notification.class)
                 .get();
 
@@ -298,19 +295,16 @@ class UserQueryControllerTest {
                 "data.getUserDetails", null, token);
 
         Assertions.assertNotNull(response);
-
         Assertions.assertDoesNotThrow(response.errors()::verify);
 
-        User user = response
-                .path("data.getUserDetails")
-                .entity(User.class)
-                .get();
+        User user = response.path("data.getUserDetails").entity(User.class).get();
 
         Assertions.assertEquals(USER_ID, user.getId());
         Assertions.assertEquals("Zelda", user.getName());
         Assertions.assertEquals("NotLink", user.getSurname());
         Assertions.assertEquals("NTLZLD98R52G273R", user.getFiscalCode());
-        Assertions.assertEquals(new Date(new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()),
+        Assertions.assertEquals(new Date(
+                        new SimpleDateFormat("yyyy-MM-dd").parse("1998-10-12").getTime()),
                 user.getDateOfBirth());
         Assertions.assertEquals("Palermo", user.getCityOfBirth());
 

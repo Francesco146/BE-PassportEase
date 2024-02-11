@@ -4,20 +4,27 @@ import it.univr.passportease.dto.input.AvailabilityFilters;
 import it.univr.passportease.entity.Availability;
 import it.univr.passportease.entity.Office;
 import it.univr.passportease.entity.RequestType;
+import it.univr.passportease.entity.User;
+import it.univr.passportease.entity.enums.Status;
 import it.univr.passportease.exception.invalid.InvalidDataFromRequestException;
+import it.univr.passportease.helper.JWT;
+import it.univr.passportease.helper.UserType;
 import it.univr.passportease.repository.AvailabilityRepository;
 import it.univr.passportease.repository.OfficeRepository;
 import it.univr.passportease.repository.RequestTypeRepository;
+import it.univr.passportease.repository.UserRepository;
+import it.univr.passportease.service.jwt.JwtService;
 import it.univr.passportease.service.userworker.UserWorkerQueryService;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link UserWorkerQueryService}
@@ -38,6 +45,9 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
      * Repository for {@link RequestType} entity
      */
     private final RequestTypeRepository requestTypeRepository;
+
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     /**
      * Get all the offices
@@ -61,26 +71,37 @@ public class UserWorkerQueryServiceImpl implements UserWorkerQueryService {
      */
     @Override
     @PreAuthorize("hasAnyAuthority('USER', 'WORKER') && hasAuthority('VALIDATED')")
-    public List<Availability> getAvailabilities(AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException {
+    public List<Availability> getAvailabilities(JWT jwt, AvailabilityFilters availabilityFilters, Integer page, Integer size) throws InvalidDataFromRequestException {
 
         boolean wantFiltered = availabilityFilters != null;
-        boolean wantPaged = size != null && page != null;
+        AvailabilityFilters defaultFilters = new AvailabilityFilters(null, null, null, null, null, null);
 
-        if (!wantFiltered) {
-            AvailabilityFilters defaultFilters = new AvailabilityFilters(null, null, null, null, null, null);
-            return wantPaged ?
-                    availabilityRepository
-                            .findAll(Specification.where(defaultFilters), PageRequest.of(page, size))
-                            .getContent()
-                    :
-                    availabilityRepository
-                            .findAll(Specification.where(defaultFilters));
-        }
+        UserType userType = jwtService.getUserOrWorkerFromToken(jwt);
 
-        filtersValidation(availabilityFilters);
-        return wantPaged ?
-                availabilityRepository.findAll(Specification.where(availabilityFilters), PageRequest.of(page, size)).getContent() :
-                availabilityRepository.findAll(Specification.where(availabilityFilters));
+        boolean isUser = userType instanceof User;
+        if (wantFiltered)
+            filtersValidation(availabilityFilters);
+
+
+        List<Availability> allAvailabilities = availabilityRepository
+                .findAll(Specification.where(defaultFilters));
+        List<Availability> userPendingAvailabilities = new ArrayList<>();
+
+        if (isUser)
+            userPendingAvailabilities = availabilityRepository.findAllByUserAndStatus((User) userType, Status.PENDING);
+
+
+        if (!wantFiltered)
+            return Stream.concat(
+                    allAvailabilities.stream(),
+                    userPendingAvailabilities.stream()
+            ).toList();
+
+
+        return Stream.concat(
+                availabilityRepository.findAll(Specification.where(availabilityFilters)).stream(),
+                userPendingAvailabilities.stream()
+        ).toList();
     }
 
     /**

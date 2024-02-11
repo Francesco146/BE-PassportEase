@@ -7,6 +7,7 @@ import it.univr.passportease.entity.User;
 import it.univr.passportease.exception.invalid.InvalidAvailabilityIDException;
 import it.univr.passportease.exception.invalid.InvalidRequestTypeException;
 import it.univr.passportease.exception.notfound.*;
+import it.univr.passportease.helper.JWT;
 
 import java.util.UUID;
 
@@ -72,5 +73,5 @@ public interface UserMutationService {
      * @param availabilityId the id of the availability to be preserved
      * @throws AvailabilityNotFoundException if the availability to be deleted does not exist
      */
-    void preserveAvailability(UUID availabilityId) throws AvailabilityNotFoundException;
+    void preserveAvailability(JWT jwt, UUID availabilityId) throws AvailabilityNotFoundException;
 }
